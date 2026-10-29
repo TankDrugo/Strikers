@@ -1,0 +1,253 @@
+<title>Mappa Calcio arcade</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a tactics board on top (areas placed like players, lines = links between areas),
+   then two columns: the open area on the left, the open node and its neighbours on the right. */
+:root {
+  --bg: #eef1ea;
+  --surface: #f9faf6;
+  --line: #cfd6c8;
+  --ink: #18241c;
+  --muted: #5b6a5f;
+  --turf: #2f7d4f;
+  --turf-soft: #dcebdf;
+  --chalk: #ffffff;
+  --board: #2f6e48;
+  --board-line: rgba(255,255,255,.55);
+  --warn: #a66a00;
+  --a-riferimento: #7a5af0;
+  --a-animazioni: #d0485f;
+  --a-personaggi: #c27c0e;
+  --a-gioco: #1f8a5b;
+  --a-interfaccia: #2e7bd6;
+  --a-ultimate: #b9469c;
+  --a-progetto: #66727a;
+  --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1612; --surface: #16201a; --line: #2a3a30; --ink: #e4ece5; --muted: #98a89c;
+    --turf: #5cc489; --turf-soft: #1d3326; --chalk: #e9f2ea; --board: #183826; --board-line: rgba(233,242,234,.35);
+    --warn: #e2a33a;
+    --a-riferimento: #a08cff; --a-animazioni: #f0778b; --a-personaggi: #e7a744; --a-gioco: #4fcf8e;
+    --a-interfaccia: #6eaaf2; --a-ultimate: #e07ac6; --a-progetto: #a3aeb4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1612; --surface: #16201a; --line: #2a3a30; --ink: #e4ece5; --muted: #98a89c;
+  --turf: #5cc489; --turf-soft: #1d3326; --chalk: #e9f2ea; --board: #183826; --board-line: rgba(233,242,234,.35);
+  --warn: #e2a33a;
+  --a-riferimento: #a08cff; --a-animazioni: #f0778b; --a-personaggi: #e7a744; --a-gioco: #4fcf8e;
+  --a-interfaccia: #6eaaf2; --a-ultimate: #e07ac6; --a-progetto: #a3aeb4;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 24px; justify-content: space-between; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--turf); }
+h1 { font: 700 clamp(30px, 5vw, 44px)/1 var(--display); letter-spacing: .01em; margin: 2px 0 0; text-wrap: balance; }
+.stats { font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+input[type="search"] { font: inherit; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--ink); width: min(320px, 100%); }
+input[type="search"]:focus-visible, button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px; }
+a { color: var(--turf); }
+.btn { font: 600 13px var(--body); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer; }
+.results { display: flex; flex-wrap: wrap; gap: 6px; }
+.board-box { overflow-x: auto; }
+svg.board { display: block; width: 100%; min-width: 620px; height: auto; border-radius: 12px; background: var(--board); }
+.board .pitch { fill: none; stroke: var(--board-line); stroke-width: 2; }
+.board .link { stroke: var(--chalk); stroke-linecap: round; opacity: .55; }
+.board .zone { cursor: pointer; }
+.board .zone circle.dot { stroke: var(--chalk); stroke-width: 3; }
+.board .zone.empty circle.dot { stroke-dasharray: 6 5; fill-opacity: .25; }
+.board .zone.on circle.ring { stroke: var(--chalk); stroke-width: 2; fill: none; }
+.board .zone text { fill: var(--chalk); font-family: var(--display); font-weight: 700; text-anchor: middle; pointer-events: none; }
+.board .zone .count { font-family: var(--mono); font-weight: 500; font-size: 14px; }
+.board .zone .status { font-family: var(--mono); font-weight: 400; font-size: 12px; opacity: .85; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; display: grid; gap: 12px; }
+.panel h2 { font: 700 26px/1.1 var(--display); margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.panel h3 { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 4px 0 0; }
+.sw { width: 12px; height: 12px; border-radius: 50%; flex: none; display: inline-block; }
+.pill { font: 500 11px var(--mono); padding: 2px 8px; border-radius: 99px; background: var(--turf-soft); color: var(--turf); letter-spacing: .04em; }
+.pill.todo { background: transparent; border: 1px dashed var(--warn); color: var(--warn); }
+.desc { margin: 0; color: var(--muted); max-width: 65ch; }
+.files { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.files > li > button { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; gap: 12px; width: 100%; padding: 6px 8px; border-radius: 6px; cursor: pointer; font: 13px var(--mono); }
+.files > li > button:hover, .files > li > button[aria-expanded="true"] { background: var(--turf-soft); }
+.files > li > button span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+.files ul { list-style: none; margin: 2px 0 6px 10px; padding: 0 0 0 10px; border-left: 2px solid var(--line); display: grid; gap: 1px; }
+.chip { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; overflow-wrap: anywhere; }
+.chip:hover { background: var(--turf-soft); }
+.chip .k { font: 11px var(--mono); color: var(--muted); white-space: nowrap; }
+.neigh { display: grid; gap: 10px; }
+.neigh .rel { font: 500 12px var(--mono); color: var(--muted); }
+.neigh .list { display: flex; flex-wrap: wrap; gap: 4px; }
+.meta { font: 13px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.crosslist { display: flex; flex-wrap: wrap; gap: 6px; }
+.empty-note { color: var(--muted); font-style: italic; margin: 0; }
+footer { font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .board .zone circle.dot { transition: r .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Calcio arcade · grafo del progetto</div>
+      <h1>Mappa del progetto</h1>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Cerca un file, una funzione, un concetto" aria-label="Cerca nel grafo">
+    </div>
+  </header>
+  <div class="results" id="results" hidden></div>
+  <div class="board-box"><svg class="board" id="board" viewBox="0 0 1000 440" role="img" aria-label="Aree del progetto disposte come una formazione in campo"></svg></div>
+  <div class="cols">
+    <section class="panel" id="area" aria-live="polite"></section>
+    <section class="panel" id="node" aria-live="polite"></section>
+  </div>
+  <footer>Generata da <code>docs/make_map.py</code> a partire da <code>graphify-out/graph.json</code>. Le linee sul campo sono i collegamenti tra le aree: più spesse, più collegamenti. Per aggiornarla vedi <code>docs/grafo.md</code>.</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const AREA = Object.fromEntries(DATA.areas.map((a) => [a.key, a]));
+const N = DATA.nodes.map(([id, label, file, loc, kind, area, comm], i) => ({ i, id, label, file, loc, kind, area, comm }));
+const byId = Object.fromEntries(N.map((n) => [n.id, n]));
+const adj = N.map(() => []);
+for (const [s, t, rel, conf] of DATA.edges) { adj[s].push({ o: t, rel, conf, out: true }); adj[t].push({ o: s, rel, conf, out: false }); }
+const color = (k) => `var(--a-${k})`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const REL = { calls: 'chiama', imports: 'importa', imports_from: 'importa da', contains: 'contiene', method: 'metodo', references: 'cita', uses: 'usa',
+  shares_data_with: 'condivide dati con', rationale_for: 'spiega', conceptually_related_to: 'legato a', semantically_similar_to: 'simile a',
+  cites: 'cita la fonte', implements: 'implementa', inherits: 'eredita da', defines: 'definisce' };
+const relName = (r, out) => (REL[r] || r.replace(/_/g, ' ')) + (out ? '' : ' (←)');
+const fileUrl = (n) => {
+  if (!n.file) return null;
+  const line = /^L(\d+)/.exec(n.loc || '');
+  return `${DATA.repo}/blob/main/${n.file}${line ? '#L' + line[1] : ''}`;
+};
+const isEmptyArea = (k) => /da iniziare/.test(AREA[k].status);
+let curArea = 'gioco', curNode = null;
+
+document.getElementById('stats').textContent = `${N.length} nodi · ${DATA.edges.length} collegamenti · ${DATA.areas.length} aree`;
+
+function drawBoard() {
+  const W = 1000, H = 440, svg = document.getElementById('board');
+  const P = (a) => [60 + a.x * (W - 120), 30 + a.y * (H - 60)];
+  const max = Math.max(1, ...DATA.cross.map((c) => c[2]));
+  const count = {}; for (const n of N) count[n.area] = (count[n.area] || 0) + 1;
+  let s = `<rect class="pitch" x="20" y="14" width="${W - 40}" height="${H - 28}" rx="10"/>
+    <line class="pitch" x1="${W / 2}" y1="14" x2="${W / 2}" y2="${H - 14}"/>
+    <circle class="pitch" cx="${W / 2}" cy="${H / 2}" r="58"/>
+    <rect class="pitch" x="20" y="${H / 2 - 90}" width="110" height="180"/>
+    <rect class="pitch" x="${W - 130}" y="${H / 2 - 90}" width="110" height="180"/>`;
+  for (const [a, b, c] of DATA.cross) {
+    const [x1, y1] = P(AREA[a]), [x2, y2] = P(AREA[b]);
+    s += `<line class="link" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${(1.5 + 9 * Math.sqrt(c / max)).toFixed(1)}"><title>${esc(AREA[a].name)} ↔ ${esc(AREA[b].name)}: ${c} collegamenti</title></line>`;
+  }
+  for (const a of DATA.areas) {
+    const [x, y] = P(a), r = 24 + Math.min(26, Math.sqrt(count[a.key] || 1) * 2.2);
+    s += `<g class="zone${isEmptyArea(a.key) ? ' empty' : ''}${a.key === curArea ? ' on' : ''}" data-k="${a.key}" tabindex="0" role="button" aria-label="Apri l'area ${esc(a.name)}">
+      <circle class="ring" cx="${x}" cy="${y}" r="${r + 7}" fill="none"/>
+      <circle class="dot" cx="${x}" cy="${y}" r="${r}" fill="${color(a.key)}"/>
+      <text class="count" x="${x}" y="${y + 5}">${count[a.key] || 0}</text>
+      <text x="${x}" y="${y + r + 22}" font-size="21">${esc(a.name)}</text>
+      ${a.status ? `<text class="status" x="${x}" y="${y + r + 39}">${esc(a.status)}</text>` : ''}
+    </g>`;
+  }
+  svg.innerHTML = s;
+  for (const g of svg.querySelectorAll('.zone')) {
+    const go = () => { location.hash = 'area-' + g.dataset.k; };
+    g.addEventListener('click', go);
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  }
+}
+
+const chip = (n, extra = '') => `<button class="chip" data-n="${esc(n.id)}"><span class="sw" style="background:${color(n.area)}"></span>${esc(n.label)}<span class="k">${esc(n.kind)}${extra}</span></button>`;
+
+function showArea(k) {
+  curArea = k;
+  const a = AREA[k], el = document.getElementById('area');
+  const mine = N.filter((n) => n.area === k);
+  const files = {};
+  for (const n of mine) (files[n.file] = files[n.file] || []).push(n);
+  const fileList = Object.entries(files).sort((x, y) => x[0].localeCompare(y[0]));
+  const out = {};
+  for (const n of mine) for (const e of adj[n.i]) { const o = N[e.o]; if (o.area !== k) out[o.area] = (out[o.area] || 0) + 1; }
+  el.innerHTML = `
+    <h2><span class="sw" style="background:${color(k)}"></span>${esc(a.name)}${a.status ? `<span class="pill${isEmptyArea(k) ? ' todo' : ''}">${esc(a.status)}</span>` : ''}</h2>
+    <p class="desc">${esc(a.desc)}</p>
+    <div class="meta">Parti da <a href="${DATA.repo}/blob/main/${a.readme}" target="_blank" rel="noopener">${esc(a.readme)}</a> · ${mine.length} nodi in ${fileList.length} file</div>
+    ${Object.keys(out).length ? `<h3>Collegata a</h3><div class="crosslist">${Object.entries(out).sort((x, y) => y[1] - x[1]).map(([o, c]) => `<button class="chip" data-a="${o}"><span class="sw" style="background:${color(o)}"></span>${esc(AREA[o].name)}<span class="k">${c}</span></button>`).join('')}</div>` : ''}
+    ${isEmptyArea(k) ? `<p class="empty-note">Area pronta ma ancora vuota: il README elenca cosa decidere e con quali parti del gioco si collega.</p>` : ''}
+    <h3>File</h3>
+    <ul class="files">${fileList.map(([f, ns]) => `<li><button aria-expanded="false" data-f="${esc(f)}"><span>${esc(f)}</span><span>${ns.length}</span></button><ul hidden>${ns.sort((x, y) => (parseInt((x.loc || 'L0').slice(1)) || 0) - (parseInt((y.loc || 'L0').slice(1)) || 0)).map((n) => `<li>${chip(n)}</li>`).join('')}</ul></li>`).join('')}</ul>`;
+  for (const b of el.querySelectorAll('.files > li > button')) {
+    b.onclick = () => { const ul = b.nextElementSibling; ul.hidden = !ul.hidden; b.setAttribute('aria-expanded', String(!ul.hidden)); };
+  }
+  if (fileList.length && fileList.length <= 3) for (const b of el.querySelectorAll('.files > li > button')) b.click();
+  wireChips(el);
+  drawBoard();
+  if (!curNode || curNode.area !== k) {
+    const hub = mine.slice().sort((x, y) => adj[y.i].length - adj[x.i].length)[0];
+    showNode(hub ? hub.id : null, false);
+  }
+}
+
+function showNode(id, fromHash = true) {
+  const el = document.getElementById('node');
+  const n = byId[id];
+  curNode = n || null;
+  if (!n) { el.innerHTML = `<h3>Nodo</h3><p class="empty-note">Scegli un nodo nell'area o cercalo in alto.</p>`; return; }
+  if (fromHash && n.area !== curArea) { curArea = n.area; showArea(n.area); }
+  const groups = {};
+  for (const e of adj[n.i]) { const key = relName(e.rel, e.out); (groups[key] = groups[key] || []).push(e); }
+  const url = fileUrl(n);
+  el.innerHTML = `
+    <h3>${esc(n.kind)} · <span style="color:${color(n.area)}">${esc(AREA[n.area].name)}</span></h3>
+    <h2>${esc(n.label)}</h2>
+    <div class="meta">${url ? `<a href="${url}" target="_blank" rel="noopener">${esc(n.file)}${n.loc ? ':' + esc(n.loc.replace(/^L/, '')) : ''}</a>` : ''}${n.comm ? ` · gruppo «${esc(n.comm)}»` : ''}</div>
+    <div class="neigh">${Object.keys(groups).length ? Object.entries(groups).sort((x, y) => y[1].length - x[1].length).map(([r, es]) =>
+      `<div><div class="rel">${esc(r)} (${es.length})</div><div class="list">${es.map((e) => chip(N[e.o], e.conf && e.conf !== 'EXTRACTED' ? ' · dedotto' : '')).join('')}</div></div>`).join('') : '<p class="empty-note">Nessun collegamento.</p>'}</div>`;
+  wireChips(el);
+}
+
+function wireChips(root) {
+  for (const c of root.querySelectorAll('.chip[data-n]')) c.onclick = () => { location.hash = 'n-' + c.dataset.n; };
+  for (const c of root.querySelectorAll('.chip[data-a]')) c.onclick = () => { location.hash = 'area-' + c.dataset.a; };
+}
+
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith('n-') && byId[h.slice(2)]) showNode(h.slice(2));
+  else if (h.startsWith('area-') && AREA[h.slice(5)]) { curNode = null; showArea(h.slice(5)); }
+  else showArea(curArea);
+}
+
+const q = document.getElementById('q'), res = document.getElementById('results');
+q.addEventListener('input', () => {
+  const t = q.value.trim().toLowerCase();
+  if (t.length < 2) { res.hidden = true; res.innerHTML = ''; return; }
+  const hits = N.filter((n) => n.label.toLowerCase().includes(t) || n.file.toLowerCase().includes(t))
+    .sort((a, b) => adj[b.i].length - adj[a.i].length).slice(0, 24);
+  res.innerHTML = hits.length ? hits.map((n) => chip(n)).join('') : '<span class="empty-note">Nessun risultato.</span>';
+  res.hidden = false;
+  wireChips(res);
+});
+
+addEventListener('hashchange', route);
+drawBoard();
+route();
+</script>

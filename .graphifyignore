@@ -1,0 +1,10 @@
+game/node_modules/
+game/dist/
+game/dev/sticks.json
+game/assets/characters/
+characters/*.glb
+animation/data/
+graphify-out/
+docs/mappa.html
+docs/map_template.html
+.claude/

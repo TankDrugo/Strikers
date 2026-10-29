@@ -1,0 +1,704 @@
+import * as THREE from 'three';
+import { BALL, FIELD, FIELDER, GOALIE, SHOT, TACKLE, PASS, MATCH, PHYSICS_DT, SIZE } from './config.js';
+import { Ball, predict, shootAtFast } from './ball.js';
+import { buildField, buildBallMesh } from './field.js';
+import { Stadium } from './stadium.js';
+import { Player, angleDiff } from './player.js';
+import { fielderAI, bestPassTarget } from './ai.js';
+
+const R = BALL.radius;
+const tmp = new THREE.Vector3();
+const tmp2 = new THREE.Vector3();
+
+// Home spots for the four fielders of team 0 (attacking +X); team 1 is mirrored.
+const HOMES = [[-11, -5], [-11, 5], [-4, -3.5], [-4, 3.5]];
+
+export class Game {
+  constructor(renderer, template, hud) {
+    this.renderer = renderer;
+    this.template = template;
+    this.hud = hud;
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x1d2738);
+    this.scene.fog = new THREE.Fog(0x1d2738, 60, 120);
+    this.camera = new THREE.PerspectiveCamera(42, 16 / 9, 0.1, 300);
+    this.camTarget = new THREE.Vector3();
+    this.camZoom = 1; // 0.6 (closer) .. 2.2 (whole pitch)
+    this.setupLights();
+    buildField(this.scene, { stadium: true });
+    this.stadium = new Stadium(this.scene);
+    this.ball = new Ball(buildBallMesh());
+    this.scene.add(this.ball.mesh);
+    this.ballShadow = new THREE.Mesh(new THREE.CircleGeometry(R * 1.1, 16), new THREE.MeshBasicMaterial({ color: 0, transparent: true, opacity: 0.35, depthWrite: false }));
+    this.ballShadow.rotation.x = -Math.PI / 2;
+    this.scene.add(this.ballShadow);
+    this.players = [];
+    for (let team = 0; team < 2; team++) {
+      for (let i = 0; i < 4; i++) {
+        const p = new Player(this, template.forSlot(team, i), team, 'fielder', i);
+        const [hx, hz] = HOMES[i];
+        p.home.set(team === 0 ? hx : -hx, 0, team === 0 ? hz : -hz);
+        p.tackleCooldown = 0;
+        this.players.push(p);
+      }
+      const g = new Player(this, template.forSlot(team, 4), team, 'goalie', 4);
+      g.home.set((team === 0 ? -1 : 1) * (FIELD.halfLength - 1.2), 0, 0);
+      g.tackleCooldown = 0;
+      this.players.push(g);
+    }
+    this.score = [0, 0];
+    this.clock = MATCH.seconds;
+    this.phase = 'kickoff';
+    this.phaseTime = 0;
+    this.kickoffTeam = 0;
+    this.input = { x: 0, z: 0, turbo: false, shootHeld: false, actions: new Set() };
+    this.human = this.players[3];
+    this.humanTeam = 0;
+    this.aiOnly = false;
+    this.acc = 0;
+    this.timeScale = 1;
+    this.stats = { shots: [0, 0], saves: [0, 0], passes: [0, 0], tackles: [0, 0], posts: 0 };
+    this.kickoff(0);
+  }
+
+  setupLights() {
+    this.scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x2a3a2a, 1.35));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    sun.position.set(-10, 34, 14); // floodlight key light
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const c = sun.shadow.camera; c.left = -26; c.right = 26; c.top = 18; c.bottom = -18; c.near = 1; c.far = 80;
+    sun.shadow.bias = -0.0005;
+    this.scene.add(sun);
+  }
+
+  teamOf(t) { return this.players.filter((p) => p.team === t); }
+  goalieOf(t) { return this.players.find((p) => p.team === t && p.isGoalie); }
+
+  kickoff(team) {
+    this.kickoffTeam = team;
+    this.ball.reset(0, 0);
+    for (const p of this.players) {
+      p.setState('free'); p.stun = 0; p.speed = 0; p.turbo = false;
+      p.pos.copy(p.home);
+      if (!p.isGoalie) p.pos.x = Math.sign(p.home.x) * Math.max(Math.abs(p.home.x), 2.5);
+      p.facing = p.team === 0 ? 0 : Math.PI;
+      p.desiredSpeed = 0; p.desiredDir = p.facing;
+      p.play(p.isGoalie ? 'gk_ready_idle' : 'idle', { loop: true });
+    }
+    const taker = this.players.find((p) => p.team === team && p.index === 3);
+    taker.pos.set(-taker.attackDir * 0.6, 0, 0);
+    this.ball.owner = taker;
+    taker.dribblePoint(this.ball.pos);
+    if (team === this.humanTeam && !this.aiOnly) this.setHuman(taker);
+    else if (!this.aiOnly) this.setHuman(this.players.find((p) => p.team === this.humanTeam && p.index === 3));
+    this.phase = 'kickoff';
+    this.phaseTime = 0;
+  }
+
+  setHuman(p) {
+    if (this.human) this.human.humanControlled = false;
+    this.human = p;
+    if (p && !this.aiOnly) p.humanControlled = true;
+  }
+
+  roleOf(p) {
+    // per team: nearest fielder to the ball chases, second nearest marks (human player is excluded)
+    if (!this._roles || this._rolesStep !== this.step) {
+      this._roles = new Map(); this._rolesStep = this.step;
+      for (const t of [0, 1]) {
+        const target = this.ball.owner ? this.ball.owner.pos : this.ball.pos;
+        const list = this.players.filter((q) => q.team === t && !q.isGoalie && !q.humanControlled && q.stun <= 0)
+          .sort((a, b) => Math.hypot(a.pos.x - target.x, a.pos.z - target.z) - Math.hypot(b.pos.x - target.x, b.pos.z - target.z));
+        const humanChasing = this.human && this.human.team === t && !this.aiOnly;
+        list.forEach((q, i) => this._roles.set(q, i === 0 && !(humanChasing && this.ball.owner && this.ball.owner.team !== t && i === 0 && Math.random() < 0) ? 'chaser' : i === 1 ? 'marker' : 'shape'));
+      }
+    }
+    return this._roles.get(p) || 'shape';
+  }
+
+  ballMeetPoint(p) {
+    const b = this.ball;
+    let best = b.pos.clone();
+    if (b.vel.lengthSq() < 0.5) return best;
+    const path = predict(b.pos, b.vel, b.spin, b.magnus, 2.0, 0.05);
+    const sp = p.turbo ? 7 : 6.1;
+    for (const s of path) {
+      if (s.p.y > 1.2) continue;
+      const d = Math.hypot(s.p.x - p.pos.x, s.p.z - p.pos.z);
+      best = s.p;
+      if (d / sp <= s.t + 0.05) break;
+    }
+    best.x = Math.max(-FIELD.halfLength + 0.4, Math.min(FIELD.halfLength - 0.4, best.x));
+    best.z = Math.max(-FIELD.halfWidth + 0.4, Math.min(FIELD.halfWidth - 0.4, best.z));
+    return best;
+  }
+
+  // ------------------------------------------------------------- actions
+
+  doPass(p, target, lob) {
+    if (!this.ball.owner === p) return;
+    const b = this.ball;
+    const dx = target.pos.x - p.pos.x, dz = target.pos.z - p.pos.z, d = Math.hypot(dx, dz);
+    const f = Math.max(0, Math.min(1, (d - PASS.minDist) / (PASS.maxDist - PASS.minDist)));
+    const range = p.isGoalie ? GOALIE.pass : lob ? FIELDER.passVolley : FIELDER.passGround;
+    const speed = range[0] + (range[1] - range[0]) * f;
+    let t = lob ? Math.max(0.6, d / speed * 1.6) : Math.max(0.15, d / speed);
+    // lead the receiver
+    const lead = Math.min(t, 1.2);
+    const tx = target.pos.x + Math.cos(target.facing) * target.speed * lead * 0.8;
+    const tz = target.pos.z + Math.sin(target.facing) * target.speed * lead * 0.8;
+    const from = b.pos.clone();
+    const to = new THREE.Vector3(tx, lob ? 0.9 : R, tz);
+    let vel = shootAtFast(from, to, t);
+    if (!lob) { vel.y = Math.min(vel.y, 1.2); }
+    p.facing = Math.atan2(tz - p.pos.z, tx - p.pos.x);
+    p.setState('pass', { vel, lob, target });
+    const clipName = p.isGoalie ? (d > GOALIE.throwMinDist ? 'gk_throw_over_hand' : 'gk_throw_underhand') : 'pass_1200';
+    p.play(clipName, { fade: 0.05 });
+    p.stateData.release = this.template.meta[clipName]?.contact ?? 0.05;
+    this.stats.passes[p.team]++;
+  }
+
+  releasePass(p) {
+    const { vel, target, lob } = p.stateData;
+    this.ball.kick(vel, null, { passTarget: target, noPickup: 0.12 });
+    if (!this.aiOnly && p.team === this.humanTeam && !target.isGoalie) this.setHuman(target);
+    p.stateData.released = true;
+  }
+
+  startWindup(p, aiHold = null) {
+    p.setState('windup', { aiHold });
+    p.play('windup', { fade: 0.08 });
+  }
+
+  releaseShot(p) {
+    const charge = Math.min(1, p.stateTime / SHOT.windupSeconds);
+    const perfect = charge >= 1 - SHOT.perfectWindow && p.stateTime <= SHOT.windupSeconds + 0.12;
+    p.setState('kick', { charge, perfect });
+    const clip = perfect ? 'windup_powershot' : 'windup_kick';
+    p.play(clip, { fade: 0.04, rate: perfect ? 1.35 : 1.25 });
+    p.stateData.release = (this.template.meta[clip]?.contact ?? 0.15) / (perfect ? 1.35 : 1.25);
+    p.stateData.aimZ = p === this.human && !this.aiOnly ? this.input.z : null;
+  }
+
+  shootBall(p) {
+    const { charge, perfect } = p.stateData;
+    const b = this.ball;
+    const goalX = p.attackDir * FIELD.halfLength;
+    const gk = this.goalieOf(1 - p.team);
+    const w = FIELD.goalHalfWidth - SHOT.offsetFromPost;
+    let side;
+    if (p.stateData.aimZ !== null && p.stateData.aimZ !== undefined && Math.abs(p.stateData.aimZ) > 0.2) side = Math.sign(p.stateData.aimZ);
+    else side = gk.pos.z > 0 ? -1 : 1;
+    const dist = Math.hypot(goalX - b.pos.x, b.pos.z);
+    const target = new THREE.Vector3(goalX, 0, side * w + (Math.random() * 2 - 1) * SHOT.widthVariance * 2 * w);
+    target.y = dist > SHOT.highShotDistance ? FIELD.goalHeight - 0.4 : 0.35 + Math.random() * 1.3;
+    target.y += (Math.random() * 2 - 1) * SHOT.heightVariance * FIELD.goalHeight;
+    const power = perfect ? 1 : 0.15 + 0.85 * charge;
+    const speed = FIELDER.shot[0] + (FIELDER.shot[1] - FIELDER.shot[0]) * power;
+    const from = b.pos.clone();
+    const flight = Math.max(0.25, from.distanceTo(target) / speed);
+    let vel = shootAtFast(from, target, flight);
+    // weak shots are less accurate
+    const err = (1 - power) * 0.12;
+    vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() * 2 - 1) * err);
+    let spin = new THREE.Vector3();
+    if (perfect) {
+      // Fielder.cpp: random spin in the shooter's frame (fwd ±7.5, side ±15, vertical 10..25), Magnus on
+      const f = p.facing;
+      const fwd = new THREE.Vector3(Math.cos(f), 0, Math.sin(f)), left = new THREE.Vector3(Math.sin(f), 0, -Math.cos(f));
+      const vz = (10 + Math.random() * 15) * (Math.random() < 0.5 ? 1 : -1);
+      spin.addScaledVector(fwd, 7.5 - Math.random() * 15).addScaledVector(left, 15 - Math.random() * 30).add(new THREE.Vector3(0, vz, 0));
+      // cBall::Shoot: fly a ghost ball, then rotate the launch so the curve ends on target
+      const path = predict(from, vel, spin, true, 2.0);
+      const d0 = from.distanceTo(target);
+      const at = path.find((s) => s.p.distanceTo(from) >= d0) || path[path.length - 1];
+      const q = new THREE.Quaternion().setFromUnitVectors(tmp.copy(at.p).sub(from).normalize(), tmp2.copy(target).sub(from).normalize());
+      vel.applyQuaternion(q);
+      if (vel.y < 1 && from.y < 1) vel.y = 1;
+    }
+    b.kick(vel, spin, { magnus: perfect, shot: true, power, perfect });
+    this.stats.shots[p.team]++;
+    this.hud.flash(perfect ? 'TIRO PERFETTO!' : null);
+    p.stateData.released = true;
+  }
+
+  startSlide(p) {
+    p.setState('slide', { hit: false });
+    p.play('slide_tackle_1200', { fade: 0.05 });
+    p.speed = Math.max(p.speed, TACKLE.slideSpeed);
+    p.tackleCooldown = 1.2;
+    this.stats.tackles[p.team]++;
+  }
+
+  startHit(p) {
+    p.setState('hit', { done: false });
+    p.play('hit_1200', { fade: 0.05 });
+    p.tackleCooldown = 1.0;
+  }
+
+  startDeke(p, side) {
+    p.setState('deke', {});
+    p.play('deke_300', { fade: 0.06, mirror: side < 0 });
+  }
+
+  knockDown(victim, attacker, kind) {
+    if (victim.state === 'react' || victim.isGoalie) return;
+    const b = this.ball;
+    if (b.owner === victim) {
+      const dir = Math.atan2(victim.pos.z - attacker.pos.z, victim.pos.x - attacker.pos.x) + (Math.random() - 0.5);
+      b.kick(new THREE.Vector3(Math.cos(dir) * 5, 2.5, Math.sin(dir) * 5), null, { noPickup: 0.35 });
+      b.lastTouch = attacker;
+    }
+    // pick the react clip by where the hit came from: 1200 front, 300 right, 600 back, 900 left (mirrored 300)
+    const rel = angleDiff(victim.facing, Math.atan2(attacker.pos.z - victim.pos.z, attacker.pos.x - victim.pos.x));
+    let dirName = '1200', mirror = false;
+    if (Math.abs(rel) > 2.35) dirName = '600';
+    else if (rel > 0.8) { dirName = '300'; }
+    else if (rel < -0.8) { dirName = '300'; mirror = true; }
+    const base = kind === 'slide' ? 'slide_tackle_react_' : 'hit_react_';
+    const name = kind === 'slide' ? base + dirName : base + dirName;
+    victim.setState('react', {});
+    victim.stun = kind === 'slide' ? TACKLE.stunSlide : TACKLE.stunHit;
+    victim.speed = 0;
+    victim.play(this.template.clips[name] ? name : base + '1200', { fade: 0.05, mirror });
+    this.hud.sfx('hit');
+  }
+
+  // ------------------------------------------------------------- per-step logic
+
+  humanControl(p, dt) {
+    const inp = this.input;
+    const mag = Math.hypot(inp.x, inp.z);
+    if (p.state === 'free') {
+      if (mag > 0.15) { p.desiredDir = Math.atan2(inp.z, inp.x); p.desiredSpeed = p.hasBall() ? FIELDER.runWithBall : FIELDER.run; }
+      else p.desiredSpeed = 0;
+      p.turbo = inp.turbo && mag > 0.15;
+      if (p.turbo) p.desiredSpeed = p.hasBall() ? FIELDER.turboWithBall[0] : FIELDER.turbo;
+      // keyboard keys change meaning with the ball; controller buttons follow the chosen layout
+      const a = inp.actions;
+      const aim = mag > 0.15 ? p.desiredDir : p.facing;
+      if (p.hasBall()) {
+        if (a.has('pass') || a.has('passOrSwitch')) { const t = bestPassTarget(this, p, aim); if (t) this.doPass(p, t, false); }
+        else if (a.has('lob') || a.has('lobOrHit')) { const t = bestPassTarget(this, p, aim); if (t) this.doPass(p, t, true); }
+        else if (a.has('shootOrSlide')) this.startWindup(p);
+        else if (a.has('deke') || a.has('dekeOrHit')) this.startDeke(p, inp.z * p.attackDir > 0 ? -1 : 1);
+      } else {
+        if (a.has('shootOrSlide') && p.tackleCooldown <= 0) this.startSlide(p);
+        else if ((a.has('lobOrHit') || a.has('dekeOrHit')) && p.tackleCooldown <= 0) this.startHit(p);
+        else if (a.has('switch') || a.has('passOrSwitch')) this.switchHuman();
+      }
+    } else if (p.state === 'windup' && !inp.shootHeld) {
+      this.releaseShot(p);
+    }
+    inp.actions.clear();
+  }
+
+  switchHuman() {
+    const target = this.ball.owner ? this.ball.owner.pos : this.ball.pos;
+    let best = null, bd = 1e9;
+    for (const q of this.players) {
+      if (q.team !== this.humanTeam || q.isGoalie || q === this.human) continue;
+      const d = Math.hypot(q.pos.x - target.x, q.pos.z - target.z);
+      if (d < bd) { bd = d; best = q; }
+    }
+    if (best) this.setHuman(best);
+  }
+
+  updateState(p, dt) {
+    p.tackleCooldown = Math.max(0, p.tackleCooldown - dt);
+    if (p.stun > 0) p.stun -= dt;
+    switch (p.state) {
+      case 'free':
+        if (p.isGoalie) this.goalieAI(p, dt);
+        else if (!p.humanControlled) fielderAI(this, p, dt);
+        if (p.state === 'free') p.locomotion(dt);
+        break;
+      case 'pass':
+        p.speed *= 0.9;
+        p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
+        if (!p.stateData.released && p.stateTime >= p.stateData.release) {
+          if (this.ball.owner === p) this.releasePass(p); else p.stateData.released = true;
+        }
+        if (p.stateTime > (p.isGoalie ? 0.6 : 0.3)) p.setState('free');
+        break;
+      case 'windup': {
+        p.speed = Math.max(0, p.speed - 6 * dt);
+        if (p.humanControlled) {
+          const mag = Math.hypot(this.input.x, this.input.z);
+          if (mag > 0.15) p.facing += Math.max(-dt * 6, Math.min(dt * 6, angleDiff(p.facing, Math.atan2(this.input.z, this.input.x))));
+        } else {
+          const goalX = p.attackDir * FIELD.halfLength;
+          p.facing += Math.max(-dt * 6, Math.min(dt * 6, angleDiff(p.facing, Math.atan2(-p.pos.z * 0.6, goalX - p.pos.x))));
+        }
+        p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
+        if (this.ball.owner !== p) { p.setState('free'); break; }
+        if (p.stateData.aiHold !== null && p.stateData.aiHold !== undefined && p.stateTime >= p.stateData.aiHold) this.releaseShot(p);
+        else if (p.stateTime > SHOT.windupSeconds + 0.4) this.releaseShot(p);
+        break;
+      }
+      case 'kick':
+        p.speed = Math.max(0, p.speed - 10 * dt);
+        if (!p.stateData.released && p.stateTime >= p.stateData.release) {
+          if (this.ball.owner === p) this.shootBall(p); else p.stateData.released = true;
+        }
+        if (p.stateTime > 0.55) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
+        break;
+      case 'slide': {
+        const slideEnd = TACKLE.slideTime;
+        if (p.stateTime < slideEnd) {
+          p.speed = Math.max(3, p.speed - 8 * dt);
+          p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
+          // ball first: a clean tackle wins it
+          const fx = p.pos.x + Math.cos(p.facing) * 0.45, fz = p.pos.z + Math.sin(p.facing) * 0.45;
+          const b = this.ball;
+          if (Math.hypot(b.pos.x - fx, b.pos.z - fz) < 0.55 * SIZE && b.pos.y < 0.6 * SIZE && !p.stateData.hit) {
+            const victim = b.owner;
+            if (victim && victim.team !== p.team) { this.knockDown(victim, p, 'slide'); p.stateData.hit = true; }
+            else if (!victim) { b.kick(new THREE.Vector3(Math.cos(p.facing) * 7, 0.5, Math.sin(p.facing) * 7), null, { noPickup: 0.1 }); b.lastTouch = p; p.stateData.hit = true; }
+          }
+          for (const o of this.players) {
+            if (o.team === p.team || o.isGoalie || o.state === 'react' || p.stateData.hit) continue;
+            if (Math.hypot(o.pos.x - fx, o.pos.z - fz) < 0.55 * SIZE) { this.knockDown(o, p, 'slide'); p.stateData.hit = true; }
+          }
+        } else if (!p.stateData.recover) {
+          p.stateData.recover = true;
+          p.play('slide_tackle_up_fail', { fade: 0.08, rate: 1.6 });
+        } else {
+          p.speed = Math.max(0, p.speed - 20 * dt);
+          if (p.stateTime > slideEnd + TACKLE.slideRecover + 0.25) p.setState('free');
+        }
+        break;
+      }
+      case 'hit': {
+        if (p.stateTime < 0.3) {
+          p.speed = 7.5;
+          p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
+          if (!p.stateData.done) for (const o of this.players) {
+            if (o.team === p.team || o.isGoalie || o.state === 'react') continue;
+            if (Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < TACKLE.hitRange * 0.75) { this.knockDown(o, p, 'hit'); p.stateData.done = true; }
+          }
+        } else p.speed = Math.max(0, p.speed - 25 * dt);
+        if (p.stateTime > 0.75) p.setState('free');
+        break;
+      }
+      case 'deke':
+        p.applyRootMotion();
+        if (p.stateTime > 0.55) { p.setState('free'); p.speed = FIELDER.runWithBall * 0.7; }
+        break;
+      case 'react':
+        p.applyRootMotion();
+        if (p.stun <= 0) { p.setState('free'); p.speed = 0; }
+        break;
+      case 'celebrate':
+      case 'dejected':
+        break;
+      case 'dive':
+      case 'catch':
+      case 'hold':
+      case 'throw':
+        this.goalieAction(p, dt);
+        break;
+    }
+    if (p.humanControlled && !this.aiOnly && p.state === 'free') { /* already handled */ }
+    p.clampToField();
+  }
+
+  // ------------------------------------------------------------- goalies
+
+  goalieAI(g, dt) {
+    const b = this.ball;
+    const gx = -g.attackDir * FIELD.halfLength; // own goal line
+    const out = g.attackDir; // direction to the pitch
+    const inBox = (pt) => Math.abs(pt.x - gx) < FIELD.halfLength - FIELD.penaltyX && Math.abs(pt.z) < FIELD.penaltyHalfWidth;
+    if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.1 }); return; }
+
+    // incoming shot?
+    if (!b.owner && (b.vel.x * -out) > 6) {
+      const path = predict(b.pos, b.vel, b.spin, b.magnus, 1.4);
+      const cross = path.find((s) => (s.p.x - gx) * out < 0.6);
+      if (cross && Math.abs(cross.p.z) < FIELD.goalHalfWidth + GOALIE.saveIgnoreMargin && cross.p.y < FIELD.goalHeight + 0.6) {
+        this.planSave(g, cross, path);
+        return;
+      }
+    }
+    // loose ball in the box: go and collect it
+    if (!b.owner && inBox(b.pos) && b.vel.length() < 9 && b.pos.y < 1.5) {
+      const meet = this.ballMeetPoint(g);
+      this.goalieMove(g, meet.x, meet.z, GOALIE.run);
+      return;
+    }
+    // positioning: on the line between ball and goal centre
+    const bx = b.pos.x - gx, bz = b.pos.z, d = Math.hypot(bx, bz);
+    const off = Math.min(2.6, 0.8 + d * 0.06);
+    const tx = gx + (bx / (d || 1)) * off, tz = Math.max(-FIELD.goalHalfWidth + 0.35, Math.min(FIELD.goalHalfWidth - 0.35, (bz / (d || 1)) * off * 1.4));
+    this.goalieMove(g, tx, tz, d < 18 ? GOALIE.run : GOALIE.jog);
+  }
+
+  goalieMove(g, x, z, speed) {
+    const dx = x - g.pos.x, dz = z - g.pos.z, dd = Math.hypot(dx, dz);
+    const faceBall = Math.atan2(this.ball.pos.z - g.pos.z, this.ball.pos.x - g.pos.x);
+    if (dd < 0.15) { g.desiredSpeed = 0; g.facing += angleDiff(g.facing, faceBall) * 0.15; g.speed = 0; g.locomotionAnim(); return; }
+    // short moves sideways keep facing the ball (strafe), long ones run
+    if (dd < 2.5) {
+      const step = Math.min(dd, GOALIE.run * 0.75 * (1 / 50));
+      g.pos.x += (dx / dd) * step * 1; g.pos.z += (dz / dd) * step * 1;
+      g.facing += angleDiff(g.facing, faceBall) * 0.2;
+      g.speed = 0;
+      const rel = angleDiff(g.facing, Math.atan2(dz, dx));
+      const right = rel > 0;
+      g.play('gk_strafe_300', { loop: true, restart: false, mirror: !right, rate: 1.2 });
+      return;
+    }
+    g.desiredDir = Math.atan2(dz, dx); g.desiredSpeed = Math.min(speed, dd * 3);
+    g.locomotion(1 / 50);
+  }
+
+  planSave(g, cross, path) {
+    const b = this.ball;
+    const out = g.attackDir;
+    const right = new THREE.Vector3(-Math.sin(g.facing), 0, Math.cos(g.facing));
+    const rel = tmp.copy(cross.p).sub(g.pos);
+    const lateral = rel.dot(right);
+    const reach = Math.abs(lateral);
+    const power = b.shotPower || Math.min(1, b.vel.length() / 34);
+    const time = Math.max(0.05, cross.t);
+    // chance of reaching it: distance vs dive reach, harder for fast and perfect shots
+    let chance = 1 - Math.max(0, (reach - 0.5) / (GOALIE.diveReach + time * 2.5));
+    chance *= 1 - 0.35 * power;
+    if (b.shotPerfect) chance *= 0.45;
+    if (cross.p.y > GOALIE.reachHeight) chance *= 0.5;
+    const success = Math.random() < chance;
+    const height = cross.p.y < 0.55 * SIZE ? 'low' : cross.p.y < 1.35 * SIZE ? 'med' : 'high';
+    let clip;
+    const catchIt = power < GOALIE.catchMaxShotPower + 0.25 && !b.shotPerfect && Math.random() < 0.65;
+    if (reach < 0.6 * SIZE) clip = catchIt ? 'gk_catch_' + height : 'gk_stand_defl_center_parry_' + height;
+    else if (reach < 1.4 * SIZE) clip = catchIt ? 'gk_dive_catch_near_right_' + height : 'gk_dvng_defl_parry_near_right_' + height;
+    else clip = catchIt ? 'gk_dive_catch_far_right_' + height : 'gk_dvng_defl_parry_far_right_' + height;
+    if (!this.template.clips[clip]) clip = 'gk_dive_catch_far_right_med';
+    g.setState('dive', { success, catchIt, target: cross.p.clone(), t0: time, from: g.pos.clone(), clip });
+    g.play(clip, { fade: 0.04, mirror: lateral < 0 && reach >= 0.6, rate: Math.max(1, 0.45 / time) });
+    g.facing = out > 0 ? 0 : Math.PI;
+  }
+
+  goalieAction(g, dt) {
+    const b = this.ball;
+    const d = g.stateData;
+    if (g.state === 'dive') {
+      const k = Math.min(1, g.stateTime / Math.max(0.12, d.t0));
+      const tx = d.target.x - g.attackDir * 0.15, tz = Math.max(-FIELD.goalHalfWidth - 0.6, Math.min(FIELD.goalHalfWidth + 0.6, d.target.z));
+      if (d.success) { g.pos.x = d.from.x + (tx - d.from.x) * k; g.pos.z = d.from.z + (tz - d.from.z) * k; }
+      else { g.pos.x = d.from.x + (tx - d.from.x) * k * 0.5; g.pos.z = d.from.z + (tz - d.from.z) * k * 0.55; }
+      if (d.success && !b.owner && !d.done) {
+        const handY = Math.min(1.9, Math.max(0.3, d.target.y));
+        if (Math.hypot(b.pos.x - g.pos.x, b.pos.z - g.pos.z) < 0.95 && Math.abs(b.pos.y - handY) < 1.0) {
+          d.done = true;
+          this.stats.saves[g.team]++;
+          if (d.catchIt) { b.owner = g; b.vel.set(0, 0, 0); b.magnus = false; b.shotTimer = 0; this.hud.flash('PARATA!'); }
+          else {
+            const s = b.vel.length() * 0.35;
+            const ang = (g.attackDir > 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 1.6;
+            b.kick(new THREE.Vector3(Math.cos(ang) * s, 3 + Math.random() * 3, Math.sin(ang) * s), null, { noPickup: 0.3 });
+            b.lastTouch = g;
+            this.hud.flash('RESPINTA!');
+          }
+        }
+      }
+      if (g.stateTime > Math.max(0.9, d.t0 + 0.6)) {
+        if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.15 }); }
+        else { g.setState('free'); g.play('gk_recover_without_ball', { fade: 0.1, rate: 1.5 }); }
+      }
+    } else if (g.state === 'hold') {
+      g.speed = 0;
+      g.facing += angleDiff(g.facing, g.attackDir > 0 ? 0 : Math.PI) * 0.1;
+      if (g.stateTime > GOALIE.holdTime * 0.6) {
+        const t = bestPassTarget(this, g);
+        if (t) {
+          const dist = Math.hypot(t.pos.x - g.pos.x, t.pos.z - g.pos.z);
+          if (dist > GOALIE.kickMinDist) {
+            g.setState('throw', { kick: true, target: t });
+            g.facing = Math.atan2(t.pos.z - g.pos.z, t.pos.x - g.pos.x);
+            g.play('gk_kick_long', { fade: 0.08 });
+            g.stateData.release = this.template.meta.gk_kick_long?.contact ?? 0.2;
+          } else this.doPass(g, t, false), g.setState('throw', { kick: false, passDone: true, ...g.stateData });
+        }
+      }
+    } else if (g.state === 'throw') {
+      if (g.stateData.kick && !g.stateData.released && g.stateTime >= g.stateData.release && b.owner === g) {
+        const t = g.stateData.target;
+        const ang = (GOALIE.kickAngle[0] + Math.random() * (GOALIE.kickAngle[1] - GOALIE.kickAngle[0])) * Math.PI / 180;
+        const dist = Math.hypot(t.pos.x - g.pos.x, t.pos.z - g.pos.z);
+        const sp = Math.min(GOALIE.kick[1], Math.max(GOALIE.kick[0], Math.sqrt(dist * 14 / Math.sin(2 * ang)) * 0.9));
+        const dir = Math.atan2(t.pos.z - g.pos.z, t.pos.x - g.pos.x);
+        b.kick(new THREE.Vector3(Math.cos(dir) * Math.cos(ang) * sp, Math.sin(ang) * sp * 0.6, Math.sin(dir) * Math.cos(ang) * sp), null, { passTarget: t, noPickup: 0.4 });
+        b.pos.y = 0.6;
+        g.stateData.released = true;
+      }
+      if (g.stateData.passDone && b.owner === g && g.stateTime > 0.3) this.releasePass(g);
+      if (g.stateTime > 0.9) g.setState('free');
+    }
+  }
+
+  // ------------------------------------------------------------- ball & players
+
+  ballStep(dt) {
+    const b = this.ball;
+    if (b.owner) {
+      const o = b.owner;
+      if (o.isGoalie) tmp.set(o.pos.x + Math.cos(o.facing) * 0.25 * SIZE, 0.75 * SIZE, o.pos.z + Math.sin(o.facing) * 0.25 * SIZE);
+      else o.dribblePoint(tmp);
+      b.vel.subVectors(tmp, b.pos).divideScalar(dt);
+      b.pos.copy(tmp);
+      b.lastTouch = o;
+      return;
+    }
+    b.step(dt);
+    // pickups and body deflections
+    let taker = null, bestD = 1e9;
+    for (const p of this.players) {
+      if (p.state === 'react' || p.state === 'slide' || p.stun > 0) continue;
+      const dx = b.pos.x - p.pos.x, dz = b.pos.z - p.pos.z, d = Math.hypot(dx, dz);
+      const reachH = p.isGoalie ? Math.min(1.9 * SIZE, 2.5) : BALL.pickupHeight;
+      const radius = p.isGoalie ? 0.75 * SIZE : BALL.pickupRadius;
+      if (d < radius && b.pos.y < reachH && b.noPickup <= 0) {
+        // a hard shot flying past a fielder deflects instead of sticking
+        const sp = b.vel.length();
+        if (!p.isGoalie && sp > 22 && b.shotTimer > 0) {
+          if (b.lastTouch && b.lastTouch.team !== p.team) { b.vel.multiplyScalar(-0.3); b.vel.y = Math.abs(b.vel.y) + 2; b.magnus = false; b.noPickup = 0.2; b.lastTouch = p; }
+          continue;
+        }
+        if (p.isGoalie) {
+          const inBox = Math.abs(p.pos.x) > FIELD.penaltyX - 0.5 && Math.abs(p.pos.z) < FIELD.penaltyHalfWidth + 0.5;
+          if (!inBox) continue;
+        }
+        if (d < bestD) { bestD = d; taker = p; }
+      }
+    }
+    if (taker) {
+      if (taker.isGoalie && b.shotTimer > 0 && b.lastTouch && b.lastTouch.team !== taker.team) {
+        this.stats.saves[taker.team]++;
+        this.hud.flash('PARATA!');
+        if (taker.state === 'dive') taker.stateData.done = true;
+      }
+      b.owner = taker; b.magnus = false; b.shotTimer = 0;
+      if (b.passTarget && b.passTarget.team === taker.team && b.passTarget !== taker) { /* intercepted by a teammate: fine */ }
+      b.passTarget = null;
+      if (!this.aiOnly && taker.team === this.humanTeam && !taker.isGoalie && this.human !== taker) this.setHuman(taker);
+      taker.aiTimer = 0;
+    }
+  }
+
+  separatePlayers() {
+    const ps = this.players;
+    for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) {
+      const a = ps[i], c = ps[j];
+      const minD = ((a.isGoalie ? 0.36 : 0.28) + (c.isGoalie ? 0.36 : 0.28)) * SIZE;
+      const dx = c.pos.x - a.pos.x, dz = c.pos.z - a.pos.z, d = Math.hypot(dx, dz);
+      if (d < minD && d > 1e-4) {
+        const push = (minD - d) / 2, nx = dx / d, nz = dz / d;
+        a.pos.x -= nx * push; a.pos.z -= nz * push; c.pos.x += nx * push; c.pos.z += nz * push;
+      }
+    }
+  }
+
+  fixedStep(dt) {
+    this.step = (this.step || 0) + 1;
+    for (const p of this.players) p.savePrev();
+    this.ball.prevPos.copy(this.ball.pos);
+    this.phaseTime += dt;
+    if (this.phase === 'kickoff') {
+      for (const p of this.players) { p.speed = 0; p.locomotionAnim(); p.update(dt); }
+      this.ballStep(dt);
+      if (this.phaseTime > 1.2) this.phase = 'play';
+      return;
+    }
+    if (this.phase === 'goal' || this.phase === 'end') {
+      for (const p of this.players) {
+        if (p.state === 'free' && !p.isGoalie) { p.desiredSpeed = 0; p.locomotion(dt); }
+        if (p.state === 'react') p.applyRootMotion();
+        p.update(dt);
+      }
+      this.ball.step(dt);
+      if (this.phase === 'goal' && this.phaseTime > MATCH.goalPause) this.kickoff(this.ball.inGoal > 0 ? 1 : 0);
+      return;
+    }
+    if (this.phase !== 'play') return;
+    this.clock = Math.max(0, this.clock - dt);
+    if (this.clock <= 0) { this.endMatch(); return; }
+
+    if (!this.aiOnly && this.human) this.humanControl(this.human, dt);
+    for (const p of this.players) this.updateState(p, dt);
+    this.separatePlayers();
+    this.ballStep(dt);
+    for (const p of this.players) p.update(dt);
+
+    for (const e of this.ball.events) {
+      if (e.type === 'goal') this.onGoal(e.side);
+      else if (e.type === 'post') { this.stats.posts++; this.hud.sfx('post'); }
+      else if (e.type === 'wall') this.hud.sfx('wall');
+    }
+    this.ball.events.length = 0;
+  }
+
+  onGoal(side) {
+    // side = +1: ball went into the goal at +X, scored by team 0
+    const team = side > 0 ? 0 : 1;
+    this.score[team]++;
+    this.phase = 'goal';
+    this.phaseTime = 0;
+    this.hud.goal(team, this.score);
+    for (const p of this.players) {
+      p.desiredSpeed = 0;
+      if (p.isGoalie) {
+        if (p.team !== team) { p.setState('dejected'); p.play('gk_dejected_0' + (1 + Math.floor(Math.random() * 3)), { fade: 0.2 }); }
+      } else if (p.team === team) { p.setState('celebrate'); p.play('wave', { fade: 0.2 }); }
+    }
+  }
+
+  endMatch() {
+    this.phase = 'end';
+    this.phaseTime = 0;
+    for (const p of this.players) {
+      p.desiredSpeed = 0;
+      const won = this.score[p.team] > this.score[1 - p.team];
+      if (!p.isGoalie && won) { p.setState('celebrate'); p.play('wave', { loop: true, fade: 0.3 }); }
+      else if (p.isGoalie && !won && this.score[0] !== this.score[1]) { p.setState('dejected'); p.play('gk_dejected_02', { fade: 0.3 }); }
+    }
+    this.hud.end(this.score, this.humanTeam, this.stats);
+  }
+
+  // ------------------------------------------------------------- frame
+
+  update(realDt) {
+    this.acc += Math.min(0.1, realDt) * this.timeScale;
+    while (this.acc >= PHYSICS_DT) { this.fixedStep(PHYSICS_DT); this.acc -= PHYSICS_DT; }
+    const alpha = this.acc / PHYSICS_DT, frameDt = Math.min(0.1, realDt) * this.timeScale;
+    for (const p of this.players) p.render(frameDt, alpha);
+    this.ball.updateMesh(frameDt, alpha);
+    const bp = this.ball.rpos;
+    this.ballShadow.position.set(bp.x, 0.008, bp.z);
+    const h = bp.y;
+    this.ballShadow.scale.setScalar(1 + h * 0.25);
+    this.ballShadow.material.opacity = Math.max(0.08, 0.35 - h * 0.05);
+    this.updateCamera(realDt);
+    this.stadium.update(realDt, this);
+    this.hud.update(this);
+  }
+
+  updateCamera(dt) {
+    // close side camera from the near touchline: it frames roughly 16 m of pitch around the play
+    const focus = this.ball.owner ? this.ball.owner.rpos : this.ball.rpos; // drawn positions: no 50 Hz steps
+    const lead = this.ball.owner ? this.ball.owner.attackDir * 1.5 : 0;
+    const tx = Math.max(-16, Math.min(16, focus.x + lead));
+    const tz = Math.max(-8, Math.min(7, focus.z));
+    const k = 1 - Math.exp(-dt * 3.5);
+    this.camTarget.x += (tx - this.camTarget.x) * k;
+    this.camTarget.z += (tz - this.camTarget.z) * k;
+    // stay in front of the near-side stand (it starts 7.6 m behind the touchline)
+    const camZ = Math.min(this.camTarget.z + 0.3 + 8.9 * this.camZoom, FIELD.halfWidth + 6.8);
+    this.camera.position.set(this.camTarget.x, 0.5 + 5.7 * this.camZoom, camZ);
+    this.camera.lookAt(this.camTarget.x, 0.65, this.camTarget.z + 0.3);
+  }
+
+}

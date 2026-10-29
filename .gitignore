@@ -1,0 +1,29 @@
+# dependencies and build output
+node_modules
+game/dist/
+__pycache__/
+*.pyc
+.venv/
+
+# NEVER commit files from the game disc (personal copy): the decoded animations are in animation/data/
+disc/
+*.iso
+*.gcm
+*.rvz
+*.ciso
+*.sanim
+*.shier
+*.trg
+*.cph
+main.dol
+strikers_dati.zip
+
+# local test output
+*.blend
+*.blend1
+screenshots/
+
+# graphify working files (graph.json, graph.html and GRAPH_REPORT.md are committed)
+graphify-out/cache/
+graphify-out/.graphify_*
+graphify-out/memory/

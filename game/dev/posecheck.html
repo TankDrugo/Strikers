@@ -1,0 +1,33 @@
+<!doctype html><html><body style="margin:0;background:#dde">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+const q = new URLSearchParams(location.search);
+const clips = (q.get('clips')||'idle,run_with_ball,windup_kick,slide_tackle_1200').split(',');
+const cols = 5, W = 260, H = 300;
+const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
+renderer.setSize(W*cols, H*clips.length); renderer.setScissorTest(true); document.body.appendChild(renderer.domElement);
+const gltf = await new GLTFLoader().loadAsync('../assets/characters/portiere.glb');
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xdde3ee);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 2.2)); const dl = new THREE.DirectionalLight(0xffffff, 1.5); dl.position.set(3,5,4); scene.add(dl);
+const grid = new THREE.GridHelper(4, 8, 0x888888, 0xbbbbbb); scene.add(grid);
+const model = SkeletonUtils.clone(gltf.scene); scene.add(model);
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.18*1.9,16,12), new THREE.MeshStandardMaterial({color:0xffaa00, wireframe:true})); scene.add(ball);
+const mixer = new THREE.AnimationMixer(model);
+const cam = new THREE.PerspectiveCamera(35, W/H, 0.1, 50);
+const views = q.get('view') === 'side' ? [3.6,1.1,0.0] : [2.2,1.1,3.0];
+for (let r=0;r<clips.length;r++){
+  const clip = gltf.animations.find(a=>a.name===clips[r]); if(!clip){console.log('missing',clips[r]);continue;}
+  mixer.stopAllAction(); const act = mixer.clipAction(clip); act.play();
+  for (let c=0;c<cols;c++){
+    const t = clip.duration * c/(cols-1) * 0.999; act.time = t; mixer.update(0);
+    model.updateMatrixWorld(true);
+    ball.visible=false;
+    cam.position.set(...views); cam.lookAt(0,0.8,0); cam.aspect=W/H; cam.updateProjectionMatrix();
+    const x=c*W, y=(clips.length-1-r)*H; renderer.setViewport(x,y,W,H); renderer.setScissor(x,y,W,H); renderer.render(scene,cam);
+  }
+}
+document.title='done';
+</script></body></html>

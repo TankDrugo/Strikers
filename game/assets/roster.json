@@ -1,0 +1,63 @@
+{
+  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one.",
+  "characters": [
+    {
+      "id": "portiere",
+      "name": "Provvisorio (rivali in arrivo)",
+      "glb": "characters/portiere.glb",
+      "clips": "characters/portiere.clips.json",
+      "recolor": true
+    },
+    {
+      "id": "celestini_ala",
+      "name": "Ala Celestini",
+      "glb": "characters/celestini_ala.glb",
+      "clips": "characters/celestini_ala.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_attaccante",
+      "name": "Attaccante Celestini",
+      "glb": "characters/celestini_attaccante.glb",
+      "clips": "characters/celestini_attaccante.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_centrocampista",
+      "name": "Centrocampista Celestini",
+      "glb": "characters/celestini_centrocampista.glb",
+      "clips": "characters/celestini_centrocampista.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_difensore",
+      "name": "Difensore Celestini",
+      "glb": "characters/celestini_difensore.glb",
+      "clips": "characters/celestini_difensore.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_portiere",
+      "name": "Portiere Celestini",
+      "glb": "characters/celestini_portiere.glb",
+      "clips": "characters/celestini_portiere.clips.json",
+      "recolor": false
+    }
+  ],
+  "teams": [
+    [
+      "celestini_difensore",
+      "celestini_centrocampista",
+      "celestini_ala",
+      "celestini_attaccante",
+      "celestini_portiere"
+    ],
+    [
+      "portiere",
+      "portiere",
+      "portiere",
+      "portiere",
+      "portiere"
+    ]
+  ]
+}

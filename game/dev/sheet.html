@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#e4e8ef;font:12px monospace}#wrap{position:relative}.lab{position:absolute;color:#123;background:rgba(255,255,255,.75);padding:1px 3px}</style></head><body><div id="wrap"></div>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+const q = new URLSearchParams(location.search);
+const sticks = await (await fetch('sticks.json')).json();
+const clips = q.get('clips').split(',');
+const COLS = 6, W = 210, H = 240, OFF = 1.25;
+const wrap = document.getElementById('wrap');
+const renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+renderer.setSize(W * COLS, H * clips.length); renderer.setScissorTest(true); wrap.appendChild(renderer.domElement);
+const gltf = await new GLTFLoader().loadAsync('../assets/characters/' + (q.get('char') || 'portiere') + '.glb');
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xe4e8ef);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x556677, 2.3)); const dl = new THREE.DirectionalLight(0xffffff, 1.4); dl.position.set(3, 6, 5); scene.add(dl);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshBasicMaterial({color: 0xb9c4d4})); ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const grid = new THREE.GridHelper(60, 120, 0x8895aa, 0x9aa6b8); grid.position.y = 0.002; scene.add(grid);
+const model = SkeletonUtils.clone(gltf.scene); model.traverse((o) => { if (o.isMesh) o.frustumCulled = false; }); scene.add(model);
+const mixer = new THREE.AnimationMixer(model);
+const bones = sticks.bones, ix = (n) => bones.indexOf(n);
+const LINKS = [['Bip01 Pelvis','Bip01 Spine'],['Bip01 Spine','Bip01 Spine1'],['Bip01 Spine1','Bip01 Neck'],['Bip01 Neck','Bip01 Head'],
+ ['Bip01 Neck','Bip01 L Clavicle'],['Bip01 L Clavicle','Bip01 L Upperarm'],['Bip01 L Upperarm','Bip01 L Forearm'],['Bip01 L Forearm','Bip01 L Hand'],
+ ['Bip01 Neck','Bip01 R Clavicle'],['Bip01 R Clavicle','Bip01 R Upperarm'],['Bip01 R Upperarm','Bip01 R Forearm'],['Bip01 R Forearm','Bip01 R Hand'],
+ ['Bip01 Pelvis','Bip01 L Thigh'],['Bip01 L Thigh','Bip01 L Calf'],['Bip01 L Calf','Bip01 L Foot'],['Bip01 L Foot','Bip01 L Toe0'],
+ ['Bip01 Pelvis','Bip01 R Thigh'],['Bip01 R Thigh','Bip01 R Calf'],['Bip01 R Calf','Bip01 R Foot'],['Bip01 R Foot','Bip01 R Toe0']];
+const lineGeo = new THREE.BufferGeometry(); lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(LINKS.length * 6), 3));
+const colors = new Float32Array(LINKS.length * 6);
+LINKS.forEach(([a, b], i) => { const c = a.includes(' L ') || b.includes(' L ') ? [0.85,0.15,0.15] : b.includes(' R ') || a.includes(' R ') ? [0.15,0.3,0.9] : [0.1,0.1,0.1]; colors.set([...c, ...c], i * 6); });
+lineGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+const lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({vertexColors: true})); scene.add(lines);
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), new THREE.MeshBasicMaterial({color: 0x222222})); scene.add(head);
+const cam = new THREE.PerspectiveCamera(32, W / H, 0.05, 200);
+for (let r = 0; r < clips.length; r++) {
+  const name = clips[r], clip = gltf.animations.find((a) => a.name === name), st = sticks.clips[name];
+  mixer.stopAllAction(); const act = mixer.clipAction(clip); act.play();
+  st.frames.forEach((fr, c) => {
+    act.time = Math.min(fr.t, clip.duration - 1e-4); mixer.update(0); model.updateMatrixWorld(true);
+    const pos = lineGeo.attributes.position;
+    const P = (n) => { const p = fr.p[ix(n)]; return [p[0] + OFF, p[1] + st.shift, p[2]]; };
+    LINKS.forEach(([a, b], i) => { pos.setXYZ(i * 2, ...P(a)); pos.setXYZ(i * 2 + 1, ...P(b)); });
+    pos.needsUpdate = true; lineGeo.computeBoundingSphere(); lineGeo.computeBoundingBox(); head.position.set(...P('Bip01 Head'));
+    // frame both figures
+    const box = new THREE.Box3().setFromObject(lines); const bp = new THREE.Vector3(); model.traverse((o) => { if (o.isBone) box.expandByPoint(o.getWorldPosition(bp)); });
+    const ctr = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+    const dist = Math.max(size.x * 1.25, size.y, 1.6) * 1.9 + size.z * 0.5;
+    const dir = new THREE.Vector3(0.35, 0.22, 1).normalize();
+    cam.position.copy(ctr).addScaledVector(dir, dist); cam.lookAt(ctr);
+    const x = c * W, y = (clips.length - 1 - r) * H;
+    renderer.setViewport(x, y, W, H); renderer.setScissor(x, y, W, H); renderer.render(scene, cam);
+    const lab = document.createElement('div'); lab.className = 'lab'; lab.style.left = (x + 2) + 'px'; lab.style.top = (r * H + 2) + 'px';
+    lab.textContent = (c === 0 ? name + ' ' : '') + 'k' + fr.k; wrap.appendChild(lab);
+  });
+}
+document.title = 'done';
+</script></body></html>
