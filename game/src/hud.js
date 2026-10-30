@@ -4,7 +4,8 @@ import { SHOT } from './config.js';
 const css = `
 .hud{position:fixed;inset:0;pointer-events:none;font-family:"Trebuchet MS",system-ui,sans-serif;color:#fff;user-select:none}
 .hud .score{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;background:rgba(10,16,28,.72);padding:6px 18px;border-radius:999px;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.hud .team{display:flex;align-items:center;gap:8px}.hud .dot{width:14px;height:14px;border-radius:50%}
+.hud .team{display:flex;align-items:center;gap:8px}.hud .dot{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.hud .tname{font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 .hud .clock{font-size:16px;opacity:.85;min-width:52px;text-align:center}
 .hud .meter{position:absolute;width:86px;height:10px;border-radius:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.6);overflow:hidden;display:none}
 .hud .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23f,#ff7b2f)}
@@ -33,7 +34,7 @@ export class Hud {
   constructor() {
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     this.el = document.createElement('div'); this.el.className = 'hud';
-    this.el.innerHTML = `<div class="score"><span class="team"><span class="dot" style="background:#ffd23f"></span><span id="s0">0</span></span><span class="clock" id="clock">3:00</span><span class="team"><span id="s1">0</span><span class="dot" style="background:#ff4f4f"></span></span></div>
+    this.el.innerHTML = `<div class="score"><span class="team"><span class="tname" id="n0">Gialli</span><span class="dot" id="d0" style="background:#ffd23f"></span><span id="s0">0</span></span><span class="clock" id="clock">3:00</span><span class="team"><span id="s1">0</span><span class="dot" id="d1" style="background:#ff4f4f"></span><span class="tname" id="n1">Rossi</span></span></div>
       <div class="meter" id="meter"><i></i><b></b></div><div class="flash" id="flash"></div>
       <div class="help" id="help"><kbd>WASD</kbd>/<kbd>frecce</kbd> muovi · <kbd>Shift</kbd> turbo · <kbd>J</kbd> passa / cambia · <kbd>K</kbd> tiro (tieni) / scivolata · <kbd>L</kbd> pallonetto / spallata · <kbd>Spazio</kbd> finta · <kbd>+</kbd>/<kbd>-</kbd> o rotella: zoom · <kbd>P</kbd> pausa</div>`;
     document.body.appendChild(this.el);
@@ -45,6 +46,15 @@ export class Hud {
   }
 
   show(on) { this.el.style.display = on ? '' : 'none'; }
+
+  // Team names and colours on the score, from roster.json (teamInfo)
+  setTeams(teams) {
+    this.teams = teams;
+    teams.forEach((t, i) => {
+      this.el.querySelector('#d' + i).style.background = t.color;
+      const n = this.el.querySelector('#n' + i); n.textContent = t.name; n.style.color = t.color;
+    });
+  }
   sfx(name) { this.onSfx && this.onSfx(name); }
 
   flash(text, color = '#fff', secs = 1.1) {
@@ -52,7 +62,7 @@ export class Hud {
     this.flashEl.textContent = text; this.flashEl.style.color = color; this.flashEl.style.opacity = 1; this.flashT = secs;
   }
 
-  goal(team, score) { this.flash('GOL!', team === 0 ? '#ffd23f' : '#ff6b6b', 2.4); this.sfx('goal'); }
+  goal(team, score) { this.flash('GOL!', this.teams ? this.teams[team].color : team === 0 ? '#ffd23f' : '#ff6b6b', 2.4); this.sfx('goal'); }
 
   end(score, humanTeam, stats) { this.onEnd && this.onEnd(score, humanTeam, stats); }
 

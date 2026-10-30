@@ -1,5 +1,5 @@
 {
-  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one.",
+  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one. teamInfo: name and colour of each team (colour = rings, score, crowd; shirt = sampled from the models' textures).",
   "characters": [
     {
       "id": "celestini_portiere",
@@ -87,5 +87,17 @@
       "rivali_attaccante",
       "rivali_portiere"
     ]
+  ],
+  "teamInfo": [
+    {
+      "name": "Celestini",
+      "color": "#4bb6ec",
+      "shirt": "#4bb6ec"
+    },
+    {
+      "name": "Rivali",
+      "color": "#2bd17e",
+      "shirt": "#1b5a3c"
+    }
   ]
 }

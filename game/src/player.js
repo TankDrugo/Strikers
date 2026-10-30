@@ -57,7 +57,11 @@ export class Player {
     this.root = new THREE.Group();
     this.root.add(this.model);
     game.scene.add(this.root);
-    this.ring = new THREE.Mesh(new THREE.RingGeometry(0.28 * SIZE, 0.36 * SIZE, 28), new THREE.MeshBasicMaterial({ color: team === 0 ? 0xffd23f : 0xff4f4f, transparent: true, opacity: 0.8, depthWrite: false }));
+    const teamColor = game.teams?.[team]?.color ?? (team === 0 ? '#ffd23f' : '#ff4f4f');
+    this.ring = new THREE.Mesh(new THREE.RingGeometry(0.28 * SIZE, 0.36 * SIZE, 28), new THREE.MeshBasicMaterial({ color: teamColor, transparent: true, opacity: 0.8, depthWrite: false }));
+    // dark edge around the ring so any team colour reads on the grass
+    const edgeMat = new THREE.MeshBasicMaterial({ color: 0x0b1410, transparent: true, opacity: 0.55, depthWrite: false });
+    for (const [a, b] of [[0.255, 0.28], [0.36, 0.39]]) this.ring.add(new THREE.Mesh(new THREE.RingGeometry(a * SIZE, b * SIZE, 28), edgeMat));
     this.ring.rotation.x = -Math.PI / 2; this.ring.position.y = 0.012;
     this.root.add(this.ring);
     this.shadow = new THREE.Mesh(new THREE.CircleGeometry(0.33 * SIZE, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false }));
@@ -203,7 +207,7 @@ export class Player {
     this.rpos.lerpVectors(this.prevPos, this.pos, alpha);
     this.root.position.copy(this.rpos);
     this.root.rotation.y = Math.PI / 2 - (this.prevFacing + angleDiff(this.prevFacing, this.facing) * alpha);
-    this.ring.material.opacity = this.humanControlled ? 0.95 : 0.45;
+    this.ring.material.opacity = this.humanControlled ? 1 : 0.85;
     this.ring.scale.setScalar(this.humanControlled ? 1.35 : 1);
   }
 

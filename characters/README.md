@@ -46,7 +46,7 @@ I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in 
 ## Note
 
 - `recolor` in `roster.json` ricolora di rosso le parti gialle della maglia per la seconda squadra. Era servito per il primo personaggio; oggi è `false` per tutti, perché ogni squadra ha i suoi modelli.
-- Gli anelli sotto i piedi e i colori del punteggio sono ancora giallo (squadra 1) e rosso (squadra 2), non i colori delle maglie: lavoro per l'interfaccia.
+- Nomi e colori delle squadre stanno in `teamInfo` di `roster.json`: `color` colora anelli sotto i piedi, punteggio, scritta GOL!, tabellone e tifosi; `shirt` è il colore della maglia preso dalle texture. Per i Rivali `color` è un verde più chiaro della maglia (`#1b5a3c`), che sull'erba non si vedrebbe.
 - Il controllo automatico dei Rivali dà gli stessi risultati dei Celestini. Il centrocampista dei Rivali ha 2 clip in più segnalate come "leggermente sollevate" (`idle_onetimer_air_600`, `banana_peel_react_600`): dipende dai capelli voluminosi, che alzano la cima della testa; a occhio le pose sono corrette.
 - Altezza in campo: tutti i giocatori di movimento sono alti uguali (`FIELDER.height` in `game/src/config.js`), il portiere un po' di più. Il modello viene scalato, le proporzioni restano le sue.
 - I modelli in questa cartella possono essere pesanti (texture a piena risoluzione). Il gioco usa le copie in `game/assets/characters/`, con le texture ridotte.

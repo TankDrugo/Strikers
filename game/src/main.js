@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Game } from './game.js';
 import { Hud } from './hud.js';
 import { Input, PadMenus } from './input.js';
-import { MATCH, FIELDER, GOALIE, RIG_HEIGHT } from './config.js';
+import { MATCH, FIELDER, GOALIE, RIG_HEIGHT, TEAM_DEFAULTS } from './config.js';
 import { Player } from './player.js';
 
 // assets/roster.json lists the characters (one retargeted .glb + clip facts each) and the 5 per team
@@ -35,7 +35,8 @@ async function loadAssets() {
   }
   const first = byId[roster.characters[0].id];
   // the default template doubles as the shared one (clip facts are the same for every character)
-  return { ...first, roster, byId, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
+  const teams = TEAM_DEFAULTS.map((d, i) => ({ ...d, ...(roster.teamInfo || [])[i] }));
+  return { ...first, roster, byId, teams, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
 }
 
 // Team 0 keeps the model's yellow shirt; team 1 gets it recoloured red (only strongly yellow pixels change).
@@ -152,13 +153,14 @@ async function boot() {
     input.game = game;
     input.resumeGuard = true;
     input.onPause = () => togglePause();
+    hud.setTeams(game.teams);
     hud.show(true);
     hud.el.querySelector('#help').style.display = aiOnly ? 'none' : '';
     hud.onEnd = (score, humanTeam, stats) => {
       setTimeout(() => {
         const res = aiOnly ? 'Fine partita' : score[humanTeam] > score[1 - humanTeam] ? 'Vittoria!' : score[humanTeam] < score[1 - humanTeam] ? 'Sconfitta' : 'Pareggio';
         const s = screen(`<h1>${res} ${score[0]} – ${score[1]}</h1>
-          <table><tr><td></td><td>Gialli</td><td>Rossi</td></tr>
+          <table><tr><td></td><td style="color:${game.teams[0].color}">${game.teams[0].name}</td><td style="color:${game.teams[1].color}">${game.teams[1].name}</td></tr>
           <tr><td>Tiri</td><td>${stats.shots[0]}</td><td>${stats.shots[1]}</td></tr>
           <tr><td>Parate</td><td>${stats.saves[0]}</td><td>${stats.saves[1]}</td></tr>
           <tr><td>Passaggi</td><td>${stats.passes[0]}</td><td>${stats.passes[1]}</td></tr>

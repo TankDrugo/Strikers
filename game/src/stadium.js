@@ -55,7 +55,8 @@ function ledTexture(lines) {
 }
 
 export class Stadium {
-  constructor(scene) {
+  constructor(scene, teams = [{ color: '#ffd23f' }, { color: '#ff4f4f' }]) {
+    this.teams = teams;
     this.root = new THREE.Group();
     scene.add(this.root);
     this.time = 0;
@@ -171,7 +172,7 @@ export class Stadium {
   }
 
   buildCrowd() {
-    // one small figure per seat block; colours lean yellow on the -X half and red on the +X half
+    // one small figure per seat block; fans of team 0 sit on the -X half (its goal), team 1 on the +X half
     const body = new THREE.CapsuleGeometry(0.17, 0.32, 3, 6);
     const mat = new THREE.MeshStandardMaterial({ roughness: 0.8 });
     this.crowdUniforms = { uTime: { value: 0 }, uHype: { value: 0 } };
@@ -192,11 +193,12 @@ export class Stadium {
     const crowd = new THREE.InstancedMesh(body, mat, spots.length);
     const phase = new Float32Array(spots.length);
     const m = new THREE.Matrix4(), c = new THREE.Color();
-    const yellow = [0xffd23f, 0xffe27a, 0xf2b705], red = [0xff4f4f, 0xe23b3b, 0xff7a7a], neutral = [0xdfe6ee, 0x6b7a90, 0x2e3a4f, 0x88c0ff];
+    const shades = (hex) => [0, 0.08, -0.1].map((dl) => new THREE.Color(hex).offsetHSL(0, 0, dl).getHex());
+    const home = shades(this.teams[0].color), away = shades(this.teams[1].color), neutral = [0xdfe6ee, 0x6b7a90, 0x2e3a4f, 0xb9c4d4];
     spots.forEach(([x, y, z], i) => {
       m.makeTranslation(x, y, z);
       crowd.setMatrixAt(i, m);
-      const pal = Math.random() < 0.65 ? (x < 0 ? yellow : red) : neutral;
+      const pal = Math.random() < 0.65 ? (x < 0 ? home : away) : neutral;
       crowd.setColorAt(i, c.setHex(pal[Math.floor(Math.random() * pal.length)]));
       phase[i] = Math.random();
     });
@@ -256,12 +258,12 @@ export class Stadium {
     g.fillStyle = '#050b18'; g.fillRect(0, 0, 1024, 384);
     g.textAlign = 'center'; g.textBaseline = 'middle';
     if (msg) {
-      g.fillStyle = '#ffd23f'; g.font = 'bold 190px Trebuchet MS, sans-serif'; g.fillText(msg, 512, 200);
+      g.fillStyle = this.msgColor || '#ffffff'; g.font = 'bold 190px Trebuchet MS, sans-serif'; g.fillText(msg, 512, 200);
     } else {
       g.font = 'bold 170px Trebuchet MS, sans-serif';
-      g.fillStyle = '#ffd23f'; g.fillText(String(score[0]), 260, 175);
+      g.fillStyle = this.teams[0].color; g.fillText(String(score[0]), 260, 175);
       g.fillStyle = '#ffffff'; g.fillText('–', 512, 170);
-      g.fillStyle = '#ff6b6b'; g.fillText(String(score[1]), 764, 175);
+      g.fillStyle = this.teams[1].color; g.fillText(String(score[1]), 764, 175);
       const c = Math.max(0, Math.ceil(clock));
       g.font = 'bold 64px Trebuchet MS, sans-serif'; g.fillStyle = '#9fdcff';
       g.fillText(`${Math.floor(c / 60)}:${String(c % 60).padStart(2, '0')}`, 512, 320);

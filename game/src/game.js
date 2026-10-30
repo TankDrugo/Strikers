@@ -17,6 +17,7 @@ export class Game {
   constructor(renderer, template, hud) {
     this.renderer = renderer;
     this.template = template;
+    this.teams = template.teams; // [{ name, color }] per team, from roster.json
     this.hud = hud;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x1d2738);
@@ -26,7 +27,7 @@ export class Game {
     this.camZoom = 1; // 0.6 (closer) .. 2.2 (whole pitch)
     this.setupLights();
     buildField(this.scene, { stadium: true });
-    this.stadium = new Stadium(this.scene);
+    this.stadium = new Stadium(this.scene, this.teams);
     this.ball = new Ball(buildBallMesh());
     this.scene.add(this.ball.mesh);
     this.ballShadow = new THREE.Mesh(new THREE.CircleGeometry(R * 1.1, 16), new THREE.MeshBasicMaterial({ color: 0, transparent: true, opacity: 0.35, depthWrite: false }));
@@ -648,6 +649,7 @@ export class Game {
     this.phase = 'goal';
     this.phaseTime = 0;
     this.hud.goal(team, this.score);
+    this.stadium.msgColor = this.teams[team].color; // scoreboard 'GOL!' in the scorer's colour
     for (const p of this.players) {
       p.desiredSpeed = 0;
       if (p.isGoalie) {

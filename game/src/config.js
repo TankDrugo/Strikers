@@ -101,6 +101,9 @@ export const PASS = { minDist: 1.0, maxDist: 10.0, volleyMinDist: 3.0 };
 
 export const MATCH = { seconds: 180, goalPause: 3.0 };
 
+// Used when assets/roster.json has no teamInfo.
+export const TEAM_DEFAULTS = [{ name: 'Gialli', color: '#ffd23f' }, { name: 'Rossi', color: '#ff4f4f' }];
+
 // Animation playback follows Character.cpp: rate = speed / clip speed, clamped.
 export const ANIM_RATE_MIN = 0.6;
 export const ANIM_RATE_MAX = 1.4;
