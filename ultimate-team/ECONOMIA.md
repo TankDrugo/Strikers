@@ -1,6 +1,6 @@
 # Economia di Ultimate Team (crediti, pacchetti, mercato)
 
-Proposta da approvare. I numeri stanno in [`data/economy.json`](data/economy.json) e li legge sia il gioco sia il simulatore [`tools/economy_sim.py`](tools/economy_sim.py). Per cambiare la curva si tocca solo il JSON e si rilancia:
+Calibrata sul ritmo di FC (decisione dell'utente: "studiala da FC"). I numeri stanno in [`data/economy.json`](data/economy.json) e li legge sia il gioco sia il simulatore [`tools/economy_sim.py`](tools/economy_sim.py). Per cambiare la curva si tocca solo il JSON e si rilancia:
 
 ```bash
 python3 ultimate-team/tools/economy_sim.py 600 400 40
@@ -23,10 +23,10 @@ Cosa si impara da Ultimate Team di EA FC e dai gacha:
 
 | Fonte | Crediti |
 |---|---|
-| Partita Divisioni: vittoria / pareggio / sconfitta | 500 / 300 / 150, moltiplicati per la divisione (×1,0 in Divisione 10, ×1,8 in Divisione 1) |
-| Gol segnato / porta inviolata | +20 / +75 |
-| 3 obiettivi giornalieri | 500 l'uno |
-| Fine stagione Divisioni (10 partite) | da 1.000 (Div. 10) a 16.000 (Div. 1) |
+| Partita Divisioni: vittoria / pareggio / sconfitta | 350 / 220 / 120, moltiplicati per la divisione (×1,0 in Divisione 10, ×1,8 in Divisione 1) |
+| Gol segnato / porta inviolata | +15 / +50 |
+| 3 obiettivi giornalieri | 400 l'uno |
+| Fine stagione Divisioni (10 partite) | da 500 (Div. 10) a 8.000 (Div. 1) |
 | Vendita sul mercato | 35% del prezzo base, meno il 5% di tassa |
 | Vendita rapida | Oro 200, Oro raro 450, Holo 2.000… (numerate e 1/1 non si vendono) |
 
@@ -34,15 +34,32 @@ Le Coppe **non danno crediti** (decisione dell'utente): solo trofei in bacheca.
 
 Una stagione di Divisioni è di 10 partite: con 18 punti si sale, sotto i 12 si scende. In Divisione 10 la CPU vale 58 di valutazione, in Divisione 1 vale 94.
 
+## Confronto con FC
+
+L'utente ha chiesto di copiare il ritmo di FC. Le partite di FC durano circa 15 minuti, le nostre 3; per questo il confronto si fa **all'ora di gioco**, non a partita.
+
+| | FC 24-26 | Noi |
+|---|---|---|
+| Crediti a partita | circa 500 in Rivals e Champions, circa 700 in Squad Battles (fonte EA) | 120-630 (3 minuti) |
+| Partite all'ora | circa 4 | circa 9 |
+| Premio settimanale / di stagione | da 3.000 a 20.000 in Squad Battles | da 500 a 8.000 ogni 10 partite |
+| Pacchetto Oro Premium | 7.500 | 7.500 |
+| Pacchetti Oro Premium guadagnati all'ora | circa 0,6-0,7 | circa 0,7 |
+| Almeno un 84+ in un Oro Premium | 4,2% (fonte EA) | circa 4% di trovare una holo |
+
+Quindi una carta speciale dal pacchetto base esce con la stessa frequenza di un 84+ in FC.
+
 ## Negozio di pacchetti
 
 | Pacchetto | Prezzo | Carte | Cosa contiene |
 |---|---|---|---|
 | Bronzo | 400 | 3 | 90% bronzo, 10% argento |
 | Argento | 1.500 | 3 | 85% argento, 15% oro |
-| Oro | 5.000 | 5 | 84% oro, 15% oro raro, ~1% holo |
-| Oro Premium | 10.000 | 5 | almeno 1 oro raro; 1,8% holo, 0,18% holo rara, 0,02% holo epica, **0,035% numerata, 0,001% 1/1** a carta |
-| Holo | 50.000 | 3 | almeno 1 holo; 20% holo, 4,2% holo rara, 0,8% holo epica, **0,18% numerata, 0,005% 1/1** a carta |
+| Oro | 5.000 | 5 | 84% oro, 15% oro raro, circa 1% holo |
+| Oro Premium | 7.500 | 5 | almeno 1 oro raro; per ogni carta 1,8% holo, 0,18% holo rara, 0,02% holo epica, **0,035% numerata, 0,001% 1/1** |
+| Holo | 50.000 | 3 | almeno 1 holo; per ogni carta 20% holo, 4,2% holo rara, 0,8% holo epica, **0,18% numerata, 0,005% 1/1** |
+
+Il pacchetto Holo è il nostro "Ultimate Pack" (in FC costa 125.000).
 
 ## Cosa dice la simulazione
 
@@ -53,35 +70,35 @@ Ore di gioco necessarie per arrivare al traguardo: il 10% più fortunato, la med
 | Traguardo | 10% | Mediana | 90% | Mai in 400 h |
 |---|---|---|---|---|
 | Primo oro raro | 2 h | 2 h | 4 h | 0% |
-| Prima holo | 3 h | 9 h | 20 h | 0% |
 | Squadra media 80+ | 2 h | 4 h | 7 h | 0% |
-| Prima holo rara | 12 h | 49 h | 157 h | 0% |
-| Arrivo in Divisione 1 | 17 h | 33 h | 76 h | 1% |
-| Squadra media 86+ | 10 h | 20 h | 109 h | 4% |
-| Squadra media 90+ | 54 h | 223 h | – | 39% |
-| Prima holo epica | 59 h | 337 h | – | 44% |
-| **Prima numerata** | 30 h | **197 h** | – | 27% |
+| Prima holo | 4 h | 10 h | 26 h | 0% |
+| Squadra media 86+ | 10 h | 25 h | 112 h | 4% |
+| Arrivo in Divisione 1 | 18 h | 36 h | 79 h | 0% |
+| Prima holo rara | 13 h | 57 h | 174 h | 1% |
+| Squadra media 90+ | 62 h | 346 h | – | 46% |
+| Prima holo epica | 63 h | – | – | 53% |
+| **Prima numerata** | 49 h | **263 h** | – | 34% |
 | **Prima 1/1 Oro** | – | – | – | **96%** |
 
 **Strategia B: risparmio e compro solo pacchetti Holo**
 
 | Traguardo | 10% | Mediana | 90% | Mai in 400 h |
 |---|---|---|---|---|
-| Prima holo | 8 h | 14 h | 25 h | 0% |
-| Squadra media 80+ | 14 h | 16 h | 26 h | 0% |
-| Prima holo rara | 9 h | 32 h | 76 h | 0% |
-| Arrivo in Divisione 1 | 37 h | 76 h | 147 h | 0% |
-| Squadra media 86+ | 34 h | 82 h | 250 h | 5% |
-| Prima holo epica | 27 h | 99 h | 299 h | 4% |
-| **Prima numerata** | 86 h | 381 h | – | 48% |
+| Prima holo | 12 h | 21 h | 35 h | 0% |
+| Squadra media 80+ | 21 h | 23 h | 42 h | 0% |
+| Prima holo rara | 12 h | 49 h | 122 h | 0% |
+| Arrivo in Divisione 1 | 54 h | 104 h | 218 h | 1% |
+| Squadra media 86+ | 59 h | 134 h | – | 11% |
+| Prima holo epica | 46 h | 185 h | – | 17% |
+| **Prima numerata** | 125 h | – | – | 68% |
 | **Prima 1/1 Oro** | – | – | – | **98%** |
 
 Come si legge:
 
-- **Le prime 5 ore sono generose**: oro raro e prima squadra decente subito, come in FC.
-- **Le due strategie sono una scelta vera**. I pacchetti Holo portano prima alle holo rare ed epiche, ma la squadra cresce molto più lentamente e si arriva tardi in Divisione 1. Non c'è una strada ovviamente migliore.
-- **Numerata**: in mediana circa 200 ore, e più di un giocatore su 4 non la trova in 400 ore. È un evento.
-- **1/1 Oro**: circa 1 giocatore su 25 la trova in 400 ore. È una leggenda.
+- **Le prime ore sono generose**: oro raro e prima squadra decente subito, come in FC.
+- **Le due strategie sono una scelta vera**. I pacchetti Holo portano prima alle holo epiche, ma la squadra cresce molto più lentamente. In genere conviene il pacchetto Oro Premium, come in FC conviene il Premium Gold rispetto ai pacchetti più costosi.
+- **Numerata**: in mediana circa 260 ore, e un giocatore su 3 non la trova in 400 ore. È un evento.
+- **1/1 Oro**: la trova circa 1 giocatore su 25 in 400 ore. È una leggenda.
 - Le numerate esistono in **10 copie per tutto il gioco**: quando una copia esce, sparisce dai pacchetti di tutti i profili. Senza server, "tutto il gioco" vuol dire tutti i profili di quel browser; col server privato diventerà davvero globale (il registro delle copie passa al server).
 
 ## Mercato simulato
@@ -98,6 +115,11 @@ Come si legge:
 - Con 10 personaggi (oggi) la collezione si completa in fretta: la curva è pensata per circa 40.
 
 ## Fonti
+
+- [Regole e crediti a partita, aiuto EA](https://help.ea.com/en/articles/ea-sports-fc/fc-rules/)
+- [Probabilità ufficiali dei pacchetti EA](https://www.ea.com/games/ea-sports-fc/news/fc-pack-probabilities)
+- [Pacchetto Oro Premium a 7.500](https://futmind.com/pack/301/premium-gold-pack) e [Ultimate Pack a 125.000](https://futmind.com/pack/405/ultimate-pack)
+- [Premi di Squad Battles in FC 26](https://allthings.how/ea-fc-26-squad-battles-rewards-timing-and-how-it-works/)
 
 - [Probabilità dei pacchetti in EA FC](https://soccergaming.com/fc-ultimate-team-pack-probabilty/)
 - [Come progettare probabilità oneste nei gacha](https://bugnet.io/blog/how-to-design-fair-gacha-rates)

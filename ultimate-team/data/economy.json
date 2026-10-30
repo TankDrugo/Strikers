@@ -3,11 +3,11 @@
   "earnings": {
     "matchesPerHour": 9,
     "division": {
-      "win": 500,
-      "draw": 300,
-      "loss": 150,
-      "perGoal": 20,
-      "cleanSheet": 75
+      "win": 350,
+      "draw": 220,
+      "loss": 120,
+      "perGoal": 15,
+      "cleanSheet": 50
     },
     "divisionMultiplier": [
       1.0,
@@ -23,21 +23,21 @@
     ],
     "dailyObjectives": {
       "count": 3,
-      "credits": 500,
+      "credits": 400,
       "dailyCapHours": 2
     },
     "seasonMatches": 10,
     "seasonReward": [
-      1000,
+      500,
+      800,
+      1100,
       1500,
       2000,
-      3000,
-      4000,
+      2600,
+      3300,
+      4200,
       5500,
-      7000,
-      9000,
-      12000,
-      16000
+      8000
     ],
     "promotePoints": 18,
     "holdPoints": 12
@@ -110,7 +110,7 @@
       }
     },
     "premiumGold": {
-      "price": 10000,
+      "price": 7500,
       "cards": 5,
       "guarantee": "goldRare",
       "odds": {

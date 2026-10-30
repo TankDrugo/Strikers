@@ -1,6 +1,6 @@
 # Ultimate Team: decisioni prese con l'utente
 
-Stato: **regole decise, economia proposta, aspetto delle carte quasi tutto scelto** (vedi le bozze in [`../interfaccia-gioco/DESIGN.md`](../interfaccia-gioco/DESIGN.md#bozze)).
+Stato: **regole decise, economia calibrata su FC, aspetto delle carte scelto** (vedi le bozze in [`../interfaccia-gioco/DESIGN.md`](../interfaccia-gioco/DESIGN.md#bozze)).
 
 ## Regole
 
@@ -24,15 +24,15 @@ Stato: **regole decise, economia proposta, aspetto delle carte quasi tutto scelt
 | Livello | Note |
 |---|---|
 | Bronzo, Argento, Oro, Oro raro | Livelli base, decisi dalla valutazione del personaggio |
-| Holo (più tipi) | Stesso personaggio, valutazione più alta. Effetti scelti: **Arcobaleno** e **Glitter** (holo), **Lava** (rara), **Prisma** e **Galassia** senza puntini (epica). Fasce proposte, da confermare |
-| **Numerata 1-10** | Solo per i personaggi più forti (valutazione base 85+). **10 copie in tutto il gioco**, ognuna col suo numero. Si mostra nella **teca graduata**; targhetta da scegliere (argento, blu e oro, satinata), non rossa |
+| Holo (più tipi) | Stesso personaggio, valutazione più alta. Effetti scelti: **Arcobaleno** e **Glitter** (holo), **Lava** (rara), **Prisma** e **Galassia** senza puntini (epica). Fasce confermate |
+| **Numerata 1-10** | Solo per i personaggi più forti (valutazione base 85+). **10 copie in tutto il gioco**, ognuna col suo numero. Si mostra nella **teca graduata**; targhetta **blu notte con scritte e numero in oro** (L3b) |
 | **1/1 Oro** | Una sola copia in tutto il gioco, per i personaggi più forti. Carta tutta in oro nella **teca nera con bordo oro** |
 
 Le numerate sono **uniche per tutto il gioco**. Senza server, "tutto il gioco" significa tutti i profili di quel browser (un registro comune); col server privato il registro passa al server. Non vanno sul mercato simulato.
 
 ## Economia
 
-Studio, numeri e simulazione in [`ECONOMIA.md`](ECONOMIA.md). In breve: prime ore generose, numerata in mediana dopo circa 200 ore, 1/1 trovata da circa 1 giocatore su 25 in 400 ore.
+Studio, numeri e simulazione in [`ECONOMIA.md`](ECONOMIA.md). In breve: prime ore generose, ritmo di FC (circa 0,7 pacchetti Oro Premium all'ora), numerata in mediana dopo circa 260 ore, 1/1 trovata da circa 1 giocatore su 25 in 400 ore.
 
 ## Apertura dei pacchetti
 
@@ -43,4 +43,10 @@ Scelta: **P1, walkout a indizi**.
 3. **Il personaggio esce camminando in 3D e fa una tra 10 esultanze, scelta a caso.**
 4. Arriva la carta; numerate e 1/1 scendono nella loro teca.
 
-Le esultanze non ci sono fra le 183 clip (le più vicine sono `wave`, `arm_powerup` e `jog`): la fonte è da decidere con l'utente.
+Le esultanze non ci sono fra le 183 clip. **Scelta dell'utente: usare le esultanze originali, adattate al walkout.** Nel gioco originale sono sequenze "NIS" (Non-Interactive Sequence) in `art/nis/` sul disco:
+
+- `art/nis/nis_dict.txt` è l'indice: nome, numero di animazioni e di telecamere, posizioni;
+- ogni file contiene un'animazione per personaggio presente (chunk `0x80017000`, letto con lo stesso `cSAnim` delle clip di gioco) più la telecamera (`0x80015501`);
+- le esultanze dopo il gol hanno nomi con `goal_winner` o `_goal_`, filtrati per squadra o capitano (fonte: `src/Game/NisPlayer.cpp` e `src/Game/Render/Nis.cpp` di smstrikers-decomp).
+
+Servono dal disco dell'utente: `art/nis/nis_dict.txt` e i file NIS di esultanza. Come gli altri file del disco, **non vanno nel repository**: si decodificano e si salvano solo le pose, come per `strikers_source.npz`. Per il walkout si tiene solo l'animazione del personaggio; la telecamera la decide il nostro palco.

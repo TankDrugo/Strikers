@@ -329,7 +329,7 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="numerate">
     <div class="station-head">
       <h2>Numerate e 1/1 nel top loader</h2>
-      <p>Teca graduata scelta per le numerate, senza la targhetta rossa: tre targhette alternative (L3a, L3b, L3c). La 1/1 Oro (L4) è scelta.</p>
+      <p>Scelte: teca graduata con targhetta blu notte e oro (L3b) per le numerate, teca nera con bordo oro (L4) per la 1/1.</p>
     </div>
     <div class="panel"><div class="loaders" id="loaders"></div></div>
   </section>
@@ -363,7 +363,7 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="scelte">
     <div class="station-head"><h2>Scelte fatte</h2><p>Menu M1 con cambio di colore nelle modalità. Holo: Arcobaleno, Glitter, Lava, Prisma, Galassia. Numerate nella teca graduata, 1/1 nella teca oro. Pacchetti: P1 con camminata ed esultanza del personaggio.</p></div>
     <div class="decide">
-      <div class="panel"><h3>Ancora da scegliere</h3><ul><li>Targhetta della teca: L3a, L3b o L3c</li><li>Fasce delle holo: va bene la proposta?</li></ul></div>
+      <div class="panel"><h3>Coppe</h3><ul><li>Scimmie in Fuga (3 partite)</li><li>Gran Premio Pazzo Pazzo (4)</li><li>Lost Heaven (5)</li><li>Bullone Galattico (5)</li></ul></div>
     </div>
   </section>
   <footer>Personaggi di esempio: le dieci squadre di prova del gioco. Valutazioni e nomi inventati.</footer>
@@ -442,9 +442,7 @@ footer { color: #fff; font-size: 15px; }
     `<div class="proto">${card({ ...c, cls: 'r-holo ' + cls })}<h3><span class="label-pick">${id}</span>${name} <span class="tier ${tc}">${tl}</span></h3><p>${desc}</p></div>`).join('');
 
   const LOADERS = [
-    ['L3a', 'Teca, targhetta argento', 'l-slab lab-silver', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Metallo spazzolato, scritte scure.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
-    ['L3b', 'Teca, targhetta blu e oro', 'l-slab lab-navy', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Blu notte con scritte e numero in oro.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
-    ['L3c', 'Teca, targhetta satinata', 'l-slab lab-frost', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Plastica satinata trasparente, scritte incise.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
+    ['L3b', 'Teca, targhetta blu e oro', 'l-slab lab-navy', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Scelta. Blu notte con scritte e numero in oro.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
     ['L4', '1/1 Oro', 'l-gold', `<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>`, 'Scelta. Teca nera con bordo oro, carta interamente in oro.', card({ ovr: 95, role: 'ATT', team: 'riv', cls: 'r-oneOfOne', seed: 1, serial: '1/1', serialCls: 'foil-num' })],
   ];
   document.getElementById('loaders').innerHTML = LOADERS.map(([id, name, cls, plate, desc, c]) =>

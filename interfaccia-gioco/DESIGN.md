@@ -1,6 +1,6 @@
 # Interfaccia gioco: decisioni prese con l'utente
 
-Stato: **decisioni raccolte, bozze quasi tutte scelte** (pagina di prova: vedi "Bozze" in fondo). Quello che ha ancora bisogno di una scelta dell'utente è segnato **[da scegliere]**.
+Stato: **decisioni raccolte, bozze scelte** (pagina di prova: vedi "Bozze" in fondo). Quello che ha ancora bisogno di una scelta dell'utente è segnato **[da scegliere]**.
 
 ## Ordine di lavoro
 
@@ -49,18 +49,18 @@ Stato: **decisioni raccolte, bozze quasi tutte scelte** (pagina di prova: vedi "
 - **Torneo privato**: si crea un tabellone con squadre, numero di turni e regole a scelta, fino a 4 giocatori umani.
 - **Premi**: solo trofei in bacheca, niente crediti per Ultimate Team.
 
-### Nomi delle 4 coppe [da scegliere]
+### Le 4 coppe
 
-Citazioni ironiche ai giochi PS2, senza loghi e senza personaggi.
+Decisione dell'utente: ogni coppa è una citazione ironica a uno dei giochi PS2 scelti come riferimento, senza loghi e senza personaggi. Crash Bandicoot non ha una coppa perché è già il tema della Home e del menu (M1).
 
-| Proposta | Citazione | Tema dello stadio e dei menu |
-|---|---|---|
-| **Coppa Scimmie in Fuga** | Ape Escape 3 | giungla, banane, retini |
-| **Gran Premio Pazzo Pazzo** | Le corse più pazze del mondo | circuito, bandiere a scacchi, avversari imbroglioni |
-| **Coppa Lost Heaven** | Mafia | anni '30, gangster, grammofono, seppia |
-| **Coppa Bullone Galattico** | Ratchet & Clank | spazio, robot, bulloni come moneta |
-| Coppa Cassa di Frutta | Crash Bandicoot | isola tropicale, casse che esplodono |
-| Coppa Ladro Gentiluomo | Sly Cooper | notte, tetti, fumetto |
+| Coppa | Citazione | Tema dello stadio e dei menu | Partite |
+|---|---|---|---|
+| **Coppa Scimmie in Fuga** | Ape Escape 3 | giungla, banane, retini | 3 |
+| **Gran Premio Pazzo Pazzo** | Le corse più pazze del mondo | circuito, bandiere a scacchi, avversari imbroglioni | 4 |
+| **Coppa Lost Heaven** | Mafia | anni '30, gangster, grammofono, seppia | 5 |
+| **Coppa Bullone Galattico** | Ratchet & Clank | spazio, robot, bulloni come moneta | 5 |
+
+Si sbloccano in quest'ordine, dalla più facile alla più difficile.
 
 ### Stelle e obiettivi
 
@@ -137,7 +137,7 @@ Italiano e inglese, scelti all'apertura. Tutti i testi stanno in un file di trad
 
 - **Menu: M1, Cartoon tropicale**, col cambio di colore e sfondo quando si entra in una modalità.
 - **Holo**: Arcobaleno, Glitter, Lava, Prisma, Galassia senza puntini (fasce in `../ultimate-team/DESIGN.md`).
-- **Numerate**: teca graduata, **senza la targhetta rossa** (alternative L3a, L3b, L3c da scegliere). **1/1 Oro**: teca nera con bordo oro (L4).
+- **Numerate**: teca graduata con targhetta **blu notte e oro (L3b)**. **1/1 Oro**: teca nera con bordo oro (L4).
 - **Pacchetti: P1, walkout a indizi**, con il personaggio 3D che esce camminando e fa una tra 10 esultanze a caso.
 
 ## Bozze
