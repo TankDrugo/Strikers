@@ -56,12 +56,28 @@ export class Game {
     // One controller per human (keyboard or pad): its team, its input and the player it moves.
     // Quick play sets them with setHumans([0]) (1 vs CPU), [0, 1] (1 vs 1), [0, 0] (2 vs CPU) or [] (CPU vs CPU).
     this.controllers = [];
-    this.cpuLevel = 1; // 0 easy, 1 normal, 2 hard: only teams without humans
+    this.cpuLevel = 1; // 0 easy, 1 normal, 2 hard, 3 very hard (fractions blend): only teams without humans
     this.setHumans([0]);
+    // cups: match facts for the star objectives, golden goal in knockouts
+    this.onEvent = null;
+    this.knockout = false;
+    this.golden = false;
+    this.winner = null;
+    this.time = 0;
+    this.passChain = [0, 0];
+    this.possTeam = null;
     this.acc = 0;
     this.timeScale = 1;
     this.stats = { shots: [0, 0], saves: [0, 0], passes: [0, 0], tackles: [0, 0], posts: 0 };
     this.kickoff(0);
+  }
+
+  emit(type, data) { if (this.onEvent) this.onEvent(type, data); }
+
+  // value for the current CPU level from a table per whole level (0..3), blended for fractions
+  cpuTune(table) {
+    const l = Math.max(0, Math.min(table.length - 1, this.cpuLevel)), i = Math.floor(l), k = l - i;
+    return table[i] + ((table[i + 1] ?? table[i]) - table[i]) * k;
   }
 
   newInput() { return { x: 0, z: 0, turbo: false, shootHeld: false, actions: new Set() }; }
@@ -212,6 +228,7 @@ export class Game {
     this.ball.kick(vel, null, { passTarget: target, noPickup: 0.12 });
     const c = this.controllerOf(p);
     if (c && !target.isGoalie) this.setControlled(c, target);
+    this.passChain[p.team]++;
     p.stateData.released = true;
   }
 
@@ -269,6 +286,7 @@ export class Game {
     }
     b.kick(vel, spin, { magnus: perfect, shot: true, power, perfect });
     this.stats.shots[p.team]++;
+    this.emit('shot', { team: p.team, perfect });
     this.hud.flash(perfect ? t('flash.perfect') : null);
     p.stateData.released = true;
   }
@@ -288,6 +306,7 @@ export class Game {
   }
 
   startDeke(p, side) {
+    p.lastDeke = this.time;
     p.setState('deke', {});
     p.play('deke_300', { fade: 0.06, mirror: side < 0 });
   }
@@ -295,6 +314,7 @@ export class Game {
   knockDown(victim, attacker, kind) {
     if (victim.state === 'react' || victim.isGoalie) return;
     const b = this.ball;
+    if (b.owner === victim && attacker.team !== victim.team) this.emit('steal', { team: attacker.team });
     if (b.owner === victim) {
       const dir = Math.atan2(victim.pos.z - attacker.pos.z, victim.pos.x - attacker.pos.x) + (Math.random() - 0.5);
       b.kick(new THREE.Vector3(Math.cos(dir) * 5, 2.5, Math.sin(dir) * 5), null, { noPickup: 0.35 });
@@ -324,6 +344,8 @@ export class Game {
       if (mag > 0.15) { p.desiredDir = Math.atan2(inp.z, inp.x); p.desiredSpeed = p.hasBall() ? FIELDER.runWithBall : FIELDER.run; }
       else p.desiredSpeed = 0;
       p.turbo = inp.turbo && mag > 0.15;
+      if (p.turbo && !c.turboOn) this.emit('turbo', { team: c.team });
+      c.turboOn = p.turbo;
       if (p.turbo) p.desiredSpeed = p.hasBall() ? FIELDER.turboWithBall[0] : FIELDER.turbo;
       // keyboard keys change meaning with the ball; controller buttons follow the chosen layout
       const a = inp.actions;
@@ -364,7 +386,7 @@ export class Game {
         if (p.isGoalie) this.goalieAI(p, dt);
         else if (!p.humanControlled) {
           fielderAI(this, p, dt);
-          if (this.isCpuTeam(p.team)) p.desiredSpeed *= [0.9, 1, 1.05][this.cpuLevel];
+          if (this.isCpuTeam(p.team)) p.desiredSpeed *= this.cpuTune([0.9, 1, 1.05, 1.08]);
         }
         if (p.state === 'free') p.locomotion(dt);
         break;
@@ -518,13 +540,13 @@ export class Game {
     const reach = Math.abs(lateral);
     const power = b.shotPower || Math.min(1, b.vel.length() / 34);
     const time = Math.max(0.05, cross.t);
-    // chance of reaching it: distance vs dive reach, harder for fast and perfect shots
-    let chance = 1 - Math.max(0, (reach - 0.5) / (GOALIE.diveReach + time * 2.5));
-    chance *= 1 - 0.35 * power;
-    if (b.shotPerfect) chance *= 0.45;
-    if (this.isCpuTeam(g.team)) chance = Math.min(1, chance * [0.8, 1, 1.15][this.cpuLevel]);
-    if (cross.p.y > GOALIE.reachHeight) chance *= 0.5;
-    const success = Math.random() < chance;
+    // like the original: saved if the dive gets there in time (reaction + travel), and the ball is within reach.
+    // High balls far from the body take a little longer. CPU level only changes the keeper's reaction.
+    const react = GOALIE.saveReact * (this.isCpuTeam(g.team) ? this.cpuTune([1.4, 1, 0.85, 0.75]) : 1);
+    const high = cross.p.y > 1.35 * SIZE && reach > GOALIE.standReach;
+    // a perfect shot curves: the keeper reads it late (our choice, so the perfect shot stays the best weapon)
+    const needed = react + (b.shotPerfect ? GOALIE.perfectReadDelay : 0) + Math.max(0, reach - GOALIE.standReach) / GOALIE.diveSpeed + (high ? 0.08 : 0);
+    const success = time >= needed && reach <= GOALIE.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
     const height = cross.p.y < 0.55 * SIZE ? 'low' : cross.p.y < 1.35 * SIZE ? 'med' : 'high';
     let clip;
     const catchIt = power < GOALIE.catchMaxShotPower + 0.25 && !b.shotPerfect && Math.random() < 0.65;
@@ -550,6 +572,7 @@ export class Game {
         if (Math.hypot(b.pos.x - g.pos.x, b.pos.z - g.pos.z) < 0.95 && Math.abs(b.pos.y - handY) < 1.0) {
           d.done = true;
           this.stats.saves[g.team]++;
+          this.emit('save', { team: g.team });
           if (d.catchIt) { b.owner = g; b.vel.set(0, 0, 0); b.magnus = false; b.shotTimer = 0; this.hud.flash(t('flash.save')); }
           else {
             const s = b.vel.length() * 0.35;
@@ -633,9 +656,11 @@ export class Game {
     if (taker) {
       if (taker.isGoalie && b.shotTimer > 0 && b.lastTouch && b.lastTouch.team !== taker.team) {
         this.stats.saves[taker.team]++;
+        this.emit('save', { team: taker.team });
         this.hud.flash(t('flash.save'));
         if (taker.state === 'dive') taker.stateData.done = true;
       }
+      if (taker.team !== this.possTeam) { this.passChain[taker.team] = 0; this.possTeam = taker.team; }
       b.owner = taker; b.magnus = false; b.shotTimer = 0;
       if (b.passTarget && b.passTarget.team === taker.team && b.passTarget !== taker) { /* intercepted by a teammate: fine */ }
       b.passTarget = null;
@@ -662,6 +687,7 @@ export class Game {
     for (const p of this.players) p.savePrev();
     this.ball.prevPos.copy(this.ball.pos);
     this.phaseTime += dt;
+    this.time += dt;
     if (this.phase === 'kickoff') {
       for (const p of this.players) { p.speed = 0; p.locomotionAnim(); p.update(dt); }
       this.ballStep(dt);
@@ -675,12 +701,19 @@ export class Game {
         p.update(dt);
       }
       this.ball.step(dt);
-      if (this.phase === 'goal' && this.phaseTime > MATCH.goalPause) this.kickoff(this.ball.inGoal > 0 ? 1 : 0);
+      if (this.phase === 'goal' && this.phaseTime > MATCH.goalPause) {
+        if (this.golden) this.endMatch(); else this.kickoff(this.ball.inGoal > 0 ? 1 : 0);
+      }
       return;
     }
     if (this.phase !== 'play') return;
     this.clock = Math.max(0, this.clock - dt);
-    if (this.clock <= 0) { this.endMatch(); return; }
+    if (this.clock <= 0) {
+      // knockout draw: one minute of golden goal, then the team with more shots
+      if (this.knockout && !this.golden && this.score[0] === this.score[1]) {
+        this.golden = true; this.clock = 60; this.hud.flash(t('flash.golden'), '#ffd21f', 2);
+      } else { this.endMatch(); return; }
+    }
 
     for (const c of this.controllers) if (c.player) this.humanControl(c, dt);
     for (const p of this.players) this.updateState(p, dt);
@@ -700,6 +733,9 @@ export class Game {
     // side = +1: ball went into the goal at +X, scored by team 0
     const team = side > 0 ? 0 : 1;
     this.score[team]++;
+    const sc = this.ball.lastTouch && this.ball.lastTouch.team === team ? this.ball.lastTouch : null;
+    this.emit('goal', { team, scorer: sc, perfect: !!this.ball.shotPerfect, chain: this.passChain[team],
+      afterDeke: !!(sc && sc.lastDeke !== undefined && this.time - sc.lastDeke < 3) });
     this.phase = 'goal';
     this.phaseTime = 0;
     this.hud.goal(team, this.score);
@@ -713,6 +749,9 @@ export class Game {
   }
 
   endMatch() {
+    const [a, b] = this.score;
+    this.winner = a > b ? 0 : b > a ? 1 : this.knockout
+      ? (this.stats.shots[0] !== this.stats.shots[1] ? (this.stats.shots[0] > this.stats.shots[1] ? 0 : 1) : (Math.random() < 0.5 ? 0 : 1)) : null;
     this.phase = 'end';
     this.phaseTime = 0;
     for (const p of this.players) {

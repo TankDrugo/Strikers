@@ -76,7 +76,8 @@ Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; d
 |---|---|
 | `src/config.js` | Tutte le costanti: campo, pallone, giocatori, portiere, tiro, contrasti, partita. `SIZE` ingrandisce i corpi rispetto all'originale |
 | `src/main.js` | Caricamento di roster e personaggi (in parallelo, con barra e messaggio d'errore), avvio delle partite, visualizzatore delle animazioni |
-| `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser |
+| `src/cups/` | Coppe: `cups.js` (4 coppe, squadre CPU rimescolate, tabellone, simulazione, voto D–Z), `objectives.js` (obiettivi delle stelle e `Tracker` che li segue dagli eventi della partita) |
+| `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `cupsMenu.js` schermate delle Coppe, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser |
 | `src/game.js` | La partita: passo fisso a 50 Hz, uno o più umani (`controllers`, `setHumans`), difficoltà della CPU (`cpuLevel`), azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
 | `src/player.js` | Il giocatore: movimento, scelta e velocità delle animazioni, root motion, disegno interpolato tra due passi di fisica |
 | `src/ball.js` | Fisica del pallone, effetto Magnus, urti con pali e barriere, gol |
@@ -100,12 +101,12 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 - **Giocatori:** velocità, accelerazioni e virate dei file `.ini` e di `g_pTweaks`.
 - **Animazioni:** velocità adattata a quella reale del giocatore (0,6–1,4×). Le clip "a sinistra" sono quelle "a destra" specchiate, come nell'originale.
 - **Azioni:** passaggi a terra e pallonetti col compagno anticipato, tiro caricato in 0,66 s, scivolate e spallate con reazioni direzionali, finte.
-- **Portieri:** si posizionano tra palla e porta, prevedono il tiro e si tuffano (presa o respinta, con le probabilità legate a potenza e tiro perfetto). Poi rinviano con la mano o col piede.
+- **Portieri:** si posizionano tra palla e porta, prevedono il tiro e si tuffano. Come nell'originale la parata non è un tiro di dado: para se il tuffo (reazione più spostamento) arriva in tempo. In partite CPU contro CPU entra circa un tiro su cinque, un tiro perfetto su due. Poi rinviano con la mano o col piede.
 - **IA:** per ogni squadra un giocatore pressa, uno marca e gli altri tengono la posizione rispetto al pallone.
 
 ## Non ancora presente
 
-Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici), Coppe e Ultimate Team (nel menu ci sono già, segnati "in costruzione").
+Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici), Ultimate Team (nel menu c'è già, segnato "in costruzione").
 
 ## Sviluppo e prove
 

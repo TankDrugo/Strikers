@@ -1,6 +1,6 @@
 # Interfaccia gioco
 
-**Stato: in progettazione.** Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive da scegliere in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). **Tappa 1 fatta**: menu M1 con LB/RB, lingua all'avvio, profili, Gioco rapido (anche in due), pausa e fine partita. Il codice sta in `game/src/ui/` (non in `interfaccia-gioco/src/`: il server di sviluppo serve solo `game/`).
+**Stato: in progettazione.** Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive da scegliere in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). **Tappe 1 e 3 fatte** (menu e Coppe; la 2, Gioco rapido, è nella 1): menu M1 con LB/RB, lingua all'avvio, profili, Gioco rapido (anche in due), pausa e fine partita. Il codice sta in `game/src/ui/` (non in `interfaccia-gioco/src/`: il server di sviluppo serve solo `game/`).
 
 ## Idea
 

@@ -48,6 +48,14 @@ export class Hud {
 
   show(on) { this.el.style.display = on ? '' : 'none'; }
 
+  // short message at the bottom (star objectives)
+  toast(text, color = '#fff5dc') {
+    if (!this.toastEl) { this.toastEl = document.createElement('div'); this.toastEl.className = 'toast'; this.el.appendChild(this.toastEl); }
+    const e = this.toastEl;
+    e.textContent = text; e.style.background = color; e.classList.add('on');
+    clearTimeout(this.toastT); this.toastT = setTimeout(() => e.classList.remove('on'), 2600);
+  }
+
   // Team names and colours on the score, from roster.json (teamInfo)
   setTeams(teams) {
     this.teams = teams;

@@ -42,7 +42,8 @@ graphify path "add_characters.py" "Player" --undirected
 - Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`.
 - Personaggi: completi. Due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante): **Celestini** (maglia celeste) e **Rivali** (maglia verde), tutti con le 183 animazioni. Nomi e colori delle squadre (anelli, punteggio, tabellone, tifosi) vengono da `teamInfo` in `game/assets/roster.json`.
 - Il gioco compilato pesa circa 89 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
-- Interfaccia gioco: tappa 1 di 4 fatta (menu stile FC con LB/RB, lingua, profili, Gioco rapido anche in due). Decisioni in `interfaccia-gioco/DESIGN.md`, codice in `game/src/ui/`. Prossime tappe: Coppe, poi Ultimate Team.
+- Interfaccia gioco: menu stile FC con LB/RB, lingua, profili, Gioco rapido anche in due, **Coppe complete** (stelle, Difficile, voto D–Z, tornei fino a 4). Decisioni in `interfaccia-gioco/DESIGN.md`, codice in `game/src/ui/` e `game/src/cups/`. Prossima tappa: Ultimate Team.
+- Portiere: parata decisa dal tempo del tuffo come nell'originale (non a dado), tarata a circa un tiro su cinque.
 - Ultimate Team: regole ed economia decise (`ultimate-team/DESIGN.md`, `ECONOMIA.md`), codice non iniziato. Le esultanze del walkout aspettano i file `art/nis/` dal disco dell'utente.
 
 ## graphify

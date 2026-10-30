@@ -45,9 +45,28 @@ export const save = {
     if (data.activeId === id) data.activeId = null;
     store();
   },
+  byId(id) { return data.profiles.find((p) => p.id === id) || null; },
+  store,
+  // Cups: per profile and cup { normalWon, hardWon, stars: { normal: { round: best }, hard: {…} } }
+  cupRecord(profileId, cupId) {
+    const p = this.byId(profileId); if (!p) return null;
+    p.cups = p.cups || {};
+    return p.cups[cupId] || (p.cups[cupId] = { normalWon: false, hardWon: false, stars: { normal: {}, hard: {} } });
+  },
+  addStars(profileId, cupId, level, round, stars) {
+    const r = this.cupRecord(profileId, cupId); if (!r) return;
+    r.stars[level][round] = Math.max(r.stars[level][round] || 0, stars); store();
+  },
+  cupWon(profileId, cupId, level) {
+    const r = this.cupRecord(profileId, cupId); if (!r) return;
+    r[level === 'hard' ? 'hardWon' : 'normalWon'] = true; store();
+  },
+  // the single-player cup in progress, so "Continua la coppa" works after closing the game
+  run(profileId) { return this.byId(profileId)?.cupRun || null; },
+  setRun(profileId, run) { const p = this.byId(profileId); if (p) { p.cupRun = run; store(); } },
   // result: 'won' | 'drawn' | 'lost'
-  addResult(result) {
-    const p = this.active(); if (!p) return;
+  addResult(result, profileId = data.activeId) {
+    const p = this.byId(profileId); if (!p) return;
     p.record.played++; p.record[result]++; store();
   },
 };

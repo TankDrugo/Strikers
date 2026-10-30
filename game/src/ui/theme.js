@@ -125,6 +125,18 @@ const CSS = `
 .ui .h-galaxy{background:radial-gradient(ellipse at 30% 30%,#6a2fd8,transparent 60%),radial-gradient(ellipse at 75% 70%,#1fb6ff,transparent 55%),#0b0626}
 .ui .h-galaxy .foil{background:radial-gradient(ellipse at calc(var(--mx) * 1%) calc(var(--my) * 1%),#ff4fd8aa,transparent 45%),conic-gradient(from calc(var(--mx) * 2deg) at 50% 50%,#6a2fd800,#ff4fd844,#6a2fd800 30%,#1fb6ff44 60%,#6a2fd800);mix-blend-mode:screen}
 .ui .h-lava .ovr,.ui .h-lava .role,.ui .h-galaxy .ovr,.ui .h-galaxy .role{color:#fff;-webkit-text-stroke-color:var(--ink)}
+/* cups */
+.ui .match{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6em;background:#fff;border:.2em solid var(--ink);border-radius:.8em;padding:.45em .8em;box-shadow:0 .2em 0 var(--ink);min-width:0}
+.ui .match span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.ui .match small{font-weight:500;opacity:.75}
+.ui .match .w{font-weight:800;color:var(--ink)}.ui .match .l{opacity:.45;text-decoration:line-through}
+.ui .match .sc{font-family:var(--fn);font-size:.9em;background:var(--ink);color:#fff;border-radius:.5em;padding:.1em .5em;white-space:nowrap}
+.ui .obj{background:#fff;border:.18em solid var(--ink);border-radius:.6em;padding:.3em .7em;font-weight:700}
+.ui .obj.done{background:#d8f7c9}.ui .obj.failed{background:#f3d6dc;opacity:.8}
+.ui .trophy{animation:ui-trophy 1.6s ease-in-out infinite alternate}
+@keyframes ui-trophy{from{transform:rotate(-6deg) scale(1)}to{transform:rotate(6deg) scale(1.08)}}
+.hud .toast{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-family:"Lilita One","Arial Black",sans-serif;font-size:20px;color:#1b1036;background:#fff5dc;border:3px solid #1b1036;border-radius:12px;padding:6px 14px;box-shadow:0 4px 0 #1b1036;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap}
+.hud .toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
 /* HUD and the old screens get the same look */
 .hud .score{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;background:#1b1036e0;border:3px solid #fff}
 .hud .flash{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;-webkit-text-stroke:3px #1b1036;paint-order:stroke fill}

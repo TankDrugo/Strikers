@@ -6,7 +6,7 @@ Stato: **decisioni raccolte, bozze scelte** (pagina di prova: vedi "Bozze" in fo
 
 1. Struttura del menu, stile grafico, profili e lingua. **Fatto** (`game/src/ui/`).
 2. Gioco rapido. **Fatto**: contro il computer, contro un amico, in due contro il computer, computer contro computer; durata e difficoltà; squadra. Formazione, stadio e regole speciali hanno per ora una sola scelta.
-3. Coppe.
+3. Coppe. **Fatto**: 4 coppe giocabili (squadre CPU rimescolate dai 10 personaggi), tabellone con LB/RB tra i turni, obiettivi delle stelle nel prepartita e in pausa con avvisi in partita, golden goal di un minuto (poi decide chi ha tirato di più), livello Difficile, voto da D a Z, bacheca, coppa in corso salvata, torneo con gli amici da 2 a 4 giocatori (profili o ospiti) e torneo privato (4, 8 o 16 squadre). Le partite CPU contro CPU del tabellone si simulano.
 4. Ultimate Team (regole in [`../ultimate-team/DESIGN.md`](../ultimate-team/DESIGN.md)).
 
 ## Avvio del gioco

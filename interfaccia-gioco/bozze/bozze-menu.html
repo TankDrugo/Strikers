@@ -213,6 +213,7 @@ section.station { display: flex; flex-direction: column; gap: 18px; scroll-margi
 .loader-wrap { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .loader { position: relative; padding: 9% 8% 8%; border-radius: 5% / 3.6%; container-type: inline-size; transform: perspective(900px) rotateY(calc((var(--mx, 50) - 50) * .12deg)); }
 .loader .card { box-shadow: none; transform: none; }
+.loader .sheen { position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: 0; background: linear-gradient(90deg, transparent 30%, #ffffffcc 50%, transparent 70%); border-radius: inherit; }
 .loader::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(115deg, transparent 20%, #ffffff70 32%, transparent 42%, transparent 60%, #ffffff40 66%, transparent 72%); }
 .l-clear { background: #ffffff38; border: 3px solid #ffffffd0; box-shadow: inset 0 0 0 6px #ffffff40, 0 8px 0 var(--ink); outline: 3px solid var(--ink); }
 .l-label { background: #ffffff38; border: 3px solid #ffffffd0; outline: 3px solid var(--ink); padding-top: 26%; box-shadow: 0 8px 0 var(--ink); }
@@ -337,7 +338,7 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="pacchetti">
     <div class="station-head">
       <h2>Apertura dei pacchetti</h2>
-      <p>Scegli l'esito e clicca sul palco. Nel gioco vero, dopo gli indizi, il personaggio in 3D esce camminando e fa una tra 10 esultanze a caso; poi compare la carta. Qui la carta arriva subito.</p>
+      <p>Scegli l'esito e clicca sul palco. Numerate e 1/1 vengono imbustate nella loro teca. Nel gioco vero, dopo gli indizi, il personaggio in 3D esce camminando e fa una tra 10 esultanze a caso; poi compare la carta. Qui la carta arriva subito.</p>
     </div>
     <div class="pack-ui">
       <div class="controls" role="group" aria-label="Animazione">
@@ -660,12 +661,35 @@ footer { color: #fff; font-size: 15px; }
     bindTilt(r.querySelector('.card'));
     if (isTop()) setTimeout(() => {
       const cls = out === 'oneOfOne' ? 'l-gold' : 'l-slab lab-navy', plate = out === 'oneOfOne' ? '<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>' : `<div class="plate"><b>${ROLES[o.card.role]} Celestini</b><span>NUMERATA 04 / 10</span><div class="grade">04</div></div><div class="bars"></div>`;
-      r.style.width = '21cqw';
-      r.innerHTML = `<div class="loader ${cls}">${plate}${card(o.card)}</div>`;
-      r.firstElementChild.animate([{ transform: 'translateY(-60cqw)' }, { transform: 'translateY(2cqw)', offset: .8 }, { transform: 'translateY(0)' }], { duration: 700, easing: 'ease-in' });
-      sfx.boing(); theatre.classList.add('screen-shake');
+      sleeve(r, cls, plate, o);
     }, reduce ? 0 : 1300);
     return r;
+  }
+  // Top loader: the empty case slides in, the card goes in through the open top, the case clicks shut,
+  // then the label is stamped on.
+  async function sleeve(r, cls, plate, o) {
+    r.style.width = '21cqw';
+    r.innerHTML = `<div class="loader ${cls}">${plate}${card(o.card)}<div class="sheen"></div></div>`;
+    const lo = r.firstElementChild, cb = lo.querySelector('.cardbox'), pl = lo.querySelector('.plate'), bars = lo.querySelector('.bars'), sh = lo.querySelector('.sheen');
+    pl.style.opacity = 0; if (bars) bars.style.opacity = 0;
+    cb.style.transform = 'translateY(-118%) rotate(-3deg)';
+    sfx.whoosh();
+    await lo.animate([{ transform: 'translateY(45cqw) rotate(-10deg)', opacity: 0 }, { transform: 'translateY(-2cqw) rotate(1deg)', opacity: 1, offset: .75 }, { transform: 'none', opacity: 1 }], { duration: 550, easing: 'cubic-bezier(.3,1.3,.5,1)' }).finished;
+    await wait(250);
+    sfx.move();
+    const slide = cb.animate([
+      { transform: 'translateY(-118%) rotate(-3deg)' }, { transform: 'translateY(-60%) rotate(-1.5deg)', offset: .35 },
+      { transform: 'translateY(4%) rotate(.6deg)', offset: .82 }, { transform: 'translateY(-1%) rotate(0)', offset: .92 }, { transform: 'none' }],
+      { duration: reduce ? 10 : 1100, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' });
+    await slide.finished; cb.style.transform = 'none';
+    sfx.boing();
+    lo.animate([{ transform: 'none' }, { transform: 'scale(1.05,.95)' }, { transform: 'scale(.98,1.02)' }, { transform: 'none' }], { duration: 300 });
+    sh.animate([{ transform: 'translateX(-120%) skewX(-20deg)', opacity: 1 }, { transform: 'translateX(140%) skewX(-20deg)', opacity: 1 }], { duration: 650, easing: 'ease-out' });
+    await wait(350);
+    pl.style.opacity = 1; if (bars) bars.style.opacity = .6;
+    pl.animate([{ transform: 'scale(2.2) rotate(-6deg)', opacity: 0 }, { transform: 'scale(.92) rotate(1deg)', opacity: 1, offset: .7 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: 'ease-out' });
+    await wait(300);
+    sfx.tada(); theatre.classList.add('screen-shake'); confetti(40);
   }
   async function walkout(o) {
     const pack = act.querySelector('.pack'); pack.classList.add('shake'); sfx.boing(); await wait(900);

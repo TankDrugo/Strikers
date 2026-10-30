@@ -180,6 +180,8 @@ Da `goalie.ini`:
 | Stordimento dopo un Super Strike | 1–2 s |
 | Fatica | sale con ogni parata: presa 5, presa in tuffo 10, deviazione 7/15, Super Strike 15/25; recupero 2/s |
 
+Come decide la parata (da smstrikers-decomp, `Goalie::CalcSaveParameters` e `GoalieSave::FindBestSave`): **non tira a sorte**. Divide la porta in una griglia 7 × 5 e cerca un'animazione di parata che arrivi sul punto del pallone entro il tempo di arrivo del tiro; se non c'è, il tiro entra. Il tiro perfetto non cambia la scelta della parata: è più difficile perché è più veloce e curva. La fatica rallenta solo il rialzarsi e lo spostamento laterale, non fa sbagliare. La difficoltà della CPU (`Difficulty0…3.ini`) non tocca il portiere. I tempi delle animazioni di parata stanno nei file del disco, non nel codice: nel gioco li stimiamo (`GOALIE.saveReact`, `GOALIE.diveSpeed` in `game/src/config.js`).
+
 ---
 
 ## 7. Animazioni e velocità di gioco

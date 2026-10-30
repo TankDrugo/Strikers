@@ -6,6 +6,7 @@ import { Input, PadMenus } from './input.js';
 import { Menu } from './ui/menu.js';
 import { t } from './ui/i18n.js';
 import { save } from './ui/save.js';
+import { Tracker } from './cups/objectives.js';
 import { MATCH, FIELDER, GOALIE, RIG_HEIGHT, TEAM_DEFAULTS } from './config.js';
 import { Player } from './player.js';
 
@@ -116,11 +117,16 @@ async function boot() {
   try { template = await loadAssets((d, n) => menu.setProgress(d, n)); } catch (e) { console.error(e); menu.showError(e); return; }
   menu.hideLoading();
   menu.teams = template.teams;
+  menu.roster = template.roster;
+
+  // cups: the same characters under other team names, colours and line-ups
+  const withLineups = (lineups) => ({ ...template, teams: lineups.map((l) => ({ name: l.name, color: l.color })),
+    forSlot: (team, slot) => template.byId[lineups[team].slots[slot]] || template.forSlot(team, slot) });
 
   const hud = new Hud();
   hud.onSfx = makeAudio();
   hud.show(false);
-  let game = null, input = null, paused = false, mode = 'menu', viewer = null, match = null;
+  let game = null, input = null, paused = false, mode = 'menu', viewer = null, match = null, trackers = [], trackT = 0;
 
   const resize = () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -134,10 +140,19 @@ async function boot() {
     if (opts.aiOnly) opts = { kind: 'watch', humans: [], bindings: [] }; // old API (tools/playtest.cjs)
     match = { kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: MATCH.seconds, cpuLevel: 1, ...opts };
     if (viewer) { viewer.dispose(); viewer = null; }
-    game = new Game(renderer, template, hud);
+    game = new Game(renderer, match.lineups ? withLineups(match.lineups) : template, hud);
     game.setHumans(match.humans);
+    game.knockout = !!match.knockout;
+    // star objectives: one tracker per human team playing the computer
+    trackers = (match.objectives || []).map((o) => {
+      const tr = new Tracker(game, o.team, o.ids);
+      tr.onChange = (i, st) => hud.toast(t(st === 'done' ? 'obj.toastDone' : 'obj.toastFailed', { text: t('obj.' + o.ids[i]) }), st === 'done' ? '#d8f7c9' : '#f3d6dc');
+      return tr;
+    });
+    game.onEvent = trackers.length ? (type, d) => { for (const tr of trackers) tr.event(type, d); } : null;
     game.cpuLevel = match.cpuLevel;
     game.clock = match.seconds;
+    for (const tr of trackers) tr.f.length = game.clock;
     input = input || new Input(game);
     input.game = game;
     input.menuOwnsKeys = true;
@@ -147,6 +162,13 @@ async function boot() {
     hud.show(true);
     hud.el.querySelector('#help').style.display = match.humans.length ? '' : 'none';
     hud.onEnd = (score, humanTeam, stats) => {
+      if (match.onFinish) {
+        const g = game, res = { score: [...score], winner: g.winner, golden: g.golden && score[0] !== score[1], decided: score[0] === score[1],
+          trackers: trackers.map((tr) => ({ team: tr.f.me, ids: tr.ids, stars: tr.finish(g.winner === tr.f.me), status: [...tr.status] })) };
+        if (res.decided) res.score[g.winner]++; // decided on shots: the winner goes through by one
+        setTimeout(() => { if (mode === 'game' && game === g) { mode = 'menu'; hud.show(false); game = null; match.onFinish(res); } }, 2500);
+        return;
+      }
       if (match.kind === 'cpu' || match.kind === 'coop' || match.kind === 'friend') {
         const me = score[humanTeam], them = score[1 - humanTeam];
         save.addResult(me > them ? 'won' : me < them ? 'lost' : 'drawn');
@@ -166,7 +188,10 @@ async function boot() {
     if (mode !== 'game' || !game || game.phase === 'end') return;
     if (paused) { if (menu.nav.top && menu.nav.top.isPause) { menu.nav.pop(); resume(); } return; }
     paused = true;
-    const l = menu.showPause({ onResume: resume, onRestart: () => { paused = false; startMatch(match); }, onQuit: () => { paused = false; showMenu(); } });
+    const objectives = trackers.map((tr) => ({ n: game.controllers.findIndex((c) => c.team === tr.f.me) + 1,
+      items: tr.ids.map((id, i) => ({ text: t('obj.' + id), status: tr.status[i] })) }));
+    const quit = () => { paused = false; if (match.onQuit) { mode = 'menu'; hud.show(false); game = null; match.onQuit(); } else showMenu(); };
+    const l = menu.showPause({ onResume: resume, onRestart: () => { paused = false; startMatch(match); }, onQuit: quit, objectives });
     l.isPause = true;
   }
 
@@ -212,6 +237,7 @@ async function boot() {
       if (helpPad !== input.usingPad) { helpPad = input.usingPad; helpEl.innerHTML = t(helpPad ? 'help.pad' : 'help.kb'); }
     }
     if (!paused) game.update(dt);
+    if (trackers.length && (trackT += dt) > 0.25) { trackT = 0; for (const tr of trackers) tr.tick(); }
     renderer.render(game.scene, game.camera);
   });
   menu.start();

@@ -76,6 +76,13 @@ export const GOALIE = {
   saveIgnoreMargin: 1.0,
   diveReach: 1.9 * SIZE, // horizontal reach of a full dive at this size (estimated from gk_dive clips)
   reachHeight: Math.min(2.0 * SIZE, 2.559),
+  // Saves are not a dice roll in the original (Goalie::CalcSaveParameters, GoalieSave::FindBestSave): the keeper
+  // saves when one of his save animations reaches the ball in time. We model that with a reaction time plus a dive
+  // speed (both estimated: the shipped save-timing grid is not in the decompilation).
+  saveReact: 0.14,
+  diveSpeed: 9.0, // m/s sideways once the dive starts (tuned on CPU matches: about 1 shot in 5 goes in, 1 perfect shot in 2; was 2 in 5 with the old dice roll)
+  perfectReadDelay: 0.1,
+  standReach: 0.6 * SIZE, // shots this close to the body need no dive
   pass: [9.0, 19.0],
 };
 

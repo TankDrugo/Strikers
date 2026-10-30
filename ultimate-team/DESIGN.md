@@ -41,7 +41,7 @@ Scelta: **P1, walkout a indizi**.
 1. Il pacchetto trema e si apre in un lampo; i raggi di luce prendono il colore della rarità.
 2. Gli indizi compaiono uno per volta: ruolo, squadra, valutazione e, per le carte top, "NUMERATA 04 / 10" o "1 / 1". Per l'oro raro c'è solo la valutazione.
 3. **Il personaggio esce camminando in 3D e fa una tra 10 esultanze, scelta a caso.**
-4. Arriva la carta; numerate e 1/1 scendono nella loro teca.
+4. Arriva la carta; numerate e 1/1 vengono **imbustate**: la teca entra vuota, la carta scivola dentro dall'apertura in alto, la teca fa clic e la targhetta viene stampata sopra (bozza P1 nella pagina delle bozze).
 
 Le esultanze non ci sono fra le 183 clip. **Scelta dell'utente: usare le esultanze originali, adattate al walkout.** Nel gioco originale sono sequenze "NIS" (Non-Interactive Sequence) in `art/nis/` sul disco:
 

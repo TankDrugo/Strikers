@@ -6,6 +6,8 @@ import { installTheme, cardHtml } from './theme.js';
 import { t, setLang, getLang } from './i18n.js';
 import { save, PROFILE_COLORS } from './save.js';
 import { readPads } from '../input.js';
+import { installCups } from './cupsMenu.js';
+import { cupById, roundKey } from '../cups/cups.js';
 
 const MAIN = ['home', 'quick', 'cups', 'ut', 'opts'];
 const SUB = { cups: ['cups', 'private', 'trophies'], ut: ['club', 'squad', 'market', 'divisions', 'album'] };
@@ -230,7 +232,9 @@ export class Menu {
             <div class="dots">${[1, 2, 3].map((i) => `<i class="${i === n ? 'on' : ''}"></i>`).join('')}</div></button>
           ${tile('playNow', t('home.playNow'), t('home.playNowText', { a: esc(teams[0].name), b: esc(teams[1].name), min: Math.round(this.setup.seconds / 60) }), '', '', '')}
           ${tile('friend', t('home.friend'), t('home.friendText'))}
-          ${tile('watch', t('home.watch'), t('home.watchText'))}
+          ${(() => { const run = save.run(p.id); return run
+            ? tile('continueCup', t('cup.continue'), t('cup.inRun', { cup: t('cups.' + run.cupId), round: t('cup.r.' + roundKey(cupById(run.cupId), run.bracket.length - 1)) }), '', 'background:var(--sun)')
+            : tile('watch', t('home.watch'), t('home.watchText')); })()}
           ${tile('record', t('home.record'), t('home.recordText', { w: r.won, d: r.drawn, l: r.lost }), '', 'cursor:default')}
         </div>`;
       }
@@ -251,12 +255,11 @@ export class Menu {
             ${CUPS.map(([c, n]) => `<div class="tile locked"><h3>${t('cups.' + c)}</h3><p>${t('cups.' + c + 't')} · ${t('cups.matches', { n })}</p></div>`).join('')}
           </div>`;
         }
-        return `<div class="view" style="grid-template-columns:repeat(4,1fr)">
-          ${CUPS.map(([c, n]) => `<div class="tile soon locked" data-nav tabindex="-1"><span class="soon-tag">${t('cups.soon')}</span><span class="big" style="margin-top:1.2em">–</span><h3>${t('cups.' + c)}</h3><p>${t('cups.' + c + 't')} · ${t('cups.matches', { n })}</p><p>☆☆☆</p></div>`).join('')}</div>`;
+        return this.cupsView();
       case 'private':
-        return `<div class="view" style="grid-template-columns:1fr">${soon(t('sub.private'), t('cups.private'))}</div>`;
+        return this.privateView();
       case 'trophies':
-        return `<div class="view" style="grid-template-columns:repeat(4,1fr)">${CUPS.map(([c]) => `<div class="tile locked" data-nav tabindex="-1"><span class="big" style="opacity:.25">🏆</span><h3>${t('cups.' + c)}</h3><p>${t('cups.noTrophy')}</p></div>`).join('')}</div>`;
+        return this.trophiesView();
       case 'ut':
         return `<div class="view" style="grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr">
           ${tile('enter-ut', t('tab.ut'), t('ut.intro'), `<span class="hint"><span class="btnA">A</span>${t('foot.enter')}</span>`, 'grid-row:span 2;background:linear-gradient(135deg,#2a1260,#6a2fd8);color:#fff', '')}
@@ -312,7 +315,7 @@ export class Menu {
     this.transition('', () => { this.state.mode = 'main'; this.state.tab = MAIN.indexOf(from); this.renderHub(false); });
   }
 
-  hubAct(a) {
+  hubAct(a, b) {
     const go = (kind) => { this.setup.kind = kind; this.showSetup(); };
     switch (a) {
       case 'playNow': this.launch({ ...this.setup, kind: 'cpu' }); break;
@@ -330,6 +333,10 @@ export class Menu {
       case 'o-profile': this.showProfiles(); break;
       case 'o-viewer': this.nav.clear(); this.hub = null; this.onViewer(); break;
       case 'o-delete': this.confirmDelete(); break;
+      case 'cup': this.showCupDetail(b.dataset.cup); break;
+      case 'private': this.showTournamentSetup(null); break;
+      case 'friendsCup': this.setTab(0); break;
+      case 'continueCup': this.showBracket(save.run(save.active().id)); break;
     }
   }
 
@@ -403,13 +410,13 @@ export class Menu {
 
   afterSetup(setupLayer) {
     const s = this.setup;
-    if (s.kind === 'friend' || s.kind === 'coop') this.showJoin(setupLayer);
+    if (s.kind === 'friend' || s.kind === 'coop') this.showJoin(2, setupLayer, (devs) => this.launch({ ...this.setup, bindings: devs.map((d, i) => d === 'kb' ? { device: 'kb', ctrl: i } : { device: 'pad', index: +d.slice(3), ctrl: i }) }));
     else { this.nav.pop(setupLayer); this.launch({ ...s }); }
   }
 
-  // Couch-style join: each device presses A / Enter to take the next free slot.
-  showJoin(setupLayer) {
-    const slots = [null, null];
+  // Couch-style join: each device presses A / Enter to take the next free slot; done(devices) when all are in.
+  showJoin(n, hideLayer, done) {
+    const slots = new Array(n).fill(null);
     const devName = (d) => d === 'kb' ? t('join.keyboard') : t('join.pad', { n: +d.slice(3) + 1 });
     const paint = () => {
       l.el.querySelector('.slots').innerHTML = slots.map((d, i) => `<div class="slot${d ? ' on' : ''}"><b>${t('join.slot', { n: i + 1 })}</b>
@@ -439,15 +446,15 @@ export class Menu {
       act: (a) => { if (a === 'kb') l.onRaw('kb', 'confirm'); if (a === 'back') close(); },
       onBack: () => close(),
     });
-    const close = () => { setupLayer.el.style.visibility = ''; this.nav.pop(l); };
-    setupLayer.el.style.visibility = 'hidden';
+    const close = () => { hideLayer.el.style.visibility = ''; this.nav.pop(l); };
+    hideLayer.el.style.visibility = 'hidden';
     let started = false;
     const go = () => {
       if (started || !l.el.isConnected) return;
       started = true;
-      const bindings = slots.map((d, i) => d === 'kb' ? { device: 'kb', ctrl: i } : { device: 'pad', index: +d.slice(3), ctrl: i });
-      this.nav.pop(l); this.nav.pop(setupLayer);
-      this.launch({ ...this.setup, bindings });
+      hideLayer.el.style.visibility = '';
+      this.nav.pop(l);
+      done([...slots]);
     };
     this.nav.push(l);
     paint();
@@ -463,9 +470,11 @@ export class Menu {
 
   // ------------------------------------------------------------- in match
 
-  showPause({ onResume, onRestart, onQuit }) {
+  showPause({ onResume, onRestart, onQuit, objectives = [] }) {
+    const obj = objectives.map((o) => `<div class="grid" style="gap:.3em"><h3 style="font-family:var(--fd);font-weight:400;font-size:1.3em;margin:0">${t('cup.objectives')}${objectives.length > 1 ? ` · ${t('hud.p', { n: o.n })}` : ''}</h3>
+      ${o.items.map((it) => `<div class="obj ${it.status}">${it.status === 'done' ? '★' : it.status === 'failed' ? '✗' : '☆'} ${it.text}</div>`).join('')}</div>`).join('');
     const l = this.layer('dim', `<div class="center"><div class="panel">
-      <h1 class="title">${t('pause.title')}</h1>${this.controlsHtml()}
+      <h1 class="title">${t('pause.title')}</h1>${obj}${obj ? `<details><summary style="cursor:pointer;font-weight:800">${t('controls.title')}</summary>${this.controlsHtml()}</details>` : this.controlsHtml()}
       <div class="row-btns"><button class="btn primary" data-nav data-act="resume" data-autofocus>${t('pause.resume')}</button><button class="btn" data-nav data-act="restart">${t('pause.restart')}</button><button class="btn" data-nav data-act="quit">${t('pause.quit')}</button></div></div></div>`, {
       act: (a) => { this.nav.pop(l); ({ resume: onResume, restart: onRestart, quit: onQuit })[a](); },
       onBack: () => { this.nav.pop(l); onResume(); },
@@ -489,3 +498,5 @@ export class Menu {
     this.nav.push(l);
   }
 }
+
+installCups(Menu);
