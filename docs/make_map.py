@@ -59,8 +59,9 @@ PROGRESS = {
                     "next": ["Decidere stile e prime schermate"]},
     "ultimate": {"done": ["Area pronta: collegamenti con roster e statistiche individuati"],
                  "next": ["Decidere le regole: carte, pacchetti, statistiche, salvataggi"]},
-    "progetto": {"done": ["Repository organizzato per aree, grafo e mappa", "Istruzioni per le nuove chat (CLAUDE.md)"],
-                 "next": ["Caricare su GitHub (TankDrugo/Strikers)"]},
+    "progetto": {"done": ["Repository su GitHub (TankDrugo/Strikers), organizzato per aree", "Grafo e mappa del progetto",
+                          "Istruzioni per le nuove chat (CLAUDE.md)"],
+                 "next": ["Aggiornare grafo e mappa a ogni passo (docs/grafo.md)"]},
 }
 
 
