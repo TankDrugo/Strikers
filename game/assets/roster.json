@@ -2,11 +2,25 @@
   "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one.",
   "characters": [
     {
-      "id": "portiere",
-      "name": "Provvisorio (rivali in arrivo)",
-      "glb": "characters/portiere.glb",
-      "clips": "characters/portiere.clips.json",
-      "recolor": true
+      "id": "celestini_portiere",
+      "name": "Portiere Celestini",
+      "glb": "characters/celestini_portiere.glb",
+      "clips": "characters/celestini_portiere.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_difensore",
+      "name": "Difensore Celestini",
+      "glb": "characters/celestini_difensore.glb",
+      "clips": "characters/celestini_difensore.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "celestini_centrocampista",
+      "name": "Centrocampista Celestini",
+      "glb": "characters/celestini_centrocampista.glb",
+      "clips": "characters/celestini_centrocampista.clips.json",
+      "recolor": false
     },
     {
       "id": "celestini_ala",
@@ -23,24 +37,38 @@
       "recolor": false
     },
     {
-      "id": "celestini_centrocampista",
-      "name": "Centrocampista Celestini",
-      "glb": "characters/celestini_centrocampista.glb",
-      "clips": "characters/celestini_centrocampista.clips.json",
+      "id": "rivali_portiere",
+      "name": "Portiere Rivali",
+      "glb": "characters/rivali_portiere.glb",
+      "clips": "characters/rivali_portiere.clips.json",
       "recolor": false
     },
     {
-      "id": "celestini_difensore",
-      "name": "Difensore Celestini",
-      "glb": "characters/celestini_difensore.glb",
-      "clips": "characters/celestini_difensore.clips.json",
+      "id": "rivali_difensore",
+      "name": "Difensore Rivali",
+      "glb": "characters/rivali_difensore.glb",
+      "clips": "characters/rivali_difensore.clips.json",
       "recolor": false
     },
     {
-      "id": "celestini_portiere",
-      "name": "Portiere Celestini",
-      "glb": "characters/celestini_portiere.glb",
-      "clips": "characters/celestini_portiere.clips.json",
+      "id": "rivali_centrocampista",
+      "name": "Centrocampista Rivali",
+      "glb": "characters/rivali_centrocampista.glb",
+      "clips": "characters/rivali_centrocampista.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "rivali_ala",
+      "name": "Ala Rivali",
+      "glb": "characters/rivali_ala.glb",
+      "clips": "characters/rivali_ala.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "rivali_attaccante",
+      "name": "Attaccante Rivali",
+      "glb": "characters/rivali_attaccante.glb",
+      "clips": "characters/rivali_attaccante.clips.json",
       "recolor": false
     }
   ],
@@ -53,11 +81,11 @@
       "celestini_portiere"
     ],
     [
-      "portiere",
-      "portiere",
-      "portiere",
-      "portiere",
-      "portiere"
+      "rivali_difensore",
+      "rivali_centrocampista",
+      "rivali_ala",
+      "rivali_attaccante",
+      "rivali_portiere"
     ]
   ]
 }

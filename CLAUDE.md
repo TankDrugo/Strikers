@@ -39,7 +39,8 @@ graphify path "add_characters.py" "Player" --undirected
 
 - Gioco: partita completa 5v5 giocabile con controller Xbox (stile EA FC) o tastiera. Stadio originale. Giocatori 1,3 volte più grandi dell'originale (`SIZE`), pallone più piccolo (raggio 0,13 m): scelta dell'utente.
 - Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`.
-- Personaggi: due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante). I 5 **Celestini** sono in gioco. I 5 **Rivali** non sono ancora stati caricati: al loro posto gioca `portiere` ricolorato di rosso. Quando arrivano: copiarli in `characters/` come `rivali_<ruolo>.glb`, `python3 animation/add_characters.py --audit`, poi `teams[1]` in `game/assets/roster.json` come `teams[0]`.
+- Personaggi: completi. Due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante): **Celestini** (maglia celeste) e **Rivali** (maglia verde), tutti con le 183 animazioni. Anelli e punteggio usano ancora giallo/rosso invece dei colori delle maglie.
+- Il gioco compilato pesa circa 89 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
 - Ultimate Team e Interfaccia gioco: cartelle pronte, lavoro non iniziato.
 
 ## graphify

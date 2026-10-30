@@ -107,4 +107,4 @@ Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md)
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Con molti personaggi diversi il file `gioco.html` cresce di circa 7 MB per personaggio.
+- Il file `gioco.html` pesa circa 89 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
