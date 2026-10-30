@@ -19,7 +19,7 @@ Il file contiene dati di animazione estratti dalla tua copia del gioco: tienilo 
 
 Il gioco è anche online, aggiornato a ogni modifica: https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH
 
-È un Artifact di claude.ai **privato**: lo apre solo il proprietario dell'account. Non va condiviso, perché contiene le animazioni ricavate dal disco.
+Funziona anche col controller Xbox (verificato dall'utente). È un Artifact di claude.ai **privato**: lo apre solo il proprietario dell'account. Non va condiviso, perché contiene le animazioni ricavate dal disco.
 
 Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
 
