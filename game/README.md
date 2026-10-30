@@ -1,6 +1,6 @@
 # Gioco
 
-Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); per ora c'è solo `portiere`, con le 183 animazioni originali adattate al suo scheletro Mixamo.
+Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali, 10 personaggi), tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
 
 ## Avvio
 

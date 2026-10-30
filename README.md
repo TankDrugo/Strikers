@@ -10,10 +10,10 @@ Gioco di calcio arcade 5 contro 5 con le proporzioni e le dinamiche di Super Mar
 |---|---|---|
 | **Gioco** (prototipo giocabile: campo, stadio, pallone, giocatori, IA, comandi) | [`game/`](game/README.md) | funziona |
 | **Animazioni** (decodifica delle clip originali, retarget sui personaggi, controlli) | [`animation/`](animation/README.md) | funziona |
-| **Personaggi** (modelli riggati Mixamo da mettere in squadra) | [`characters/`](characters/README.md) | 1 su 10 |
+| **Personaggi** (modelli riggati Mixamo da mettere in squadra) | [`characters/`](characters/README.md) | completo (10 su 10) |
 | **Riferimento** (misure e dinamiche del gioco originale, con le fonti) | [`reference/`](reference/README.md) | completo |
-| **Ultimate Team** (collezione di giocatori, carte, squadre) | [`ultimate-team/`](ultimate-team/README.md) | da iniziare |
-| **Interfaccia gioco** (menu, HUD, schermate) | [`interfaccia-gioco/`](interfaccia-gioco/README.md) | da iniziare |
+| **Ultimate Team** (collezione di giocatori, carte, squadre) | [`ultimate-team/`](ultimate-team/README.md) | progettato, codice da scrivere |
+| **Interfaccia gioco** (menu, HUD, schermate, Coppe) | [`interfaccia-gioco/`](interfaccia-gioco/README.md) | funziona (menu, profili, Gioco rapido, Coppe) |
 
 Il grafo del progetto è in [`graphify-out/`](graphify-out/): `graph.html` (grafo interattivo), `GRAPH_REPORT.md` (sintesi), `graph.json` (dati). La mappa navigabile è [`docs/mappa.html`](docs/mappa.html). Come aggiornarli: [`docs/grafo.md`](docs/grafo.md).
 

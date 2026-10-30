@@ -1,0 +1,296 @@
+{
+  "animation/add_characters.py": {
+    "mtime": 1793349513.899561,
+    "seen": 1793368216.4883103,
+    "ast_hash": "d7df1ffececd95959283d5c13f84048c",
+    "semantic_hash": "d7df1ffececd95959283d5c13f84048c"
+  },
+  "animation/audit.py": {
+    "mtime": 1793349513.899561,
+    "seen": 1793368216.488319,
+    "ast_hash": "8248adb988509d36f022ef674cb02a31",
+    "semantic_hash": "8248adb988509d36f022ef674cb02a31"
+  },
+  "animation/retarget.py": {
+    "mtime": 1793349513.922484,
+    "seen": 1793368216.488324,
+    "ast_hash": "4d62a6005ac95a5e242115d8e6531308",
+    "semantic_hash": "4d62a6005ac95a5e242115d8e6531308"
+  },
+  "animation/strikers_anim.py": {
+    "mtime": 1793349513.922484,
+    "seen": 1793368216.4883273,
+    "ast_hash": "0f24a85adb92f36e88ee535e15fef969",
+    "semantic_hash": "0f24a85adb92f36e88ee535e15fef969"
+  },
+  "animation/tests/make_sample.py": {
+    "mtime": 1793349513.922484,
+    "seen": 1793368216.4883294,
+    "ast_hash": "ca0cd6a47d11c43fa9fd970d331808a6",
+    "semantic_hash": "ca0cd6a47d11c43fa9fd970d331808a6"
+  },
+  "animation/tests/test_converter.py": {
+    "mtime": 1793349513.927996,
+    "seen": 1793368216.4883316,
+    "ast_hash": "96cc0d9622a6462ee554f3dbf8c6498c",
+    "semantic_hash": "96cc0d9622a6462ee554f3dbf8c6498c"
+  },
+  "docs/make_map.py": {
+    "mtime": 1793349514.962362,
+    "seen": 1793368216.488333,
+    "ast_hash": "916a583bc38c96bddea8eb08c42f1f8c",
+    "semantic_hash": "916a583bc38c96bddea8eb08c42f1f8c"
+  },
+  "game/assets/roster.json": {
+    "mtime": 1793349516.138484,
+    "seen": 1793368216.488335,
+    "ast_hash": "a6784892fed220dce9d2cf33883a7cad",
+    "semantic_hash": "a6784892fed220dce9d2cf33883a7cad"
+  },
+  "game/package.json": {
+    "mtime": 1793349516.1464841,
+    "seen": 1793368216.4883363,
+    "ast_hash": "1864fd21b3d3e2bb2e3566ce689689e1",
+    "semantic_hash": "1864fd21b3d3e2bb2e3566ce689689e1"
+  },
+  "game/src/ai.js": {
+    "mtime": 1793349516.1464841,
+    "seen": 1793368216.4883385,
+    "ast_hash": "bf371cf267e7e5722797f742fb9f2beb",
+    "semantic_hash": "bf371cf267e7e5722797f742fb9f2beb"
+  },
+  "game/src/ball.js": {
+    "mtime": 1793349516.1497495,
+    "seen": 1793368216.48834,
+    "ast_hash": "871e69e2570396199b51a3b435e0174d",
+    "semantic_hash": "871e69e2570396199b51a3b435e0174d"
+  },
+  "game/src/config.js": {
+    "mtime": 1793363064.7337782,
+    "seen": 1793368216.4883416,
+    "ast_hash": "2202ef041577115b75fc6cf65e9425e0",
+    "semantic_hash": "2202ef041577115b75fc6cf65e9425e0"
+  },
+  "game/src/field.js": {
+    "mtime": 1793349516.1497495,
+    "seen": 1793368216.488346,
+    "ast_hash": "73fc7a29e3a621c11691ac477a4949cf",
+    "semantic_hash": "73fc7a29e3a621c11691ac477a4949cf"
+  },
+  "game/src/game.js": {
+    "mtime": 1793362986.0415273,
+    "seen": 1793368216.4883475,
+    "ast_hash": "bab7498786177b2c3c76a4a2c0b96be6",
+    "semantic_hash": "bab7498786177b2c3c76a4a2c0b96be6"
+  },
+  "game/src/hud.js": {
+    "mtime": 1793363185.131267,
+    "seen": 1793368216.4883492,
+    "ast_hash": "2736cf407d82620ebba03837edffe3c3",
+    "semantic_hash": "2736cf407d82620ebba03837edffe3c3"
+  },
+  "game/src/input.js": {
+    "mtime": 1793361029.2546415,
+    "seen": 1793368216.4883504,
+    "ast_hash": "7ca9caf38581b335646f0ba1ace36c47",
+    "semantic_hash": "7ca9caf38581b335646f0ba1ace36c47"
+  },
+  "game/src/main.js": {
+    "mtime": 1793363215.5804002,
+    "seen": 1793368216.4883518,
+    "ast_hash": "b3a000792409eed9665b5792277a887b",
+    "semantic_hash": "b3a000792409eed9665b5792277a887b"
+  },
+  "game/src/player.js": {
+    "mtime": 1793349516.1497495,
+    "seen": 1793368216.488353,
+    "ast_hash": "e5701ef7847c6b6480436e5a2448ad97",
+    "semantic_hash": "e5701ef7847c6b6480436e5a2448ad97"
+  },
+  "game/src/stadium.js": {
+    "mtime": 1793349516.1497495,
+    "seen": 1793368216.4883544,
+    "ast_hash": "7a19f8acc30f7bcff72b841c50acb415",
+    "semantic_hash": "7a19f8acc30f7bcff72b841c50acb415"
+  },
+  "game/tools/build.mjs": {
+    "mtime": 1793349516.1497495,
+    "seen": 1793368216.4883657,
+    "ast_hash": "a70538544738c8a6d5855e3ce30e5e94",
+    "semantic_hash": "a70538544738c8a6d5855e3ce30e5e94"
+  },
+  "game/tools/playtest.cjs": {
+    "mtime": 1793361379.4419975,
+    "seen": 1793368216.4883668,
+    "ast_hash": "2aadb48f9709ebbf686a8fbd18478ab0",
+    "semantic_hash": "2aadb48f9709ebbf686a8fbd18478ab0"
+  },
+  "reference/strikers_characters.json": {
+    "mtime": 1793349516.1580613,
+    "seen": 1793368216.4883683,
+    "ast_hash": "6c14a5c2a5ba56521a078538d1bd3880",
+    "semantic_hash": "6c14a5c2a5ba56521a078538d1bd3880"
+  },
+  "ultimate-team/data/economy.json": {
+    "mtime": 1793360586.384667,
+    "seen": 1793368216.4883697,
+    "ast_hash": "4b95c28a9c93816e8ed84cce1b886106",
+    "semantic_hash": "4b95c28a9c93816e8ed84cce1b886106"
+  },
+  "ultimate-team/tools/economy_sim.py": {
+    "mtime": 1793351636.2549827,
+    "seen": 1793368216.4883711,
+    "ast_hash": "608e91d2a707a51187e56167521a8e01",
+    "semantic_hash": "608e91d2a707a51187e56167521a8e01"
+  },
+  "CLAUDE.md": {
+    "mtime": 1793363500.3766382,
+    "seen": 1793368216.4883728,
+    "ast_hash": "ee6a6a8608d503b8062ed7eb11002ed1",
+    "semantic_hash": "ee6a6a8608d503b8062ed7eb11002ed1"
+  },
+  "README.md": {
+    "mtime": 1793349513.8987648,
+    "seen": 1793368216.488374,
+    "ast_hash": "00ef9138655309383667e91ea3f2809f",
+    "semantic_hash": "00ef9138655309383667e91ea3f2809f"
+  },
+  "animation/README.md": {
+    "mtime": 1793349513.8987648,
+    "seen": 1793368216.4883757,
+    "ast_hash": "41144ae04f1ee20307dda5ad46657e0a",
+    "semantic_hash": "41144ae04f1ee20307dda5ad46657e0a"
+  },
+  "characters/README.md": {
+    "mtime": 1793349513.927996,
+    "seen": 1793368216.4883773,
+    "ast_hash": "910a395d3e49d23c10f7b900c30e0c6b",
+    "semantic_hash": "910a395d3e49d23c10f7b900c30e0c6b"
+  },
+  "docs/grafo.md": {
+    "mtime": 1793349514.958484,
+    "seen": 1793368216.4883785,
+    "ast_hash": "3697079e6a62fef556f75304d5ddca72",
+    "semantic_hash": "3697079e6a62fef556f75304d5ddca72"
+  },
+  "game/README.md": {
+    "mtime": 1793363500.3755846,
+    "seen": 1793368216.48838,
+    "ast_hash": "5d888917e5e3a665e1b6878879afd194",
+    "semantic_hash": "5d888917e5e3a665e1b6878879afd194"
+  },
+  "game/dev/index.html": {
+    "mtime": 1793349516.1424842,
+    "seen": 1793368216.4883811,
+    "ast_hash": "5bd9ae0c332cfbff42d46b7cfcaf2795",
+    "semantic_hash": "5bd9ae0c332cfbff42d46b7cfcaf2795"
+  },
+  "game/dev/posecheck.html": {
+    "mtime": 1793349516.1454647,
+    "seen": 1793368216.488383,
+    "ast_hash": "ec2accb571d54826fde09665498bcd76",
+    "semantic_hash": "ec2accb571d54826fde09665498bcd76"
+  },
+  "game/dev/sheet.html": {
+    "mtime": 1793349516.1454647,
+    "seen": 1793368216.4883845,
+    "ast_hash": "8061e8144e4d6c25aa03efd7a14918a9",
+    "semantic_hash": "8061e8144e4d6c25aa03efd7a14918a9"
+  },
+  "interfaccia-gioco/DESIGN.md": {
+    "mtime": 1793363500.3758233,
+    "seen": 1793368216.4883862,
+    "ast_hash": "694caba821366f0591202f46cc10aeb2",
+    "semantic_hash": "694caba821366f0591202f46cc10aeb2"
+  },
+  "interfaccia-gioco/README.md": {
+    "mtime": 1793363500.3763158,
+    "seen": 1793368216.4883873,
+    "ast_hash": "b98f222bc93ae6380f68dd6bc6f8df96",
+    "semantic_hash": "b98f222bc93ae6380f68dd6bc6f8df96"
+  },
+  "interfaccia-gioco/bozze/bozze-menu.html": {
+    "mtime": 1793362662.3338585,
+    "seen": 1793368216.4883885,
+    "ast_hash": "74298cb3af6ffdfef8e00b7f52d317db",
+    "semantic_hash": "74298cb3af6ffdfef8e00b7f52d317db"
+  },
+  "reference/README.md": {
+    "mtime": 1793349516.154484,
+    "seen": 1793368216.48839,
+    "ast_hash": "68c364e5e167d4efd79253e0ba3e0730",
+    "semantic_hash": "68c364e5e167d4efd79253e0ba3e0730"
+  },
+  "reference/STRIKERS_REFERENCE.md": {
+    "mtime": 1793363500.3747716,
+    "seen": 1793368216.4883912,
+    "ast_hash": "905fec19f33bce3a48523ad3c9b93481",
+    "semantic_hash": "905fec19f33bce3a48523ad3c9b93481"
+  },
+  "ultimate-team/DESIGN.md": {
+    "mtime": 1793363500.3760743,
+    "seen": 1793368216.4883938,
+    "ast_hash": "db2141a1f3d1eda2195386a1c265b4ba",
+    "semantic_hash": "db2141a1f3d1eda2195386a1c265b4ba"
+  },
+  "ultimate-team/ECONOMIA.md": {
+    "mtime": 1793360625.7988021,
+    "seen": 1793368216.4883957,
+    "ast_hash": "850560474b664f97f57b5e2d29e18f69",
+    "semantic_hash": "850560474b664f97f57b5e2d29e18f69"
+  },
+  "ultimate-team/README.md": {
+    "mtime": 1793352181.6669283,
+    "seen": 1793368216.488398,
+    "ast_hash": "4d25c28afec7a4f170af38a7e4fd37f8",
+    "semantic_hash": "4d25c28afec7a4f170af38a7e4fd37f8"
+  },
+  "game/src/ui/i18n.js": {
+    "mtime": 1793363185.1307,
+    "seen": 1793368216.4883573,
+    "ast_hash": "164b548524dcaf4436fae3d199f6ddbd",
+    "semantic_hash": "164b548524dcaf4436fae3d199f6ddbd"
+  },
+  "game/src/ui/menu.js": {
+    "mtime": 1793363199.2903712,
+    "seen": 1793368216.488359,
+    "ast_hash": "8030586907c77f8882e109ea1c822125",
+    "semantic_hash": "8030586907c77f8882e109ea1c822125"
+  },
+  "game/src/ui/nav.js": {
+    "mtime": 1793361151.7377667,
+    "seen": 1793368216.4883604,
+    "ast_hash": "216caef9776c2ae96813743ece33b1a1",
+    "semantic_hash": "216caef9776c2ae96813743ece33b1a1"
+  },
+  "game/src/ui/save.js": {
+    "mtime": 1793362884.9671376,
+    "seen": 1793368216.4883623,
+    "ast_hash": "1ec3c231f7757307e7976046b57ece56",
+    "semantic_hash": "1ec3c231f7757307e7976046b57ece56"
+  },
+  "game/src/ui/theme.js": {
+    "mtime": 1793363185.1309903,
+    "seen": 1793368216.488364,
+    "ast_hash": "0c1e93428fe905aafd4aab1ad5aa6c10",
+    "semantic_hash": "0c1e93428fe905aafd4aab1ad5aa6c10"
+  },
+  "game/src/cups/cups.js": {
+    "mtime": 1793362780.1276648,
+    "seen": 1793368216.4883432,
+    "ast_hash": "0bae010b09548d498a211f09bee90e11",
+    "semantic_hash": "0bae010b09548d498a211f09bee90e11"
+  },
+  "game/src/cups/objectives.js": {
+    "mtime": 1793362802.1716661,
+    "seen": 1793368216.4883447,
+    "ast_hash": "49698bcf3f1491c2bdcb641604e99109",
+    "semantic_hash": "49698bcf3f1491c2bdcb641604e99109"
+  },
+  "game/src/ui/cupsMenu.js": {
+    "mtime": 1793363352.93733,
+    "seen": 1793368216.4883559,
+    "ast_hash": "0494be0e1907256f9d6a26f4d21931ad",
+    "semantic_hash": "0494be0e1907256f9d6a26f4d21931ad"
+  }
+}
