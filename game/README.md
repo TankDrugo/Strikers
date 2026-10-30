@@ -15,6 +15,20 @@ Poi apri `dist/gioco.html` con un doppio clic (Chrome, Edge o Firefox). Non serv
 
 Il file contiene dati di animazione estratti dalla tua copia del gioco: tienilo per uso personale e non pubblicarlo.
 
+## Link online (privato)
+
+Il gioco è anche online, aggiornato a ogni modifica: https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH
+
+È un Artifact di claude.ai **privato**: lo apre solo il proprietario dell'account. Non va condiviso, perché contiene le animazioni ricavate dal disco.
+
+Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
+
+```bash
+node tools/build.mjs --web
+```
+
+Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 48 MB, sotto il limite di 64 MB per pubblicazione.
+
 ## Comandi
 
 ### Controller Xbox (Series S/X, anche via Bluetooth o cavo)

@@ -23,7 +23,7 @@ Il grafo del progetto è in [`graphify-out/`](graphify-out/): `graph.html` (graf
 cd game && npm install && node tools/build.mjs
 ```
 
-Poi apri `game/dist/gioco.html` con un doppio clic. Comandi (controller Xbox o tastiera) in [`game/README.md`](game/README.md).
+Poi apri `game/dist/gioco.html` con un doppio clic. Oppure gioca dal link privato, sempre aggiornato: https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH. Comandi (controller Xbox o tastiera) in [`game/README.md`](game/README.md).
 
 ## Lavorare con Claude
 

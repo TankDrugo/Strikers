@@ -28,7 +28,8 @@ graphify path "add_characters.py" "Player" --undirected
 
 ## Regole del progetto
 
-- **Repository privato, uso personale.** Le animazioni derivano dal disco dell'utente. Mai rendere pubblico il repository, mai pubblicare il gioco compilato o i dati di animazione come Artifact o altrove.
+- **Repository privato, uso personale.** Le animazioni derivano dal disco dell'utente. Mai rendere pubblico il repository. Il gioco compilato si pubblica **solo** sull'Artifact privato del gioco, https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH, mai su un link nuovo o pubblico.
+- **Dopo ogni modifica al gioco, aggiorna il link online:** `node game/tools/build.mjs --web`, poi pubblica `game/dist/web/index.html` con tutti i file di `game/dist/web/assets/` sull'Artifact qui sopra (parametro `url`). Dettagli in `game/README.md`, sezione Link online.
 - **Mai aggiungere file del disco** (`.sanim`, `.shier`, `.bin`, `.trg`, `main.dol`, `.iso`, `.zip` del disco). Sono in `.gitignore`. Le animazioni decodificate stanno già in `animation/data/strikers_source.npz`.
 - **Nessun nome o marchio Nintendo** nel gioco (testi, stadio, interfaccia). I nomi originali compaiono solo in `reference/` e `animation/`, come fonte.
 - Le misure vengono da `reference/STRIKERS_REFERENCE.md`. Se cambi un valore rispetto all'originale, scrivilo nel commento accanto (esempio: `SIZE` e `BALL.radius` in `game/src/config.js`).

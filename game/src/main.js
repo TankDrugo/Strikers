@@ -8,9 +8,12 @@ import { Player } from './player.js';
 
 // assets/roster.json lists the characters (one retargeted .glb + clip facts each) and the 5 per team
 // (slots 0-3 fielders, slot 4 goalie). The built game embeds them; the dev page fetches them.
+// where the dev page and the web build fetch assets from (the single-file build embeds them instead)
+const ASSETS = window.__ASSETS || '/assets/';
+
 async function loadAssets() {
   const embedded = document.getElementById('asset-roster');
-  const roster = embedded ? JSON.parse(embedded.textContent) : await (await fetch('/assets/roster.json')).json();
+  const roster = embedded ? JSON.parse(embedded.textContent) : await (await fetch(ASSETS + 'roster.json')).json();
   const byId = {};
   for (const ch of roster.characters) {
     let glbBuffer, meta;
@@ -22,8 +25,13 @@ async function loadAssets() {
       glbBuffer = bytes.buffer;
       meta = JSON.parse(document.getElementById('asset-clips-' + ch.id).textContent);
     } else {
-      glbBuffer = await (await fetch('/assets/' + ch.glb)).arrayBuffer();
-      meta = await (await fetch('/assets/' + ch.clips)).json();
+      const res = await fetch(ASSETS + ch.glb);
+      if (ch.glb.endsWith('.gz.txt')) {
+        // web build: gzip + base64 text, unpacked in the browser
+        const bin = Uint8Array.from(atob(await res.text()), (c) => c.charCodeAt(0));
+        glbBuffer = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+      } else glbBuffer = await res.arrayBuffer();
+      meta = await (await fetch(ASSETS + ch.clips)).json();
     }
     const gltf = await new GLTFLoader().parseAsync(glbBuffer, '');
     const clips = {};
