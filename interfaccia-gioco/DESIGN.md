@@ -4,8 +4,8 @@ Stato: **decisioni raccolte, bozze scelte** (pagina di prova: vedi "Bozze" in fo
 
 ## Ordine di lavoro
 
-1. Struttura del menu, stile grafico, profili e lingua.
-2. Gioco rapido.
+1. Struttura del menu, stile grafico, profili e lingua. **Fatto** (`game/src/ui/`).
+2. Gioco rapido. **Fatto**: contro il computer, contro un amico, in due contro il computer, computer contro computer; durata e difficoltà; squadra. Formazione, stadio e regole speciali hanno per ora una sola scelta.
 3. Coppe.
 4. Ultimate Team (regole in [`../ultimate-team/DESIGN.md`](../ultimate-team/DESIGN.md)).
 

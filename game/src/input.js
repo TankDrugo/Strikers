@@ -16,6 +16,11 @@ export function readPad() {
   return null;
 }
 
+export function readPads() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  return [...pads].filter((gp) => gp && gp.connected !== false);
+}
+
 export function padPressed(gp, i) {
   const b = gp && gp.buttons[i];
   if (!b) return false;
@@ -34,37 +39,50 @@ export function padStick(gp) {
   return [x, y];
 }
 
+// Which device drives which human: bind([{ device: 'any', ctrl: 0 }]) for one human (keyboard and every pad),
+// bind([{ device: 'kb', ctrl: 0 }, { device: 'pad', index: 0, ctrl: 1 }]) for two. ctrl = index in game.controllers.
 export class Input {
   constructor(game) {
     this.game = game;
     this.keys = new Set();
-    this.prev = [];
-    this.prevRaw = [];
-    this.ignore = new Set();
+    this.prev = {}; // per pad index: buttons that count (held ones from a menu are ignored until released)
+    this.prevRaw = {};
+    this.ignore = {};
     this.resumeGuard = true;
     this.usingPad = false;
+    this.bindings = [{ device: 'any', ctrl: 0 }];
     addEventListener('keydown', (e) => this.key(e, true));
     addEventListener('keyup', (e) => this.key(e, false));
     addEventListener('blur', () => this.keys.clear());
     addEventListener('wheel', (e) => this.zoom(e.deltaY > 0 ? 1.08 : 1 / 1.08), { passive: true });
   }
 
+  bind(list) { this.bindings = list; this.keys.clear(); this.resumeGuard = true; }
+
+  ctrlFor(device, index) {
+    const b = this.bindings.find((x) => x.device === 'any' || (x.device === device && (device === 'kb' || x.index === index)));
+    return b ? this.game.controllers[b.ctrl] : null;
+  }
+
   key(e, down) {
     const k = e.key.toLowerCase();
+    if (this.suspended && this.menuOwnsKeys) return;
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
     if (down) {
       if (this.keys.has(k)) return;
       this.keys.add(k);
       this.usingPad = false;
       if (this.suspended) return;
-      const a = this.game.input.actions;
+      if (k === 'p' || k === 'escape') { this.onPause && this.onPause(); return; }
+      if (k === '+' || k === '=') this.zoom(1 / 1.12);
+      if (k === '-') this.zoom(1.12);
+      const c = this.ctrlFor('kb');
+      if (!c) return;
+      const a = c.input.actions;
       if (k === 'j') a.add('passOrSwitch');
       if (k === 'k') a.add('shootOrSlide');
       if (k === 'l') a.add('lobOrHit');
       if (k === ' ') a.add('deke');
-      if (k === 'p' || k === 'escape') this.onPause && this.onPause();
-      if (k === '+' || k === '=') this.zoom(1 / 1.12);
-      if (k === '-') this.zoom(1.12);
     } else this.keys.delete(k);
   }
 
@@ -74,42 +92,59 @@ export class Input {
   }
 
   poll() {
-    const inp = this.game.input, K = this.keys;
-    let x = 0, z = 0;
-    if (K.has('a') || K.has('arrowleft')) x -= 1;
-    if (K.has('d') || K.has('arrowright')) x += 1;
-    if (K.has('w') || K.has('arrowup')) z -= 1;
-    if (K.has('s') || K.has('arrowdown')) z += 1;
-    let turbo = K.has('shift');
-    let shootHeld = K.has('k');
+    const g = this.game;
+    const acc = new Map(); // controller -> { x, z, turbo, shootHeld }
+    const get = (c) => { if (!acc.has(c)) acc.set(c, { x: 0, z: 0, turbo: false, shootHeld: false }); return acc.get(c); };
+    for (const c of g.controllers) get(c);
 
-    const gp = readPad();
-    if (gp) {
+    const kc = this.ctrlFor('kb');
+    if (kc) {
+      const K = this.keys, o = get(kc);
+      if (K.has('a') || K.has('arrowleft')) o.x -= 1;
+      if (K.has('d') || K.has('arrowright')) o.x += 1;
+      if (K.has('w') || K.has('arrowup')) o.z -= 1;
+      if (K.has('s') || K.has('arrowdown')) o.z += 1;
+      if (K.has('shift')) o.turbo = true;
+      if (K.has('k')) o.shootHeld = true;
+    }
+
+    for (const gp of readPads()) {
+      const id = gp.index;
       const now = gp.buttons.map((_, i) => padPressed(gp, i));
       if (now.some(Boolean) || Math.hypot(gp.axes[0] || 0, gp.axes[1] || 0) > DEADZONE) this.usingPad = true;
+      const ign = this.ignore[id] || (this.ignore[id] = new Set());
       // after a menu or the pause, buttons still held from it must be released before they count again
-      if (this.suspended || this.resumeGuard) { for (let i = 0; i < now.length; i++) if (now[i]) this.ignore.add(i); this.resumeGuard = false; }
-      for (const i of [...this.ignore]) if (!now[i]) this.ignore.delete(i);
-      const live = now.map((v, i) => v && !this.ignore.has(i));
-      const edge = (i) => live[i] && !this.prev[i];
-      if (now[PAD.MENU] && !this.prevRaw[PAD.MENU]) this.onPause && this.onPause();
-      if (!this.suspended) {
+      if (this.suspended || this.resumeGuard) for (let i = 0; i < now.length; i++) if (now[i]) ign.add(i);
+      for (const i of [...ign]) if (!now[i]) ign.delete(i);
+      const live = now.map((v, i) => v && !ign.has(i));
+      const prev = this.prev[id] || [], prevRaw = this.prevRaw[id] || [];
+      const edge = (i) => live[i] && !prev[i];
+      if (now[PAD.MENU] && !prevRaw[PAD.MENU]) this.onPause && this.onPause();
+      const c = this.ctrlFor('pad', id);
+      if (c && !this.suspended) {
+        const o = get(c), inp = c.input;
         const [px, py] = padStick(gp);
-        if (px || py) { x = px; z = py; }
+        if (px || py) { o.x = px; o.z = py; }
         if (edge(PAD.A)) inp.actions.add('pass');
         if (edge(PAD.B)) inp.actions.add('shootOrSlide');
         if (edge(PAD.Y)) inp.actions.add('lob');
         if (edge(PAD.X)) inp.actions.add('dekeOrHit');
         if (edge(PAD.LB)) inp.actions.add('switch');
-        if (live[PAD.B]) shootHeld = true;
-        if (now[PAD.RT]) turbo = true;
+        if (live[PAD.B]) o.shootHeld = true;
+        if (now[PAD.RT]) o.turbo = true;
       }
-      this.prev = live;
-      this.prevRaw = now;
+      this.prev[id] = live;
+      this.prevRaw[id] = now;
     }
-    const m = Math.hypot(x, z);
-    if (m > 1) { x /= m; z /= m; }
-    inp.x = x; inp.z = z; inp.turbo = turbo; inp.shootHeld = shootHeld;
+    this.resumeGuard = false;
+
+    for (const [c, o] of acc) {
+      let { x, z } = o;
+      if (this.suspended) { x = 0; z = 0; }
+      const m = Math.hypot(x, z);
+      if (m > 1) { x /= m; z /= m; }
+      Object.assign(c.input, { x, z, turbo: o.turbo, shootHeld: o.shootHeld });
+    }
   }
 }
 

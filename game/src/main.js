@@ -3,6 +3,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Game } from './game.js';
 import { Hud } from './hud.js';
 import { Input, PadMenus } from './input.js';
+import { Menu } from './ui/menu.js';
+import { t } from './ui/i18n.js';
+import { save } from './ui/save.js';
 import { MATCH, FIELDER, GOALIE, RIG_HEIGHT, TEAM_DEFAULTS } from './config.js';
 import { Player } from './player.js';
 
@@ -11,11 +14,20 @@ import { Player } from './player.js';
 // where the dev page and the web build fetch assets from (the single-file build embeds them instead)
 const ASSETS = window.__ASSETS || '/assets/';
 
-async function loadAssets() {
+async function fetchOk(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
+  return res;
+}
+
+async function loadAssets(onProgress = () => {}) {
   const embedded = document.getElementById('asset-roster');
-  const roster = embedded ? JSON.parse(embedded.textContent) : await (await fetch(ASSETS + 'roster.json')).json();
+  const roster = embedded ? JSON.parse(embedded.textContent) : await (await fetchOk(ASSETS + 'roster.json')).json();
   const byId = {};
-  for (const ch of roster.characters) {
+  let done = 0;
+  onProgress(0, roster.characters.length);
+  // all characters at once: on the online link most of the time is download
+  await Promise.all(roster.characters.map(async (ch) => {
     let glbBuffer, meta;
     const tag = document.getElementById('asset-glb-' + ch.id);
     if (tag) {
@@ -25,13 +37,13 @@ async function loadAssets() {
       glbBuffer = bytes.buffer;
       meta = JSON.parse(document.getElementById('asset-clips-' + ch.id).textContent);
     } else {
-      const res = await fetch(ASSETS + ch.glb);
+      const res = await fetchOk(ASSETS + ch.glb);
       if (ch.glb.endsWith('.gz.txt')) {
         // web build: gzip + base64 text, unpacked in the browser
-        const bin = Uint8Array.from(atob(await res.text()), (c) => c.charCodeAt(0));
+        const bin = Uint8Array.from(atob((await res.text()).trim()), (c) => c.charCodeAt(0));
         glbBuffer = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
       } else glbBuffer = await res.arrayBuffer();
-      meta = await (await fetch(ASSETS + ch.clips)).json();
+      meta = await (await fetchOk(ASSETS + ch.clips)).json();
     }
     const gltf = await new GLTFLoader().parseAsync(glbBuffer, '');
     const clips = {};
@@ -40,7 +52,8 @@ async function loadAssets() {
     gltf.scene.traverse((o) => { if (o.isMesh && !material) material = o.material; });
     byId[ch.id] = { id: ch.id, name: ch.name, scene: gltf.scene, clips, meta: meta.clips, height: meta.model_height,
       teamMaterials: ch.recolor ? teamMaterials(material) : null };
-  }
+    onProgress(++done, roster.characters.length);
+  }));
   const first = byId[roster.characters[0].id];
   // the default template doubles as the shared one (clip facts are the same for every character)
   const teams = TEAM_DEFAULTS.map((d, i) => ({ ...d, ...(roster.teamInfo || [])[i] }));
@@ -89,45 +102,9 @@ function makeAudio() {
   };
 }
 
-function screen(html) {
-  const s = document.createElement('div');
-  s.className = 'screen';
-  s.innerHTML = `<div class="card">${html}</div>`;
-  document.body.appendChild(s);
-  return s;
-}
-
-const PAD_KEYS = `<div class="keys">
-<kbd>Levetta sx</kbd><span>muovi (anche croce direzionale)</span>
-<kbd>RT</kbd><span>turbo</span>
-<kbd>A</kbd><span>passaggio</span>
-<kbd>B</kbd><span>tieni premuto per caricare il tiro, rilascia per tirare · senza palla: scivolata</span>
-<kbd>Y</kbd><span>pallonetto</span>
-<kbd>X</kbd><span>finta · senza palla: spallata</span>
-<kbd>LB</kbd><span>cambia giocatore</span>
-<kbd>Menu ☰</kbd><span>pausa · nella pausa <kbd>View ⧉</kbd> ricomincia la partita</span></div>`;
-
-const KEYS = `<div class="keys">
-<kbd>WASD</kbd><span>muovi (anche frecce o levetta)</span>
-<kbd>Shift</kbd><span>turbo</span>
-<kbd>J</kbd><span>passaggio · senza palla: cambia giocatore</span>
-<kbd>K</kbd><span>tieni premuto per caricare il tiro, rilascia per tirare · senza palla: scivolata</span>
-<kbd>L</kbd><span>pallonetto · senza palla: spallata</span>
-<kbd>Spazio</kbd><span>finta</span>
-<kbd>+</kbd> <kbd>-</kbd><span>zoom della telecamera (anche rotella del mouse)</span>
-<kbd>P</kbd><span>pausa</span></div>
-<p>Rilascia il tiro con la barra piena (verde) per un <b>tiro perfetto</b> a effetto. Il portiere della tua squadra gioca da solo.</p>`;
-
-const HELP_KEYS = '<kbd>WASD</kbd> muovi · <kbd>Shift</kbd> turbo · <kbd>J</kbd> passa / cambia · <kbd>K</kbd> tiro (tieni) / scivolata · <kbd>L</kbd> pallonetto / spallata · <kbd>Spazio</kbd> finta · <kbd>+</kbd>/<kbd>-</kbd> zoom · <kbd>P</kbd> pausa';
-const HELP_PAD = '<kbd>A</kbd> passa · <kbd>B</kbd> tiro (tieni) / scivolata · <kbd>Y</kbd> pallonetto · <kbd>X</kbd> finta / spallata · <kbd>RT</kbd> turbo · <kbd>LB</kbd> cambia · <kbd>☰</kbd> pausa';
-
-function controlsHtml() {
-  const pad = navigator.getGamepads && [...navigator.getGamepads()].some((g) => g);
-  return pad ? `<p><b>Controller collegato.</b></p>${PAD_KEYS}<details><summary>Tastiera</summary>${KEYS}</details>`
-    : `${KEYS}<p><small>Collega un controller Xbox e premi un tasto: i comandi compaiono qui.</small></p>`;
-}
-
 async function boot() {
+  const menu = new Menu();
+  menu.showLoading();
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(2, devicePixelRatio));
   renderer.setSize(innerWidth, innerHeight);
@@ -135,14 +112,15 @@ async function boot() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   document.body.appendChild(renderer.domElement);
-  const loading = screen('<h1>Caricamento…</h1><p>Preparo il campo e le 183 animazioni.</p>');
-  const template = await loadAssets();
-  loading.remove();
+  let template;
+  try { template = await loadAssets((d, n) => menu.setProgress(d, n)); } catch (e) { console.error(e); menu.showError(e); return; }
+  menu.hideLoading();
+  menu.teams = template.teams;
 
   const hud = new Hud();
   hud.onSfx = makeAudio();
   hud.show(false);
-  let game = null, input = null, paused = false, mode = 'menu', viewer = null;
+  let game = null, input = null, paused = false, mode = 'menu', viewer = null, match = null;
 
   const resize = () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -151,72 +129,56 @@ async function boot() {
   };
   addEventListener('resize', resize);
 
-  function startMatch({ aiOnly = false, seconds = MATCH.seconds } = {}) {
+  // opts from the quick play menu: { kind: 'cpu'|'friend'|'coop'|'watch', humans: [team…], bindings, seconds, cpuLevel }
+  function startMatch(opts = {}) {
+    if (opts.aiOnly) opts = { kind: 'watch', humans: [], bindings: [] }; // old API (tools/playtest.cjs)
+    match = { kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: MATCH.seconds, cpuLevel: 1, ...opts };
     if (viewer) { viewer.dispose(); viewer = null; }
     game = new Game(renderer, template, hud);
-    game.aiOnly = aiOnly;
-    if (aiOnly) game.setHuman(null);
-    game.clock = seconds;
+    game.setHumans(match.humans);
+    game.cpuLevel = match.cpuLevel;
+    game.clock = match.seconds;
     input = input || new Input(game);
     input.game = game;
-    input.resumeGuard = true;
+    input.menuOwnsKeys = true;
+    input.bind(match.bindings);
     input.onPause = () => togglePause();
     hud.setTeams(game.teams);
     hud.show(true);
-    hud.el.querySelector('#help').style.display = aiOnly ? 'none' : '';
+    hud.el.querySelector('#help').style.display = match.humans.length ? '' : 'none';
     hud.onEnd = (score, humanTeam, stats) => {
+      if (match.kind === 'cpu' || match.kind === 'coop' || match.kind === 'friend') {
+        const me = score[humanTeam], them = score[1 - humanTeam];
+        save.addResult(me > them ? 'won' : me < them ? 'lost' : 'drawn');
+      }
       setTimeout(() => {
-        const res = aiOnly ? 'Fine partita' : score[humanTeam] > score[1 - humanTeam] ? 'Vittoria!' : score[humanTeam] < score[1 - humanTeam] ? 'Sconfitta' : 'Pareggio';
-        const s = screen(`<h1>${res} ${score[0]} – ${score[1]}</h1>
-          <table><tr><td></td><td style="color:${game.teams[0].color}">${game.teams[0].name}</td><td style="color:${game.teams[1].color}">${game.teams[1].name}</td></tr>
-          <tr><td>Tiri</td><td>${stats.shots[0]}</td><td>${stats.shots[1]}</td></tr>
-          <tr><td>Parate</td><td>${stats.saves[0]}</td><td>${stats.saves[1]}</td></tr>
-          <tr><td>Passaggi</td><td>${stats.passes[0]}</td><td>${stats.passes[1]}</td></tr>
-          <tr><td>Scivolate</td><td>${stats.tackles[0]}</td><td>${stats.tackles[1]}</td></tr></table>
-          <div class="row"><button id="again">Rigioca</button><button class="alt" id="menu">Menu</button></div>`);
-        s.querySelector('#again').onclick = () => { s.remove(); startMatch({ aiOnly, seconds }); };
-        s.querySelector('#menu').onclick = () => { s.remove(); showMenu(); };
-        s.querySelector('#again').focus();
+        if (mode !== 'game') return;
+        menu.showEnd({ score, teams: game.teams, stats, humanTeam, kind: match.kind,
+          onAgain: () => startMatch(match), onMenu: () => showMenu() });
       }, 2500);
     };
+    paused = false;
     mode = 'game';
     resize();
   }
 
-  let pauseScreen = null;
   function togglePause() {
     if (mode !== 'game' || !game || game.phase === 'end') return;
-    paused = !paused;
-    if (paused) {
-      pauseScreen = screen(`<h1>Pausa</h1>${controlsHtml()}<div class="row"><button id="resume">Riprendi</button><button class="alt" id="restart">Ricomincia</button><button class="alt" id="quit">Esci al menu</button></div>`);
-      pauseScreen.querySelector('#restart').onclick = restartFromPause;
-      pauseScreen.querySelector('#resume').onclick = togglePause;
-      pauseScreen.querySelector('#quit').onclick = () => { paused = false; pauseScreen.remove(); pauseScreen = null; showMenu(); };
-    } else if (pauseScreen) { pauseScreen.remove(); pauseScreen = null; game.input.actions.clear(); if (input) input.resumeGuard = true; }
+    if (paused) { if (menu.nav.top && menu.nav.top.isPause) { menu.nav.pop(); resume(); } return; }
+    paused = true;
+    const l = menu.showPause({ onResume: resume, onRestart: () => { paused = false; startMatch(match); }, onQuit: () => { paused = false; showMenu(); } });
+    l.isPause = true;
   }
 
-  function restartFromPause() {
-    if (!pauseScreen) return;
-    paused = false; pauseScreen.remove(); pauseScreen = null;
-    startMatch({ aiOnly: game.aiOnly, seconds: MATCH.seconds });
-  }
+  function resume() { paused = false; for (const c of game.controllers) c.input.actions.clear(); if (input) { input.keys.clear(); input.resumeGuard = true; } }
 
   function showMenu() {
     mode = 'menu';
     hud.show(false);
     if (viewer) { viewer.dispose(); viewer = null; }
-    if (!game) { game = new Game(renderer, template, hud); game.aiOnly = true; game.setHuman(null); game.clock = 9999; }
-    const s = screen(`<h1>Calcio arcade · prototipo</h1>
-      <p>5 contro 5 su un campo di 41 × 24 m chiuso da barriere, con le misure e la fisica del documento di riferimento. Tutti i giocatori usano il tuo personaggio con le animazioni adattate.</p>
-      <div id="ctl">${controlsHtml()}</div>
-      <div class="row"><button id="play">Gioca (3 minuti)</button><button class="alt" id="cpu">Guarda CPU contro CPU</button><button class="alt" id="anim">Visualizzatore animazioni</button></div>`);
-    s.querySelector('#play').onclick = () => { s.remove(); startMatch(); };
-    s.querySelector('#cpu').onclick = () => { s.remove(); startMatch({ aiOnly: true }); };
-    s.querySelector('#anim').onclick = () => { s.remove(); openViewer(); };
-    s.querySelector('#play').focus();
-    const refresh = () => { const c = s.querySelector('#ctl'); if (c && s.isConnected) c.innerHTML = controlsHtml(); };
-    addEventListener('gamepadconnected', refresh);
-    addEventListener('gamepaddisconnected', refresh);
+    game = null;
+    menu.nav.clear();
+    menu.showHub();
   }
 
   function openViewer() {
@@ -227,7 +189,9 @@ async function boot() {
     resize();
   }
 
-  window.__proto = { get game() { return game; }, startMatch, openViewer, template };
+  menu.onStart = startMatch;
+  menu.onViewer = openViewer;
+  window.__proto = { get game() { return game; }, startMatch, openViewer, showMenu, template, menu };
 
   const padMenus = new PadMenus();
   const helpEl = hud.el.querySelector('#help');
@@ -236,22 +200,21 @@ async function boot() {
   renderer.setAnimationLoop((now) => {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    padMenus.poll(dt, {
-      onBack: (top) => { if (top === pauseScreen) togglePause(); },
-      onRestart: (top) => { if (top === pauseScreen) restartFromPause(); },
-      onViewer: mode === 'viewer' && viewer ? (c) => viewer.pad(c) : null,
-    });
-    if (mode === 'viewer' && viewer) { viewer.update(dt); renderer.render(viewer.scene, viewer.camera); return; }
-    if (!game) return;
+    menu.poll(dt);
+    if (mode === 'viewer' && viewer) {
+      if (!menu.active) padMenus.poll(dt, { onViewer: (c) => viewer.pad(c) });
+      viewer.update(dt); renderer.render(viewer.scene, viewer.camera); return;
+    }
+    if (!game) { renderer.clear(); return; }
     if (input && mode === 'game') {
-      input.suspended = paused || !!document.querySelector('.screen');
+      input.suspended = paused || menu.active;
       input.poll();
-      if (helpPad !== input.usingPad) { helpPad = input.usingPad; helpEl.innerHTML = helpPad ? HELP_PAD : HELP_KEYS; }
+      if (helpPad !== input.usingPad) { helpPad = input.usingPad; helpEl.innerHTML = t(helpPad ? 'help.pad' : 'help.kb'); }
     }
     if (!paused) game.update(dt);
     renderer.render(game.scene, game.camera);
   });
-  showMenu();
+  menu.start();
 }
 
 class AnimViewer {
@@ -335,5 +298,8 @@ class AnimViewer {
 
 boot().catch((e) => {
   console.error(e);
-  screen(`<h1>Errore</h1><p>${String(e && e.message || e)}</p>`);
+  const d = document.createElement('pre');
+  d.style.cssText = 'position:fixed;inset:16px;color:#fff;background:#1b1036;padding:16px;white-space:pre-wrap;z-index:9';
+  d.textContent = 'Errore / Error\n' + String(e && (e.stack || e.message) || e);
+  document.body.appendChild(d);
 });

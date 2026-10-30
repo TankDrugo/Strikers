@@ -45,7 +45,7 @@ Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo *
 | Menu ☰ | pausa | pausa |
 | View ⧉ (nella pausa) | ricomincia la partita | |
 
-Nei menu: croce o levetta per scegliere, A per confermare, B per tornare al gioco dalla pausa. Nel visualizzatore: croce su/giù per cambiare animazione, X per specchiarla, B per uscire.
+Nei menu (stile EA FC): **LB / RB** cambiano scheda, croce o levetta si spostano, **A** conferma, **B** torna indietro. Funzionano tutti i controller collegati. Nel visualizzatore: croce su/giù per cambiare animazione, X per specchiarla, B per uscire.
 
 Il controller va collegato prima di aprire il gioco, oppure basta premere un suo tasto con la pagina aperta: il browser lo rende visibile solo dopo la prima pressione. Funziona in Chrome, Edge e Firefox.
 
@@ -62,19 +62,26 @@ Il controller va collegato prima di aprire il gioco, oppure basta premere un suo
 | + / - o rotella | zoom della telecamera | |
 | P / Esc | pausa | |
 
-Dal menu puoi anche guardare una partita CPU contro CPU, o aprire il **visualizzatore** con tutte le 183 animazioni: 84 da giocatore e 99 da portiere, anche specchiate.
+Nei menu: **Q / E** come LB / RB, frecce o WASD per spostarsi, **Invio** per confermare, **Esc** per tornare indietro.
+
+### In due
+
+In Gioco rapido: *Contro un amico* (uno per squadra) o *In due contro il computer* (stessa squadra). Ogni giocatore entra premendo **A** sul suo controller o **Invio** sulla tastiera; un'etichetta G1 / G2 segue il giocatore di ognuno.
+
+Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; da Impostazioni apri il **visualizzatore** con tutte le 183 animazioni: 84 da giocatore e 99 da portiere, anche specchiate.
 
 ## Codice
 
 | File | Cosa fa |
 |---|---|
 | `src/config.js` | Tutte le costanti: campo, pallone, giocatori, portiere, tiro, contrasti, partita. `SIZE` ingrandisce i corpi rispetto all'originale |
-| `src/main.js` | Caricamento di roster e personaggi, menu, pausa, visualizzatore delle animazioni |
-| `src/game.js` | La partita: passo fisso a 50 Hz, azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
+| `src/main.js` | Caricamento di roster e personaggi (in parallelo, con barra e messaggio d'errore), avvio delle partite, visualizzatore delle animazioni |
+| `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser |
+| `src/game.js` | La partita: passo fisso a 50 Hz, uno o più umani (`controllers`, `setHumans`), difficoltà della CPU (`cpuLevel`), azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
 | `src/player.js` | Il giocatore: movimento, scelta e velocità delle animazioni, root motion, disegno interpolato tra due passi di fisica |
 | `src/ball.js` | Fisica del pallone, effetto Magnus, urti con pali e barriere, gol |
 | `src/ai.js` | IA dei giocatori di movimento |
-| `src/input.js` | Controller Xbox e tastiera, navigazione nei menu |
+| `src/input.js` | Controller Xbox e tastiera; `Input.bind` decide quale dispositivo guida quale umano |
 | `src/hud.js` | Punteggio, tempo, barra del tiro, scritte |
 | `src/field.js`, `src/stadium.js` | Campo, porte e stadio (disegno originale) |
 | `assets/roster.json` | Personaggi disponibili e formazione delle due squadre (posti 0–3 giocatori, posto 4 portiere) |
@@ -98,7 +105,7 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 
 ## Non ancora presente
 
-Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici), partita a due giocatori.
+Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici), Coppe e Ultimate Team (nel menu ci sono già, segnati "in costruzione").
 
 ## Sviluppo e prove
 

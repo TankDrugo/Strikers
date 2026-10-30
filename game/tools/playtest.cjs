@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('file://' + file);
   await page.waitForFunction(() => window.__proto && window.__proto.template, null, { timeout: 180000 });
-  await page.click('#cpu');
+  await page.evaluate(() => { window.__proto.menu.nav.clear(); window.__proto.startMatch({ aiOnly: true }); });
   await page.waitForTimeout(1500);
   if (shots) await page.screenshot({ path: shots + '_kickoff.png' });
   const report = await page.evaluate(() => {

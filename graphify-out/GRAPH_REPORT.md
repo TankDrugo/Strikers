@@ -1,69 +1,64 @@
 # Graph Report - Strikers  (2026-10-30)
 
 ## Corpus Check
-- 37 files · ~49,826 words
+- 42 files · ~57,081 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 489 nodes · 1046 edges · 26 communities (24 shown, 2 thin omitted)
-- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 149 edges (avg confidence: 0.88)
+- 579 nodes · 1326 edges · 21 communities (18 shown, 3 thin omitted)
+- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 188 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e101aab`
+- Built from commit: `26a7f4f9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- strikers_anim.py
+- Pose
 - game.js
 - Game
 - test_converter.py
-- boot
+- menu.js
 - build.mjs
 - Stadium
-- package.json
+- Menu
 - Ball
 - retarget.py
-- audit.py
-- retarget_clip
+- strikers_anim.py
+- import_into_blender
 - test_converter.py
-- Ultimate Team (area, da iniziare)
+- Economia di Ultimate Team (crediti, pacchetti, mercato)
 - main
 - Interfaccia gioco: decisioni prese con l'utente
-- Source
+- FormatError
 - economy_sim.py
 - Clip
-- calibrate
-- Calcio arcade (progetto)
-- Economia di Ultimate Team (crediti, pacchetti, mercato)
-- make_map.py
-- Ultimate Team: decisioni prese con l'utente
-- Coppe
+- AnimViewer
 
 ## God Nodes (most connected - your core abstractions)
-1. `Game` - 35 edges
-2. `Player` - 22 edges
-3. `import_into_blender()` - 21 edges
-4. `test_decode()` - 17 edges
-5. `STRIKERS_REFERENCE: misure e dinamiche con fonti` - 17 edges
-6. `NameBook` - 15 edges
-7. `Pose` - 15 edges
-8. `boot()` - 14 edges
-9. `Stadium` - 13 edges
-10. `main()` - 12 edges
+1. `Game` - 45 edges
+2. `Menu` - 38 edges
+3. `t()` - 26 edges
+4. `Player` - 22 edges
+5. `import_into_blender()` - 21 edges
+6. `boot()` - 21 edges
+7. `UiNav` - 19 edges
+8. `test_decode()` - 17 edges
+9. `STRIKERS_REFERENCE: misure e dinamiche con fonti` - 17 edges
+10. `NameBook` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Tavole: personaggio accanto allo scheletro originale` --semantically_similar_to--> `audit()`  [INFERRED] [semantically similar]
   game/dev/sheet.html → animation/audit.py
 - `HUD in partita` --references--> `Hud`  [INFERRED]
   interfaccia-gioco/README.md → game/src/hud.js
-- `roster.json: personaggi e formazioni (posti 0–3 giocatori, 4 portiere)` --shares_data_with--> `main()`  [INFERRED]
-  characters/README.md → animation/add_characters.py
 - `ShootAtFast: velocità di passaggio in forma chiusa` --references--> `shootAtFast()`  [INFERRED]
   reference/STRIKERS_REFERENCE.md → game/src/ball.js
 - `Fisica del pallone: gravità −14, attrito aria 0,1, rimbalzi` --references--> `BALL`  [INFERRED]
+  reference/STRIKERS_REFERENCE.md → game/src/config.js
+- `Parametri del portiere (goalie.ini)` --references--> `GOALIE`  [INFERRED]
   reference/STRIKERS_REFERENCE.md → game/src/config.js
 
 ## Import Cycles
@@ -73,103 +68,79 @@
 - **Da modello .glb a personaggio in campo** — characters_readme_aggiungere_personaggio, animation_add_characters_main, animation_retarget_main, characters_readme_roster_json, game_tools_build, game_src_main_loadassets, game_src_player_player [INFERRED 0.85]
 - **Pipeline animazioni: disco → pacchetto → retarget → controllo** — animation_strikers_anim_load_clips, animation_retarget_source_from_disc, animation_retarget_retarget_clip, animation_audit_audit [INFERRED 0.85]
 
-## Communities (26 total, 2 thin omitted)
+## Communities (21 total, 3 thin omitted)
 
-### Community 0 - "strikers_anim.py"
-Cohesion: 0.05
-Nodes (43): Convertitore per Blender, Formati originali .sanim / .shier / .bin, contact_time(), _biped_names(), _blender_add_curve(), _blender_cli(), _blender_fcurve_bag(), Chunk (+35 more)
+### Community 0 - "Pose"
+Cohesion: 0.10
+Nodes (12): contact_time(), _mat_to_euler_zxy(), _mirror_rot(), _mirror_trans(), Pose, _quat_norm(), _quat_to_mat(), rest_offsets() (+4 more)
 
 ### Community 1 - "game.js"
 Cohesion: 0.08
-Nodes (46): IA: uno pressa, uno marca, gli altri in posizione, Passo fisso di fisica a 50 Hz, bestPassTarget(), dist2(), fielderAI(), moveTo(), openness(), v (+38 more)
+Nodes (51): IA: uno pressa, uno marca, gli altri in posizione, Passo fisso di fisica a 50 Hz, bestPassTarget(), dist2(), fielderAI(), moveTo(), openness(), v (+43 more)
 
 ### Community 2 - "Game"
-Cohesion: 0.09
-Nodes (8): Portiere: posizione, previsione del tiro, tuffo, rinvio, predict(), Game, angleDiff(), Player, seekDirection(), seekSpeed(), SeekSpeed e SeekDirection
+Cohesion: 0.08
+Nodes (4): Portiere: posizione, previsione del tiro, tuffo, rinvio, predict(), Game, Player
 
 ### Community 3 - "test_converter.py"
-Cohesion: 0.16
-Nodes (15): Nomi delle ossa da hash nlStringLowerHash, string_hash(), string_lower_hash(), sample_props(), sample_quat(), sample_scale(), sample_trans(), write_bundle() (+7 more)
+Cohesion: 0.17
+Nodes (13): Nomi delle ossa da hash nlStringLowerHash, string_hash(), string_lower_hash(), sample_props(), sample_quat(), sample_scale(), sample_trans(), write_bundle() (+5 more)
 
-### Community 4 - "boot"
-Cohesion: 0.09
-Nodes (21): Gioco senza build (moduli e importmap), Comandi controller Xbox stile EA FC, Hud, Input, PAD, PadMenus, padPressed(), padStick() (+13 more)
+### Community 4 - "menu.js"
+Cohesion: 0.07
+Nodes (24): Comandi controller Xbox stile EA FC, Input, PAD, PadMenus, padPressed(), padStick(), readPad(), readPads() (+16 more)
 
 ### Community 5 - "build.mjs"
-Cohesion: 0.07
-Nodes (22): Procedura: aggiungere un personaggio, Nomi e colori delle squadre (teamInfo): anelli, punteggio, tabellone, tifosi, Dieci personaggi per il 5 contro 5, Ricolorazione della maglia per la seconda squadra, roster.json: personaggi e formazioni (posti 0–3 giocatori, 4 portiere), Ruoli e posti: 0 difensore, 1 centrocampista, 2 ala, 3 attaccante, 4 portiere, Squadra Celestini (5 ruoli, in gioco), Squadra Rivali (5 ruoli, in gioco) (+14 more)
+Cohesion: 0.05
+Nodes (37): check_rig(), main(), Glb, Procedura: aggiungere un personaggio, Dieci personaggi per il 5 contro 5, Ricolorazione della maglia per la seconda squadra, roster.json: personaggi e formazioni (posti 0–3 giocatori, 4 portiere), Ruoli e posti: 0 difensore, 1 centrocampista, 2 ala, 3 attaccante, 4 portiere (+29 more)
 
 ### Community 6 - "Stadium"
-Cohesion: 0.28
-Nodes (5): ledTexture(), perimeterPoints(), ringGeometry(), roundedRect(), Stadium
+Cohesion: 0.12
+Nodes (8): Nomi e colori delle squadre (teamInfo): anelli, punteggio, tabellone, tifosi, Hud, ledTexture(), perimeterPoints(), ringGeometry(), roundedRect(), Stadium, Tabellone e cartelloni dello stadio
 
-### Community 7 - "package.json"
-Cohesion: 0.18
-Nodes (11): dependencies, three@0.180.0, devDependencies, esbuild@0.25.10, name, private, scripts, build (+3 more)
+### Community 7 - "Menu"
+Cohesion: 0.13
+Nodes (13): Gioco senza build (moduli e importmap), boot(), openViewer(), resume(), showMenu(), startMatch(), togglePause(), makeAudio() (+5 more)
 
 ### Community 8 - "Ball"
 Cohesion: 0.20
 Nodes (6): Problema noto: pallone oltre 50 m/s, Tiro perfetto con effetto Magnus, Ball, integrate(), Fisica del pallone: gravità −14, attrito aria 0,1, rimbalzi, Effetto Magnus solo sul tiro perfetto (barra ≥ 0,99)
 
 ### Community 9 - "retarget.py"
-Cohesion: 0.18
-Nodes (8): check_rig(), main(), angle(), rot_angle(), sample(), Root motion nei metadati delle clip, root_motion(), Scheletro Mixamo richiesto
+Cohesion: 0.17
+Nodes (10): angle(), audit(), rot_angle(), sample(), Controllo delle 183 clip (audit + tavole), Root motion nei metadati delle clip, open_source(), root_motion() (+2 more)
 
-### Community 10 - "audit.py"
-Cohesion: 0.20
-Nodes (7): audit(), model_frames(), world(), Controllo delle 183 clip (audit + tavole), Glb, Controllo di una singola posa, Tavole: personaggio accanto allo scheletro originale
+### Community 10 - "strikers_anim.py"
+Cohesion: 0.16
+Nodes (11): _biped_names(), _blender_add_curve(), _blender_cli(), _blender_fcurve_bag(), clip_states(), _common_args(), dump_json(), main() (+3 more)
 
-### Community 11 - "retarget_clip"
-Cohesion: 0.25
-Nodes (7): Metodo di retarget Biped → Mixamo, lowest_offset(), R(), mat_to_quat(), orthonormal(), retarget_clip(), W()
+### Community 11 - "import_into_blender"
+Cohesion: 0.26
+Nodes (10): Convertitore per Blender, Formati originali .sanim / .shier / .bin, import_into_blender(), load_chunks(), _load_cli(), load_clips(), load_retargets(), load_skeletons() (+2 more)
 
 ### Community 12 - "test_converter.py"
-Cohesion: 0.24
-Nodes (5): strikers_frames(), game_world(), mul_rows(), quat_rows(), to4()
+Cohesion: 0.17
+Nodes (10): strikers_frames(), check(), close(), game_world(), mul_rows(), qclose(), quat_rows(), test_bvh_import() (+2 more)
 
-### Community 13 - "Ultimate Team (area, da iniziare)"
-Cohesion: 0.24
-Nodes (7): Interfaccia: domande aperte (stile, schermate, HTML o three.js, lingue), HUD in partita, Interfaccia gioco (area, da iniziare), Tabellone e cartelloni dello stadio, Ultimate Team: domande aperte (statistiche, pacchetti, salvataggi, rarità, intesa), Squadra di 5 che riempie teams[0], Ultimate Team (area, da iniziare)
+### Community 13 - "Economia di Ultimate Team (crediti, pacchetti, mercato)"
+Cohesion: 0.06
+Nodes (33): Animazioni (area), Personaggi (area), Instradamento per area (CLAUDE.md), Aggiornare grafo e mappa dopo le modifiche, Mappa del progetto (docs/mappa.html), area_of(), kind_of(), main() (+25 more)
 
 ### Community 14 - "main"
-Cohesion: 0.21
-Nodes (5): main(), quat_to_mat(), Rig, shrink_images(), write_glb()
+Cohesion: 0.06
+Nodes (21): model_frames(), world(), Calibrazione sulla posa idle originale, Metodo di retarget Biped → Mixamo, Rifare il pacchetto dal disco (--export), Pacchetto strikers_source.npz (183 clip decodificate), calibrate(), frame_from() (+13 more)
 
 ### Community 15 - "Interfaccia gioco: decisioni prese con l'utente"
-Cohesion: 0.18
-Nodes (11): Avvio del gioco, Bozze, Gioco rapido, Home, Interfaccia gioco: decisioni prese con l'utente, Lingue, Navigazione (stile FC), Ordine di lavoro (+3 more)
+Cohesion: 0.13
+Nodes (15): Avvio del gioco, Bozze, Coppe, Gioco rapido, Home, Interfaccia gioco: decisioni prese con l'utente, Le 4 coppe, Lingue (+7 more)
 
-### Community 16 - "Source"
-Cohesion: 0.25
-Nodes (4): Rifare il pacchetto dal disco (--export), Pacchetto strikers_source.npz (183 clip decodificate), open_source(), Source
+### Community 16 - "FormatError"
+Cohesion: 0.16
+Nodes (7): Chunk, _cstr(), FormatError, Retargets, Skeleton, top_level_chunks(), _u32()
 
 ### Community 18 - "economy_sim.py"
 Cohesion: 0.29
 Nodes (6): draw(), main(), make_pool(), open_pack(), sale_value(), simulate()
-
-### Community 20 - "calibrate"
-Cohesion: 0.33
-Nodes (4): Calibrazione sulla posa idle originale, calibrate(), frame_from(), swing()
-
-### Community 21 - "Calcio arcade (progetto)"
-Cohesion: 0.28
-Nodes (9): Animazioni (area), Personaggi (area), Instradamento per area (CLAUDE.md), Aggiornare grafo e mappa dopo le modifiche, Mappa del progetto (docs/mappa.html), Gioco (area), Calcio arcade (progetto), Riferimento: il gioco originale (area) (+1 more)
-
-### Community 22 - "Economia di Ultimate Team (crediti, pacchetti, mercato)"
-Cohesion: 0.22
-Nodes (9): Come funzionano i giochi di questo tipo, Confronto con FC, Cosa dice la simulazione, Da tarare dopo, giocando, Economia di Ultimate Team (crediti, pacchetti, mercato), Fonti, Mercato simulato, Negozio di pacchetti (+1 more)
-
-### Community 23 - "make_map.py"
-Cohesion: 0.47
-Nodes (3): area_of(), kind_of(), main()
-
-### Community 24 - "Ultimate Team: decisioni prese con l'utente"
-Cohesion: 0.33
-Nodes (6): Apertura dei pacchetti, Economia, Rarità, Regole, Sezioni, Ultimate Team: decisioni prese con l'utente
-
-### Community 25 - "Coppe"
-Cohesion: 0.50
-Nodes (4): Coppe, Le 4 coppe, Stelle e obiettivi, Voto della coppa (gradazione stile Dragon Ball)
 
 ## Ambiguous Edges - Review These
 - `.step()` → `Problema noto: pallone oltre 50 m/s`  [AMBIGUOUS]
@@ -177,24 +148,24 @@ Nodes (4): Coppe, Le 4 coppe, Stelle e obiettivi, Voto della coppa (gradazione s
 
 ## Knowledge Gaps
 - **15 isolated node(s):** `Convertitore per Blender`, `IA: uno pressa, uno marca, gli altri in posizione`, `Codice decompilato smstrikers-decomp`, `Da misurare: mesh .glg, telecamera, tiri dei gregari`, `Controllo di una singola posa` (+10 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 138 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 150 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `roster.json: personaggi e formazioni (posti 0–3 giocatori, 4 portiere)` connect `build.mjs` to `retarget.py`, `Ultimate Team (area, da iniziare)`?**
-  _High betweenness centrality (0.233) - this node is a cross-community bridge._
+- **Why does `roster.json: personaggi e formazioni (posti 0–3 giocatori, 4 portiere)` connect `build.mjs` to `Economia di Ultimate Team (crediti, pacchetti, mercato)`, `Stadium`?**
+  _High betweenness centrality (0.248) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `import_into_blender()` (e.g. with `Convertitore per Blender` and `.harvest_path()`) actually correct?**
   _`import_into_blender()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Convertitore per Blender`, `IA: uno pressa, uno marca, gli altri in posizione`, `Codice decompilato smstrikers-decomp` to the rest of the system?**
   _15 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `strikers_anim.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.054203180785459264 - nodes in this community are weakly interconnected._
-- **Why does `main()` connect `retarget.py` to `build.mjs`, `main`?**
-  _High betweenness centrality (0.229) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `test_decode()` (e.g. with `.name()` and `.local()`) actually correct?**
-  _`test_decode()` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **Should `Pose` be split into smaller, more focused modules?**
+  _Cohesion score 0.10144927536231885 - nodes in this community are weakly interconnected._
+- **Why does `main()` connect `build.mjs` to `retarget.py`, `test_converter.py`, `main`?**
+  _High betweenness centrality (0.237) - this node is a cross-community bridge._
+- **Should `game.js` be split into smaller, more focused modules?**
+  _Cohesion score 0.07615018508725542 - nodes in this community are weakly interconnected._
 
 ### Low-confidence Hints
 _AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._
