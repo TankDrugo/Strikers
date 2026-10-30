@@ -1,6 +1,6 @@
 # Interfaccia gioco
 
-**Stato: da iniziare.** Questa cartella è pronta per il lavoro: quando l'utente dice "lavoriamo sull'interfaccia", si parte da qui.
+**Stato: in progettazione.** Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive da scegliere in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). Codice del nuovo menu non ancora scritto.
 
 ## Idea
 
@@ -23,12 +23,11 @@ Funziona, ma è grezzo: niente stile coerente, niente transizioni, testi solo in
 - **Personaggi** (`game/assets/roster.json`): la scelta delle squadre prima della partita.
 - **Comandi** (`game/src/input.js`): ogni schermata deve funzionare con controller Xbox e tastiera.
 
-## Da decidere prima di scrivere codice
+## Ancora da decidere
 
-1. Stile grafico: riferimenti visivi, colori, caratteri.
-2. Quali schermate servono per prime.
-3. Restare in HTML/CSS sopra il canvas (come ora) o disegnare l'interfaccia in three.js?
-4. Lingue: solo italiano o anche inglese?
+1. Scelte sulle bozze (stile del menu, holo, top loader, pacchetti): vedi `DESIGN.md`.
+2. Nomi delle 4 coppe.
+3. Restare in HTML/CSS sopra il canvas (come ora): proposta sì, le bozze sono già in HTML/CSS.
 
 ## Struttura proposta (da confermare)
 
@@ -36,5 +35,6 @@ Funziona, ma è grezzo: niente stile coerente, niente transizioni, testi solo in
 interfaccia-gioco/
   README.md        questo file
   DESIGN.md        stile e schermate decise con l'utente
+  bozze/           pagina di prova con le proposte visive
   src/             componenti dell'interfaccia, importati da game/src/main.js
 ```

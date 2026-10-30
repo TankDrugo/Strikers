@@ -1,6 +1,6 @@
 # Ultimate Team
 
-**Stato: da iniziare.** Questa cartella è pronta per il lavoro: quando l'utente dice "lavoriamo su Ultimate Team", si parte da qui.
+**Stato: in progettazione.** Regole decise in [`DESIGN.md`](DESIGN.md), economia proposta in [`ECONOMIA.md`](ECONOMIA.md) (numeri in `data/economy.json`, simulatore in `tools/economy_sim.py`). Codice non ancora scritto.
 
 ## Idea
 
@@ -16,15 +16,9 @@ Una modalità in cui il giocatore colleziona personaggi (carte), compone la prop
 | `interfaccia-gioco/` | Le schermate (collezione, pacchetti, formazione) sono lavoro dell'interfaccia: decidere insieme chi fa cosa |
 | `game/src/main.js` | Menu principale: qui va il punto d'ingresso della modalità |
 
-## Da decidere prima di scrivere codice
+## Decisioni (sintesi)
 
-Domande da fare all'utente nella prima chat su questo tema:
-
-1. Le carte hanno statistiche che cambiano il gioco, o sono solo collezione?
-2. Come si ottengono le carte: pacchetti, premi delle partite, crediti?
-3. Dove si salvano i progressi: nel browser (`localStorage`) o su un server?
-4. Rarità e versioni speciali dello stesso personaggio?
-5. Intesa (chemistry) tra i giocatori della squadra?
+Statistiche che cambiano il gioco; carte da pacchetti comprati con crediti guadagnati giocando; salvataggio nel profilo (browser, poi server privato); rarità Bronzo/Argento/Oro, holo di più tipi, numerate 1-10 e 1/1 Oro; niente intesa. Dettagli in `DESIGN.md`.
 
 ## Struttura proposta (da confermare)
 
@@ -32,6 +26,8 @@ Domande da fare all'utente nella prima chat su questo tema:
 ultimate-team/
   README.md        questo file
   DESIGN.md        regole decise con l'utente
+  ECONOMIA.md      crediti, pacchetti, mercato: studio e simulazione
+  tools/           economy_sim.py
   src/             logica (collezione, pacchetti, formazione), importata da game/src
   data/            definizione delle carte
 ```
