@@ -39,6 +39,30 @@ AREAS = [
      "Istruzioni per Claude, mappa e grafo.", (0.55, 0.10)),
 ]
 
+# Where each area stands: shown in "Dove siamo arrivati" and in the area panel. Update it with the work.
+UPDATED = "30 ottobre 2026"
+PROGRESS = {
+    "riferimento": {"done": ["Campo, porte, pallone, personaggi, portiere, tiri e contrasti misurati dal gioco originale, con le fonti"],
+                    "next": ["Da misurare: telecamera originale e altezza delle mesh"]},
+    "animazioni": {"done": ["183 clip originali decodificate (84 giocatore, 99 portiere)",
+                            "Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco",
+                            "Tutte le clip controllate, a occhio e con il controllo automatico"],
+                   "next": ["Rivali: retarget appena arrivano i 5 modelli"]},
+    "personaggi": {"done": ["5 Celestini in gioco: portiere, difensore, centrocampista, ala, attaccante",
+                            "Roster con i ruoli per posto in campo"],
+                   "next": ["Caricare i 5 Rivali (oggi c'è un sostituto in maglia rossa)"]},
+    "gioco": {"done": ["Partita 5 contro 5 completa, CPU contro CPU o con controller Xbox",
+                       "Stadio, fisica del pallone, IA, portieri che si tuffano",
+                       "Giocatori più grandi, pallone più piccolo, movimento senza sfocatura"],
+              "next": ["Pallone oltre il limite di 50 m/s in alcuni tiri", "Power-up, Super Strike, partita a due giocatori"]},
+    "interfaccia": {"done": ["Area pronta: menu, HUD e pausa del prototipo censiti"],
+                    "next": ["Decidere stile e prime schermate"]},
+    "ultimate": {"done": ["Area pronta: collegamenti con roster e statistiche individuati"],
+                 "next": ["Decidere le regole: carte, pacchetti, statistiche, salvataggi"]},
+    "progetto": {"done": ["Repository organizzato per aree, grafo e mappa", "Istruzioni per le nuove chat (CLAUDE.md)"],
+                 "next": ["Caricare su GitHub (TankDrugo/Strikers)"]},
+}
+
 
 def area_of(path):
     if not path:
@@ -89,9 +113,9 @@ def main():
         a, b = nodes[s][5], nodes[t][5]
         if a != b:
             cross[tuple(sorted((a, b)))] += 1
-    areas = [{"key": k, "name": name, "readme": readme, "status": status, "desc": desc, "x": pos[0], "y": pos[1]}
-             for k, name, _, readme, status, desc, pos in AREAS]
-    data = {"repo": repo, "areas": areas, "nodes": nodes, "edges": edges,
+    areas = [{"key": k, "name": name, "readme": readme, "status": status, "desc": desc, "x": pos[0], "y": pos[1],
+              **PROGRESS.get(k, {"done": [], "next": []})} for k, name, _, readme, status, desc, pos in AREAS]
+    data = {"repo": repo, "updated": UPDATED, "areas": areas, "nodes": nodes, "edges": edges,
             "cross": [[a, b, c] for (a, b), c in sorted(cross.items())]}
     body = open(TEMPLATE, encoding="utf-8").read().replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
     with open(OUT, "w", encoding="utf-8") as fh:

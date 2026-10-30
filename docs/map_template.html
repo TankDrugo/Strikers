@@ -97,6 +97,18 @@ svg.board { display: block; width: 100%; min-width: 620px; height: auto; border-
 .crosslist { display: flex; flex-wrap: wrap; gap: 6px; }
 .empty-note { color: var(--muted); font-style: italic; margin: 0; }
 footer { font-size: 13px; color: var(--muted); }
+.progress { display: grid; gap: 10px; }
+.progress-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.progress-head h2 { font: 700 26px/1.1 var(--display); margin: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.card { all: unset; box-sizing: border-box; cursor: pointer; display: grid; align-content: start; gap: 8px; padding: 12px 14px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); min-width: 0; }
+.card:hover { border-color: var(--c); }
+.card:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px; }
+.card .t { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 700 19px/1.1 var(--display); }
+.card ul, .panel ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
+.card .lab, .panel .lab { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.card .next li, .panel .next li { color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) { .board .zone circle.dot { transition: r .15s; } }
 </style>
 
@@ -113,6 +125,10 @@ footer { font-size: 13px; color: var(--muted); }
   </header>
   <div class="results" id="results" hidden></div>
   <div class="board-box"><svg class="board" id="board" viewBox="0 0 1000 440" role="img" aria-label="Aree del progetto disposte come una formazione in campo"></svg></div>
+  <section class="progress" aria-labelledby="ph">
+    <div class="progress-head"><h2 id="ph">Dove siamo arrivati</h2><span class="stats" id="upd"></span></div>
+    <div class="cards" id="cards"></div>
+  </section>
   <div class="cols">
     <section class="panel" id="area" aria-live="polite"></section>
     <section class="panel" id="node" aria-live="polite"></section>
@@ -191,6 +207,8 @@ function showArea(k) {
     <p class="desc">${esc(a.desc)}</p>
     <div class="meta">Parti da <a href="${DATA.repo}/blob/main/${a.readme}" target="_blank" rel="noopener">${esc(a.readme)}</a> · ${mine.length} nodi in ${fileList.length} file</div>
     ${Object.keys(out).length ? `<h3>Collegata a</h3><div class="crosslist">${Object.entries(out).sort((x, y) => y[1] - x[1]).map(([o, c]) => `<button class="chip" data-a="${o}"><span class="sw" style="background:${color(o)}"></span>${esc(AREA[o].name)}<span class="k">${c}</span></button>`).join('')}</div>` : ''}
+    ${a.done.length ? `<div><div class="lab">Fatto</div><ul class="plain">${a.done.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : ''}
+    ${a.next.length ? `<div class="next"><div class="lab">Prossimi passi</div><ul class="plain">${a.next.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : ''}
     ${isEmptyArea(k) ? `<p class="empty-note">Area pronta ma ancora vuota: il README elenca cosa decidere e con quali parti del gioco si collega.</p>` : ''}
     <h3>File</h3>
     <ul class="files">${fileList.map(([f, ns]) => `<li><button aria-expanded="false" data-f="${esc(f)}"><span>${esc(f)}</span><span>${ns.length}</span></button><ul hidden>${ns.sort((x, y) => (parseInt((x.loc || 'L0').slice(1)) || 0) - (parseInt((y.loc || 'L0').slice(1)) || 0)).map((n) => `<li>${chip(n)}</li>`).join('')}</ul></li>`).join('')}</ul>`;
@@ -247,6 +265,13 @@ q.addEventListener('input', () => {
   wireChips(res);
 });
 
+document.getElementById('upd').textContent = 'Aggiornata il ' + DATA.updated;
+document.getElementById('cards').innerHTML = DATA.areas.map((a) => `<button class="card" data-a="${a.key}" style="--c:${color(a.key)}">
+  <span class="t">${esc(a.name)}${a.status ? `<span class="pill${isEmptyArea(a.key) ? ' todo' : ''}">${esc(a.status)}</span>` : ''}</span>
+  ${a.done.length ? `<span><span class="lab">Fatto</span><ul>${a.done.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></span>` : ''}
+  ${a.next.length ? `<span class="next"><span class="lab">Prossimo</span><ul>${a.next.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></span>` : ''}
+</button>`).join('');
+for (const c of document.querySelectorAll('.card')) c.onclick = () => { location.hash = 'area-' + c.dataset.a; document.getElementById('area').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 addEventListener('hashchange', route);
 drawBoard();
 route();
