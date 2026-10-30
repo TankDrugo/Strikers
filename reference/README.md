@@ -2,6 +2,17 @@
 
 Misure e dinamiche di Super Mario Strikers, ricavate dai file del disco (versione europea G4QP01) e dal codice decompilato. Sono la base di tutte le costanti in `game/src/config.js`.
 
+## Stato
+
+**completo** · Misure e dinamiche del gioco originale, con le fonti. La base di tutte le costanti.
+
+Fatto:
+- Campo, porte, pallone, personaggi, portiere, tiri e contrasti misurati dal gioco originale, con le fonti
+- Come il portiere decide la parata (tempo del tuffo, non il caso)
+
+Prossimo:
+- Da misurare: telecamera originale e altezza delle mesh
+
 | File | Contenuto |
 |---|---|
 | [`STRIKERS_REFERENCE.md`](STRIKERS_REFERENCE.md) | Il documento completo, con la fonte di ogni valore: convenzioni, campo e porte, pallone, personaggi (altezze, velocità, accelerazioni, virate), passaggi e tiri, portiere, contrasti, animazioni, telecamera |

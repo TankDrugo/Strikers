@@ -1,6 +1,19 @@
 # Ultimate Team
 
-**Stato: in progettazione.** Regole decise in [`DESIGN.md`](DESIGN.md), economia proposta in [`ECONOMIA.md`](ECONOMIA.md) (numeri in `data/economy.json`, simulatore in `tools/economy_sim.py`). Codice non ancora scritto.
+## Stato
+
+**progettato** · Collezione di personaggi, carte e squadre.
+
+Fatto:
+- Regole decise: carte con statistiche, rarità, numerate 1-10 e 1/1 uniche
+- Economia calibrata sul ritmo di FC, con simulatore
+- Aspetto scelto: 5 holo, teca graduata, walkout a indizi con imbustamento
+
+Prossimo:
+- Scrivere il codice di Club, Rosa, Mercato, Divisioni e Album
+- Esultanze del walkout dai file art/nis/ del disco
+
+Regole in [`DESIGN.md`](DESIGN.md), economia in [`ECONOMIA.md`](ECONOMIA.md) (numeri in `data/economy.json`, simulatore in `tools/economy_sim.py`).
 
 ## Idea
 

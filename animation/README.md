@@ -2,6 +2,19 @@
 
 Tutto quello che porta le animazioni del gioco originale sui personaggi del nostro gioco.
 
+## Stato
+
+**funziona** · Clip originali decodificate, retarget sugli scheletri Mixamo, controlli automatici.
+
+Fatto:
+- 183 clip originali decodificate (84 giocatore, 99 portiere)
+- Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco
+- Tutte le clip controllate su tutti i 10 personaggi
+
+Prossimo:
+- Comprimere le animazioni per alleggerire il gioco
+- Esultanze del walkout dai file art/nis/ del disco
+
 | File | Cosa fa |
 |---|---|
 | `data/strikers_source.npz` | Le 183 clip originali già decodificate (84 di Mario, 99 del portiere): per ogni fotogramma, rotazione e posizione di ogni osso, più durata, velocità, root motion, stati di gioco e istante del contatto col pallone. Sostituisce i file del disco |

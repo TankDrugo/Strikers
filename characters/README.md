@@ -2,6 +2,19 @@
 
 Qui stanno i modelli originali dei personaggi, così come escono dal programma 3D: un file `.glb` per personaggio, riggato con lo scheletro **Mixamo** (ossa `mixamorig:Hips`, `mixamorig:Spine`…), in metri, rivolto verso +Z.
 
+## Stato
+
+**completo** · Modelli dei giocatori, roster e formazioni delle due squadre.
+
+Fatto:
+- Celestini e Rivali in gioco: 10 personaggi, 5 ruoli per squadra
+- Roster con i ruoli per posto in campo
+- Colori delle squadre su anelli, punteggio, tabellone e tifosi
+
+Prossimo:
+- Nuovi personaggi (serviranno anche per Coppe e Ultimate Team)
+- Statistiche diverse per personaggio (con Ultimate Team)
+
 | File | Squadra | Ruolo (posto in `teams`) | Stato |
 |---|---|---|---|
 | `celestini_difensore.glb` | Celestini | difensore (0) | in gioco |

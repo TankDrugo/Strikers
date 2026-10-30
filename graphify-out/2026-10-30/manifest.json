@@ -36,10 +36,10 @@
     "semantic_hash": "96cc0d9622a6462ee554f3dbf8c6498c"
   },
   "docs/make_map.py": {
-    "mtime": 1793349514.962362,
-    "seen": 1793368216.488333,
-    "ast_hash": "916a583bc38c96bddea8eb08c42f1f8c",
-    "semantic_hash": "916a583bc38c96bddea8eb08c42f1f8c"
+    "mtime": 1793379459.6628058,
+    "seen": 1793379464.5245106,
+    "ast_hash": "b2b71932571219e4fa7a5a0ea1c1cc7d",
+    "semantic_hash": ""
   },
   "game/assets/roster.json": {
     "mtime": 1793349516.138484,
@@ -150,10 +150,10 @@
     "semantic_hash": "ee6a6a8608d503b8062ed7eb11002ed1"
   },
   "README.md": {
-    "mtime": 1793349513.8987648,
-    "seen": 1793368216.488374,
-    "ast_hash": "00ef9138655309383667e91ea3f2809f",
-    "semantic_hash": "00ef9138655309383667e91ea3f2809f"
+    "mtime": 1793379459.6632528,
+    "seen": 1793379464.5245676,
+    "ast_hash": "5dcfefd26e1f0174b1cee16927974d3f",
+    "semantic_hash": ""
   },
   "animation/README.md": {
     "mtime": 1793349513.8987648,
@@ -174,10 +174,10 @@
     "semantic_hash": "3697079e6a62fef556f75304d5ddca72"
   },
   "game/README.md": {
-    "mtime": 1793363500.3755846,
-    "seen": 1793368216.48838,
-    "ast_hash": "5d888917e5e3a665e1b6878879afd194",
-    "semantic_hash": "5d888917e5e3a665e1b6878879afd194"
+    "mtime": 1793379459.6636739,
+    "seen": 1793379464.524574,
+    "ast_hash": "e2d14b78ada204c9dcdb5dc12baf7472",
+    "semantic_hash": ""
   },
   "game/dev/index.html": {
     "mtime": 1793349516.1424842,
@@ -292,5 +292,11 @@
     "seen": 1793368216.4883559,
     "ast_hash": "0494be0e1907256f9d6a26f4d21931ad",
     "semantic_hash": "0494be0e1907256f9d6a26f4d21931ad"
+  },
+  "game/package-lock.json": {
+    "mtime": 1793360831.7457478,
+    "seen": 1793379464.524595,
+    "ast_hash": "888d870f1ab9c0b7eb047153064ea08c",
+    "semantic_hash": ""
   }
 }

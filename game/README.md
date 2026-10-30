@@ -2,6 +2,21 @@
 
 Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali, 10 personaggi), tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
 
+## Stato
+
+**funziona** · Partita 5 contro 5: campo, stadio, pallone, giocatori, IA, comandi.
+
+Fatto:
+- Partita 5 contro 5 completa, CPU contro CPU o con controller Xbox
+- Stadio, fisica del pallone, IA
+- Portiere che para come l'originale: conta il tempo del tuffo, non il caso
+- Partita a due giocatori (uno contro uno o insieme contro la CPU), difficoltà della CPU
+- Link online privato, aggiornato a ogni modifica
+
+Prossimo:
+- Pallone oltre il limite di 50 m/s in alcuni tiri
+- Power-up, Super Strike
+
 ## Avvio
 
 ```bash

@@ -1,17 +1,17 @@
 # Graph Report - Strikers  (2026-10-30)
 
 ## Corpus Check
-- 45 files · ~64,117 words
+- 45 files · ~64,547 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 733 nodes · 1643 edges · 34 communities (28 shown, 6 thin omitted)
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 189 edges (avg confidence: 0.85)
+- 741 nodes · 1658 edges · 41 communities (34 shown, 7 thin omitted)
+- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 189 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `816e728b`
+- Built from commit: `12806af1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,19 +34,26 @@
 - Riferimento e differenze volute
 - Animazioni: README
 - Pose e contatto col pallone
-- interfaccia-gioco/DESIGN.md
+- render
 - Bozze: carte e pacchetti
 - Personaggi e squadre
 - Nomi delle ossa
 - Interfaccia: piano e schermate
+- UiNav
+- make_map.py
 - Economia: documento
 - Clip e chiavi
 - Visualizzatore animazioni
 - Ultimate Team: rosa e ingresso
 - Strumenti di verifica pose
+- interfaccia-gioco/DESIGN.md
+- Voto della coppa D-C-B-A-S-Z (percentuale di completamento)
 - Obiettivi: Tracker
 - Ultimate Team: decisioni
+- Coppe come citazioni ironiche a giochi PS2
 - FormatError
+- Coppe
+- Modulo unico di salvataggio (save)
 - Cose mancanti
 - Golden goal
 
@@ -85,31 +92,31 @@
 - **Sezioni di Ultimate Team (Club, Rosa, Mercato, Divisioni, Album)** — ultimate_team_design_club, ultimate_team_design_rosa, ultimate_team_design_mercato, ultimate_team_design_divisioni, ultimate_team_design_album [EXTRACTED 1.00]
 - **Animation verification tools** — animation_readme_audit, game_dev_sheet, game_dev_sheet_sticks_json, game_dev_posecheck, animation_readme_audit_results [INFERRED 0.85]
 
-## Communities (34 total, 6 thin omitted)
+## Communities (41 total, 7 thin omitted)
 
 ### Community 0 - "Partita: Game e azioni"
 Cohesion: 0.08
-Nodes (4): predict(), Game, Player, seekSpeed()
+Nodes (6): predict(), Game, angleDiff(), Player, seekDirection(), seekSpeed()
 
 ### Community 1 - "IA e fisica del pallone"
 Cohesion: 0.10
 Nodes (38): bestPassTarget(), dist2(), fielderAI(), moveTo(), openness(), v, shootAtFast(), tmp (+30 more)
 
 ### Community 2 - "HUD in partita"
-Cohesion: 0.08
-Nodes (15): Hud, boot(), openViewer(), resume(), showMenu(), startMatch(), togglePause(), makeAudio() (+7 more)
+Cohesion: 0.11
+Nodes (11): Hud, boot(), openViewer(), resume(), showMenu(), startMatch(), togglePause(), getLang() (+3 more)
 
 ### Community 3 - "Personaggi: aggiunta e controllo clip"
 Cohesion: 0.06
-Nodes (29): check_rig(), main(), angle(), audit(), model_frames(), world(), rot_angle(), sample() (+21 more)
+Nodes (26): check_rig(), main(), angle(), audit(), model_frames(), world(), rot_angle(), sample() (+18 more)
 
 ### Community 4 - "Coppe: logica e menu"
-Cohesion: 0.07
-Nodes (43): baseTeams(), cpuTeams(), cupById(), CUPS, grade(), makeBracket(), NAMES, nextRound() (+35 more)
+Cohesion: 0.09
+Nodes (37): baseTeams(), cpuTeams(), cupById(), CUPS, grade(), makeBracket(), NAMES, nextRound() (+29 more)
 
 ### Community 5 - "strikers_anim.py"
-Cohesion: 0.15
-Nodes (11): _biped_names(), _blender_add_curve(), _blender_cli(), _blender_fcurve_bag(), clip_states(), _common_args(), dump_json(), main() (+3 more)
+Cohesion: 0.14
+Nodes (11): _biped_names(), _blender_add_curve(), _blender_cli(), _blender_fcurve_bag(), _common_args(), main(), _quat_norm(), register() (+3 more)
 
 ### Community 7 - "Dipendenze del gioco"
 Cohesion: 0.08
@@ -120,8 +127,8 @@ Cohesion: 0.18
 Nodes (12): string_hash(), string_lower_hash(), sample_props(), sample_quat(), sample_scale(), sample_trans(), write_bundle(), write_clip() (+4 more)
 
 ### Community 9 - "Stadio"
-Cohesion: 0.28
-Nodes (5): ledTexture(), perimeterPoints(), ringGeometry(), roundedRect(), Stadium
+Cohesion: 0.15
+Nodes (11): ledTexture(), perimeterPoints(), ringGeometry(), roundedRect(), Stadium, Pagina bozze (Artifact privato M9yMAgV1hSDitKZo9UgzLA), Interfaccia: ancora da decidere (bozze, nomi coppe, HTML/CSS sopra il canvas), HUD in partita (+3 more)
 
 ### Community 10 - "Economia: mercato e simulatore"
 Cohesion: 0.15
@@ -136,8 +143,8 @@ Cohesion: 0.13
 Nodes (10): HOLOS, LOADERS, Album: una pagina per personaggio con tutte le varianti, Club: crediti, negozio dei pacchetti con probabilita dichiarate, Divisioni: stagioni da 10 partite, da Divisione 10 a 1, Holo: Arcobaleno, Glitter (holo), Lava (rara), Prisma, Galassia (epica), Numerata 1-10 (teca graduata, targhetta blu notte e oro L3b), Rarita base: Bronzo, Argento, Oro, Oro raro (+2 more)
 
 ### Community 13 - "Test del convertitore"
-Cohesion: 0.17
-Nodes (9): strikers_frames(), check(), close(), game_world(), mul_rows(), qclose(), quat_rows(), test_bvh_import() (+1 more)
+Cohesion: 0.13
+Nodes (12): contact_time(), strikers_frames(), _quat_to_mat(), check(), close(), game_world(), mul_rows(), qclose() (+4 more)
 
 ### Community 14 - "Regole del progetto (CLAUDE.md)"
 Cohesion: 0.21
@@ -152,12 +159,12 @@ Cohesion: 0.17
 Nodes (14): Animation README, Biped skeleton (Bip01 bones, ball bone), Bone name hash recovery (nlStringLowerHash, --names-from), Converter tests (tests/test_converter.py), Converter known limits (G4QP01, rest pose, keyframe offset), Mirrored clip export (--mirrored), retarget.py Biped-to-Mixamo retarget, Root motion in clips.json metadata (+6 more)
 
 ### Community 17 - "Pose e contatto col pallone"
-Cohesion: 0.11
-Nodes (12): contact_time(), _mat_to_euler_zxy(), _mirror_rot(), _mirror_trans(), Pose, _quat_norm(), _quat_to_mat(), rest_offsets() (+4 more)
+Cohesion: 0.14
+Nodes (8): dump_json(), _mat_to_euler_zxy(), _mirror_rot(), _mirror_trans(), Pose, rest_offsets(), write_bvh(), joint()
 
-### Community 18 - "interfaccia-gioco/DESIGN.md"
-Cohesion: 0.05
-Nodes (33): POOL, MAIN, SUB, installTheme(), back(), MAIN, pad(), press() (+25 more)
+### Community 18 - "render"
+Cohesion: 0.19
+Nodes (12): MAIN, SUB, back(), MAIN, pad(), press(), render(), setTab() (+4 more)
 
 ### Community 19 - "Bozze: carte e pacchetti"
 Cohesion: 0.22
@@ -168,12 +175,20 @@ Cohesion: 0.32
 Nodes (11): add_characters.py character onboarding, Characters README, Add a character procedure, Celestini team (light blue shirt), recolor flag (now false for all), Rivali team (green shirt), roster.json (teams, teamInfo, recolor), teamInfo team names and colors (+3 more)
 
 ### Community 21 - "Nomi delle ossa"
-Cohesion: 0.30
-Nodes (8): import_into_blender(), load_chunks(), _load_cli(), load_clips(), load_retargets(), load_skeletons(), NameBook, test_blender()
+Cohesion: 0.29
+Nodes (9): clip_states(), import_into_blender(), load_chunks(), _load_cli(), load_clips(), load_retargets(), load_skeletons(), NameBook (+1 more)
 
 ### Community 22 - "Interfaccia: piano e schermate"
+Cohesion: 0.18
+Nodes (11): Avvio del gioco, Bozze, Gioco rapido, Home, Interfaccia gioco: decisioni prese con l'utente, Lingue, Navigazione (stile FC), Ordine di lavoro (+3 more)
+
+### Community 23 - "UiNav"
 Cohesion: 0.13
-Nodes (15): Avvio del gioco, Bozze, Coppe, Gioco rapido, Home, Interfaccia gioco: decisioni prese con l'utente, Le 4 coppe, Lingue (+7 more)
+Nodes (9): Input, PAD, PadMenus, padPressed(), padStick(), readPad(), readPads(), UiNav (+1 more)
+
+### Community 24 - "make_map.py"
+Cohesion: 0.21
+Nodes (6): area_of(), kind_of(), last_update(), main(), read_status(), write_readme_table()
 
 ### Community 25 - "Economia: documento"
 Cohesion: 0.22
@@ -187,13 +202,29 @@ Nodes (7): Rosa: formazione di 5 (posti 0-3 movimento, 4 portiere) e panchina, C
 Cohesion: 0.47
 Nodes (6): audit.py per-frame clip audit, audit.py results for portiere (ground_float, dir), Pose check page (clip frame grid), Animation sheet page (model vs original stick skeleton), sticks.json original skeleton frames, three.js importmap from node_modules
 
+### Community 30 - "interfaccia-gioco/DESIGN.md"
+Cohesion: 0.22
+Nodes (5): Gioco rapido: umano vs CPU, 1v1, 2 vs CPU, CPU vs CPU, Menu M1 Cartoon tropicale (scelto), Un tema per ogni modalita (tropicale, coppe, hi-tech UT, art deco Mercato), Torneo con gli amici fino a 4 giocatori (stile Tenkaichi 3), Torneo privato (4, 8 o 16 squadre)
+
 ### Community 33 - "Ultimate Team: decisioni"
 Cohesion: 0.33
 Nodes (6): Apertura dei pacchetti, Economia, Rarità, Regole, Sezioni, Ultimate Team: decisioni prese con l'utente
 
+### Community 34 - "Coppe come citazioni ironiche a giochi PS2"
+Cohesion: 0.40
+Nodes (4): Coppa Bullone Galattico (Ratchet & Clank, 5 partite), Coppa Lost Heaven (Mafia, 5 partite), Coppa Scimmie in Fuga (Ape Escape 3, 3 partite), Gran Premio Pazzo Pazzo (Le corse piu pazze del mondo, 4 partite)
+
 ### Community 35 - "FormatError"
 Cohesion: 0.16
 Nodes (7): Chunk, _cstr(), FormatError, Retargets, Skeleton, top_level_chunks(), _u32()
+
+### Community 36 - "Coppe"
+Cohesion: 0.50
+Nodes (4): Coppe, Le 4 coppe, Stelle e obiettivi, Voto della coppa (gradazione stile Dragon Ball)
+
+### Community 37 - "Modulo unico di salvataggio (save)"
+Cohesion: 0.67
+Nodes (3): Profili giocatore con progressi propri, Server privato (futuro salvataggio online), Ultimate Team fa parte del profilo (club, crediti, collezione)
 
 ### Community 38 - "Cose mancanti"
 Cohesion: 0.67
@@ -201,23 +232,23 @@ Nodes (3): Ultimate Team (rules decided, code not started), Not yet present (pow
 
 ## Knowledge Gaps
 - **23 isolated node(s):** `Pacchetto Holo (50.000, il nostro Ultimate Pack)`, `ShootAtFast closed-form pass velocity`, `Album: una pagina per personaggio con tutte le varianti`, `Rarita base: Bronzo, Argento, Oro, Oro raro`, `graphify-out outputs (graph.html, GRAPH_REPORT.md, graph.json)` (+18 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 179 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 183 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Ultimate Team (area in progettazione, codice non scritto)` connect `Ultimate Team: rosa e ingresso` to `IA e fisica del pallone`, `Economia: mercato e simulatore`, `Ultimate Team: sezioni e carte`, `Regole del progetto (CLAUDE.md)`, `interfaccia-gioco/DESIGN.md`?**
-  _High betweenness centrality (0.391) - this node is a cross-community bridge._
+- **Why does `Ultimate Team (area in progettazione, codice non scritto)` connect `Ultimate Team: rosa e ingresso` to `IA e fisica del pallone`, `Stadio`, `Economia: mercato e simulatore`, `Ultimate Team: sezioni e carte`, `Regole del progetto (CLAUDE.md)`?**
+  _High betweenness centrality (0.395) - this node is a cross-community bridge._
 - **What connects `Pacchetto Holo (50.000, il nostro Ultimate Pack)`, `ShootAtFast closed-form pass velocity`, `Album: una pagina per personaggio con tutte le varianti` to the rest of the system?**
   _23 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Partita: Game e azioni` be split into smaller, more focused modules?**
-  _Cohesion score 0.08018648018648018 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07901668129938542 - nodes in this community are weakly interconnected._
 - **Why does `Punto d ingresso della modalita nel menu principale` connect `Ultimate Team: rosa e ingresso` to `IA e fisica del pallone`?**
-  _High betweenness centrality (0.253) - this node is a cross-community bridge._
+  _High betweenness centrality (0.255) - this node is a cross-community bridge._
 - **Should `IA e fisica del pallone` be split into smaller, more focused modules?**
-  _Cohesion score 0.10283687943262411 - nodes in this community are weakly interconnected._
-- **Why does `Calcio arcade project README` connect `Regole del progetto (CLAUDE.md)` to `Gioco: README e moduli`, `Riferimento e differenze volute`, `Animazioni: README`, `interfaccia-gioco/DESIGN.md`, `Personaggi e squadre`, `Ultimate Team: rosa e ingresso`?**
-  _High betweenness centrality (0.215) - this node is a cross-community bridge._
+  _Cohesion score 0.09693877551020408 - nodes in this community are weakly interconnected._
+- **Why does `Calcio arcade project README` connect `Regole del progetto (CLAUDE.md)` to `Stadio`, `Gioco: README e moduli`, `Riferimento e differenze volute`, `Animazioni: README`, `Personaggi e squadre`, `Ultimate Team: rosa e ingresso`?**
+  _High betweenness centrality (0.213) - this node is a cross-community bridge._
 - **Should `HUD in partita` be split into smaller, more focused modules?**
-  _Cohesion score 0.0758714969241285 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10839598997493734 - nodes in this community are weakly interconnected._

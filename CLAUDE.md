@@ -35,6 +35,7 @@ graphify path "add_characters.py" "Player" --undirected
 - Le misure vengono da `reference/STRIKERS_REFERENCE.md`. Se cambi un valore rispetto all'originale, scrivilo nel commento accanto (esempio: `SIZE` e `BALL.radius` in `game/src/config.js`).
 - Dopo ogni modifica al gioco: `node game/tools/build.mjs` e una partita CPU contro CPU senza errori (vedi `game/README.md`, sezione Prove).
 - Dopo una modifica a `game/`, `animation/` o ai README, aggiorna il grafo (`docs/grafo.md`).
+- Quando un lavoro cambia lo stato di un'area, aggiorna la sezione `## Stato` del README di quell'area (stato, `Fatto:`, `Prossimo:`): mappa e tabella del `README.md` principale la leggono da lì con `python3 docs/make_map.py`.
 
 ## Stato al passaggio di consegne
 
