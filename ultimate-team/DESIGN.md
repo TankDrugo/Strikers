@@ -1,6 +1,6 @@
 # Ultimate Team: decisioni prese con l'utente
 
-Stato: **regole decise, economia proposta, aspetto delle carte da scegliere** (vedi le bozze in [`../interfaccia-gioco/DESIGN.md`](../interfaccia-gioco/DESIGN.md#bozze)).
+Stato: **regole decise, economia proposta, aspetto delle carte quasi tutto scelto** (vedi le bozze in [`../interfaccia-gioco/DESIGN.md`](../interfaccia-gioco/DESIGN.md#bozze)).
 
 ## Regole
 
@@ -24,9 +24,9 @@ Stato: **regole decise, economia proposta, aspetto delle carte da scegliere** (v
 | Livello | Note |
 |---|---|
 | Bronzo, Argento, Oro, Oro raro | Livelli base, decisi dalla valutazione del personaggio |
-| Holo (più tipi) | Stesso personaggio, valutazione più alta. Tre fasce: holo, holo rara, holo epica. **Quali effetti, da scegliere sulle bozze** |
-| **Numerata 1-10** | Solo per i personaggi più forti (valutazione base 85+). **10 copie in tutto il gioco**, ognuna col suo numero. Si mostra nel **top loader** |
-| **1/1 Oro** | Una sola copia in tutto il gioco, per i personaggi più forti. Nel top loader |
+| Holo (più tipi) | Stesso personaggio, valutazione più alta. Effetti scelti: **Arcobaleno** e **Glitter** (holo), **Lava** (rara), **Prisma** e **Galassia** senza puntini (epica). Fasce proposte, da confermare |
+| **Numerata 1-10** | Solo per i personaggi più forti (valutazione base 85+). **10 copie in tutto il gioco**, ognuna col suo numero. Si mostra nella **teca graduata**; targhetta da scegliere (argento, blu e oro, satinata), non rossa |
+| **1/1 Oro** | Una sola copia in tutto il gioco, per i personaggi più forti. Carta tutta in oro nella **teca nera con bordo oro** |
 
 Le numerate sono **uniche per tutto il gioco**. Senza server, "tutto il gioco" significa tutti i profili di quel browser (un registro comune); col server privato il registro passa al server. Non vanno sul mercato simulato.
 
@@ -36,4 +36,11 @@ Studio, numeri e simulazione in [`ECONOMIA.md`](ECONOMIA.md). In breve: prime or
 
 ## Apertura dei pacchetti
 
-Animazioni spettacolari, con una rivelazione a tappe più ricca per holo e numerate (come i walkout di FC). **Stile da scegliere sulle bozze.**
+Scelta: **P1, walkout a indizi**.
+
+1. Il pacchetto trema e si apre in un lampo; i raggi di luce prendono il colore della rarità.
+2. Gli indizi compaiono uno per volta: ruolo, squadra, valutazione e, per le carte top, "NUMERATA 04 / 10" o "1 / 1". Per l'oro raro c'è solo la valutazione.
+3. **Il personaggio esce camminando in 3D e fa una tra 10 esultanze, scelta a caso.**
+4. Arriva la carta; numerate e 1/1 scendono nella loro teca.
+
+Le esultanze non ci sono fra le 183 clip (le più vicine sono `wave`, `arm_powerup` e `jog`): la fonte è da decidere con l'utente.

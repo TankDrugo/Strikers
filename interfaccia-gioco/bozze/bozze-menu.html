@@ -195,7 +195,7 @@ section.station { display: flex; flex-direction: column; gap: 18px; scroll-margi
 @keyframes lava { to { filter: hue-rotate(-18deg) brightness(1.2); } }
 .h-lava .ovr, .h-lava .role, .h-galaxy .ovr, .h-galaxy .role { color: #fff; -webkit-text-stroke-color: var(--ink); }
 .h-galaxy { background: radial-gradient(ellipse at 30% 30%, #6a2fd8, transparent 60%), radial-gradient(ellipse at 75% 70%, #1fb6ff, transparent 55%), #0b0626; }
-.h-galaxy .foil { background: radial-gradient(circle, #fff 0 .5cqw, transparent .7cqw) 0 0 / 11cqw 13cqw, radial-gradient(circle, #ffe9a0 0 .35cqw, transparent .5cqw) 5cqw 7cqw / 17cqw 15cqw, radial-gradient(ellipse at calc(var(--mx) * 1%) calc(var(--my) * 1%), #ff4fd8aa, transparent 45%); background-position: calc(var(--mx) * -.3cqw) calc(var(--my) * -.3cqw), calc(var(--mx) * -.6cqw) 0, 0 0; mix-blend-mode: screen; }
+.h-galaxy .foil { background: radial-gradient(ellipse at calc(var(--mx) * 1%) calc(var(--my) * 1%), #ff4fd8aa, transparent 45%), radial-gradient(ellipse at calc(100% - var(--mx) * 1%) 80%, #4fd8ff88, transparent 40%), conic-gradient(from calc(var(--mx) * 2deg) at 50% 50%, #6a2fd800, #ff4fd844, #6a2fd800 30%, #1fb6ff44 60%, #6a2fd800); mix-blend-mode: screen; }
 .h-prism .foil { background: repeating-conic-gradient(from calc(var(--mx) * 3.6deg) at calc(var(--mx) * 1%) calc(var(--my) * 1%), #ff3d6e 0 5deg, #ffd21f 10deg, #41c24a 15deg, #2bc0ff 20deg, #8a4dff 25deg, #ff3d6e 30deg), linear-gradient(45deg, #ffffff55 25%, transparent 25% 75%, #ffffff55 75%) 0 0 / 14cqw 14cqw; background-blend-mode: overlay; mix-blend-mode: color-dodge; opacity: .55; }
 .h-vinyl .foil { background: repeating-radial-gradient(circle at calc(var(--mx) * 1%) 110%, #ff3d6e 0 2%, #ffd21f 4%, #2bc0ff 6%, #8a4dff 8%, #ff3d6e 10%); mix-blend-mode: color-dodge; opacity: .5; }
 .h-halftone .foil { background: radial-gradient(circle, #000 30%, transparent 33%) 0 0 / 5cqw 5cqw, conic-gradient(from calc(var(--mx) * 3.6deg), #ff3d6e, #ffd21f, #41c24a, #2bc0ff, #8a4dff, #ff3d6e); background-blend-mode: screen; mix-blend-mode: hard-light; opacity: .55; }
@@ -224,6 +224,13 @@ section.station { display: flex; flex-direction: column; gap: 18px; scroll-margi
 .l-slab .plate span { color: #fff; }
 .l-slab .plate b, .l-slab .plate span { grid-column: 1; font-size: 5.5cqw; }
 .l-slab .plate .grade { grid-column: 2; grid-row: 1 / span 2; font-family: var(--font-num); font-size: 12cqw; line-height: 1; text-align: center; background: #fff; color: var(--ink); border-radius: 2cqw; padding: 1cqw 2cqw; grid-row: span 2; }
+.l-slab.lab-silver .plate { background: linear-gradient(115deg, #f4f6fa, #b8c0cc 40%, #eef1f5 60%, #9aa3b0); color: var(--ink); }
+.l-slab.lab-silver .plate span { color: #3b4352; }
+.l-slab.lab-navy .plate { background: linear-gradient(#1c2557, #0c1233); color: #ffe27a; border-color: #d9a640; }
+.l-slab.lab-navy .plate span { color: #fff3c4; }
+.l-slab.lab-navy .plate .grade { background: linear-gradient(115deg, #fff3b0, #d79a12 50%, #b47706); }
+.l-slab.lab-frost .plate { background: #ffffff55; backdrop-filter: blur(2px); color: var(--ink); border-color: #ffffffd0; box-shadow: inset 0 0 0 .6cqw #ffffff66; }
+.l-slab.lab-frost .plate span { color: var(--ink); }
 .l-slab .bars { position: absolute; left: 6%; bottom: 2.5%; width: 30%; height: 3%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px); opacity: .6; }
 .l-gold { background: #111; border: 6px solid; border-image: linear-gradient(135deg, #fff3b0, #c98a0c, #fff3b0, #8a5a00) 1; outline: 3px solid var(--ink); padding-top: 30%; box-shadow: 0 8px 0 var(--ink); border-radius: 0; }
 .l-gold .plate { background: linear-gradient(115deg, #fff3b0, #d79a12 40%, #fff3b0 55%, #b47706); border-color: #111; text-align: center; align-items: center; }
@@ -279,7 +286,7 @@ footer { color: #fff; font-size: 15px; }
     <h1>Bozze del menu</h1>
     <p class="lede">Pagina di prova, non è il gioco. Quattro stazioni: il menu da provare col controller o la tastiera, otto prototipi di holo, quattro top loader per le numerate e tre animazioni di apertura dei pacchetti. Ogni proposta ha una sigla: rispondimi con le sigle che ti piacciono.</p>
     <nav class="jump" aria-label="Sezioni">
-      <a href="#menu">Menu</a><a href="#holo">Holo</a><a href="#numerate">Numerate</a><a href="#pacchetti">Pacchetti</a><a href="#scelte">Cosa scegliere</a>
+      <a href="#menu">Menu</a><a href="#holo">Holo</a><a href="#numerate">Numerate</a><a href="#pacchetti">Pacchetti</a><a href="#scelte">Scelte</a>
     </nav>
   </header>
 
@@ -290,10 +297,8 @@ footer { color: #fff; font-size: 15px; }
     </div>
     <div class="tv-shell">
       <div class="controls" role="group" aria-label="Stile del menu">
-        <span class="label-pick">STILE</span>
-        <button class="btn" data-variant="" aria-pressed="true" id="v-a">M1 Cartoon tropicale</button>
-        <button class="btn" data-variant="v-tech" aria-pressed="false" id="v-b">M2 Hi-tech bulloni</button>
-        <button class="btn" data-variant="v-comic" aria-pressed="false" id="v-c">M3 Fumetto retinato</button>
+        <span class="label-pick">SCELTO</span>
+        <span class="chip" style="font-size:17px;padding:4px 12px">M1 Cartoon tropicale</span>
         <button class="btn" id="sound" aria-pressed="false">Suoni: spenti</button>
       </div>
       <div class="tv" id="tv" tabindex="0" data-mode="main" aria-label="Schermo del menu, cliccalo per usarlo con la tastiera">
@@ -316,7 +321,7 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="holo">
     <div class="station-head">
       <h2>Prototipi holo</h2>
-      <p>Muovi il mouse (o il dito) sopra una carta per inclinarla; da ferme si muovono da sole. Ogni effetto ha una fascia proposta: <span class="tier t1">HOLO</span> <span class="tier t2">RARA</span> <span class="tier t3">EPICA</span>. Scegline da 3 a 6.</p>
+      <p>Le cinque holo scelte, con la fascia che propongo: <span class="tier t1">HOLO</span> <span class="tier t2">RARA</span> <span class="tier t3">EPICA</span>. La Galassia ora è senza puntini.</p>
     </div>
     <div class="panel"><div class="grid-cards" id="holos"></div></div>
   </section>
@@ -324,7 +329,7 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="numerate">
     <div class="station-head">
       <h2>Numerate e 1/1 nel top loader</h2>
-      <p>Quattro custodie e tre modi di scrivere il numero (timbro, lamina oro, incisione laser). Scegli una custodia per le numerate da 1 a 10 e una per la 1/1 Oro.</p>
+      <p>Teca graduata scelta per le numerate, senza la targhetta rossa: tre targhette alternative (L3a, L3b, L3c). La 1/1 Oro (L4) è scelta.</p>
     </div>
     <div class="panel"><div class="loaders" id="loaders"></div></div>
   </section>
@@ -332,14 +337,12 @@ footer { color: #fff; font-size: 15px; }
   <section class="station" id="pacchetti">
     <div class="station-head">
       <h2>Apertura dei pacchetti</h2>
-      <p>Scegli l'animazione e l'esito, poi clicca sul palco. Più la carta è rara, più la rivelazione è lunga e ricca, come i walkout di FC.</p>
+      <p>Scegli l'esito e clicca sul palco. Nel gioco vero, dopo gli indizi, il personaggio in 3D esce camminando e fa una tra 10 esultanze a caso; poi compare la carta. Qui la carta arriva subito.</p>
     </div>
     <div class="pack-ui">
       <div class="controls" role="group" aria-label="Animazione">
         <span class="label-pick">ANIMAZIONE</span>
-        <button class="btn" data-anim="walkout" aria-pressed="true" id="a-1">P1 Walkout a indizi</button>
-        <button class="btn" data-anim="tear" aria-pressed="false" id="a-2">P2 Strappo cartoon</button>
-        <button class="btn" data-anim="crate" aria-pressed="false" id="a-3">P3 Cassa che esplode</button>
+        <span class="chip" style="font-size:17px;padding:4px 12px">P1 Walkout a indizi (scelto)</span>
       </div>
       <div class="controls" role="group" aria-label="Esito">
         <span class="label-pick">ESITO</span>
@@ -358,12 +361,9 @@ footer { color: #fff; font-size: 15px; }
   </section>
 
   <section class="station" id="scelte">
-    <div class="station-head"><h2>Cosa scegliere</h2><p>Rispondimi in chat con le sigle, per esempio "M1, holo H1 H4 H5 H7, top loader L2 e L4, pacchetti P1".</p></div>
+    <div class="station-head"><h2>Scelte fatte</h2><p>Menu M1 con cambio di colore nelle modalità. Holo: Arcobaleno, Glitter, Lava, Prisma, Galassia. Numerate nella teca graduata, 1/1 nella teca oro. Pacchetti: P1 con camminata ed esultanza del personaggio.</p></div>
     <div class="decide">
-      <div class="panel"><h3>Menu</h3><ul><li>M1, M2 o M3, o un misto</li><li>Va bene il cambio di colore quando entri in una modalità?</li></ul></div>
-      <div class="panel"><h3>Holo</h3><ul><li>Da 3 a 6 tra H1 e H8</li><li>Quale per holo, quale per rara, quale per epica</li></ul></div>
-      <div class="panel"><h3>Numerate</h3><ul><li>Custodia: L1, L2 o L3</li><li>1/1 Oro: L4 o un'altra</li><li>Numero: timbro, lamina o laser</li></ul></div>
-      <div class="panel"><h3>Pacchetti</h3><ul><li>P1, P2 o P3</li><li>Oppure uno per tipo di pacchetto (es. P2 per Oro, P1 per Holo)</li></ul></div>
+      <div class="panel"><h3>Ancora da scegliere</h3><ul><li>Targhetta della teca: L3a, L3b o L3c</li><li>Fasce delle holo: va bene la proposta?</li></ul></div>
     </div>
   </section>
   <footer>Personaggi di esempio: le dieci squadre di prova del gioco. Valutazioni e nomi inventati.</footer>
@@ -433,22 +433,19 @@ footer { color: #fff; font-size: 15px; }
 
   const HOLOS = [
     ['H1', 'Arcobaleno', 'h-rainbow', 't1', 'HOLO', 'La classica lamina a strisce che scorre con la luce.', { ovr: 86, role: 'ATT', team: 'cel', seed: 0 }],
-    ['H2', 'Cromata', 'h-chrome', 't1', 'HOLO', 'Argento a specchio, righe che girano con l\'angolo.', { ovr: 85, role: 'DIF', team: 'riv', seed: 1 }],
-    ['H3', 'Glitter', 'h-glitter', 't2', 'RARA', 'Brillantini su lamina arcobaleno, come gli adesivi.', { ovr: 87, role: 'ALA', team: 'cel', seed: 2 }],
+    ['H3', 'Glitter', 'h-glitter', 't1', 'HOLO', 'Brillantini su lamina arcobaleno, come gli adesivi.', { ovr: 87, role: 'ALA', team: 'cel', seed: 2 }],
     ['H4', 'Lava', 'h-lava', 't2', 'RARA', 'Fondo scuro con magma che pulsa e crepe.', { ovr: 88, role: 'CEN', team: 'riv', seed: 3 }],
-    ['H5', 'Galassia', 'h-galaxy', 't3', 'EPICA', 'Nebulosa e stelle in parallasse: si muovono a strati.', { ovr: 91, role: 'ATT', team: 'riv', seed: 1 }],
     ['H6', 'Prisma', 'h-prism', 't3', 'EPICA', 'Raggi a cristallo che partono dal punto di luce.', { ovr: 90, role: 'POR', team: 'cel', seed: 0 }],
-    ['H7', 'Vinile', 'h-vinyl', 't1', 'HOLO', 'Cerchi concentrici come un CD della PS2 alla luce.', { ovr: 84, role: 'CEN', team: 'cel', seed: 3 }],
-    ['H8', 'Retinato pop', 'h-halftone', 't2', 'RARA', 'Puntini da fumetto su colori che cambiano.', { ovr: 86, role: 'DIF', team: 'cel', seed: 2 }],
+    ['H5', 'Galassia', 'h-galaxy', 't3', 'EPICA', 'Nebulosa che cambia colore con la luce, senza puntini.', { ovr: 91, role: 'ATT', team: 'riv', seed: 1 }],
   ];
   document.getElementById('holos').innerHTML = HOLOS.map(([id, name, cls, tc, tl, desc, c]) =>
     `<div class="proto">${card({ ...c, cls: 'r-holo ' + cls })}<h3><span class="label-pick">${id}</span>${name} <span class="tier ${tc}">${tl}</span></h3><p>${desc}</p></div>`).join('');
 
   const LOADERS = [
-    ['L1', 'Top loader classico', 'l-clear', '', 'Plastica trasparente. Numero timbrato in oro sulla carta.', card({ ovr: 92, role: 'ATT', team: 'cel', cls: 'r-holo h-galaxy', seed: 0, serial: '07/10', serialCls: 'stamp' })],
-    ['L2', 'Top loader con targhetta', 'l-label', `<div class="plate"><b>Attaccante Celestini</b><span>NUMERATA · 03 / 10</span></div>`, 'In alto una targhetta col nome e il numero. Numero in lamina oro anche sulla carta.', card({ ovr: 92, role: 'ATT', team: 'cel', cls: 'r-numbered', seed: 0, serial: '03/10', serialCls: 'foil-num' })],
-    ['L3', 'Teca graduata', 'l-slab', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">10</div></div><div class="bars"></div>`, 'Custodia rigida spessa, come le carte certificate. Numero inciso al laser.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-holo h-prism', seed: 3, serial: '09/10', serialCls: 'laser' })],
-    ['L4', '1/1 Oro', 'l-gold', `<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>`, 'Teca nera con bordo oro, carta interamente in oro che riflette.', card({ ovr: 95, role: 'ATT', team: 'riv', cls: 'r-oneOfOne', seed: 1, serial: '1/1', serialCls: 'foil-num' })],
+    ['L3a', 'Teca, targhetta argento', 'l-slab lab-silver', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Metallo spazzolato, scritte scure.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
+    ['L3b', 'Teca, targhetta blu e oro', 'l-slab lab-navy', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Blu notte con scritte e numero in oro.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
+    ['L3c', 'Teca, targhetta satinata', 'l-slab lab-frost', `<div class="plate"><b>Centrocampista Rivali</b><span>NUMERATA 09 / 10</span><div class="grade">09</div></div><div class="bars"></div>`, 'Plastica satinata trasparente, scritte incise.', card({ ovr: 90, role: 'CEN', team: 'riv', cls: 'r-numbered', seed: 3, serial: '09/10', serialCls: 'laser' })],
+    ['L4', '1/1 Oro', 'l-gold', `<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>`, 'Scelta. Teca nera con bordo oro, carta interamente in oro.', card({ ovr: 95, role: 'ATT', team: 'riv', cls: 'r-oneOfOne', seed: 1, serial: '1/1', serialCls: 'foil-num' })],
   ];
   document.getElementById('loaders').innerHTML = LOADERS.map(([id, name, cls, plate, desc, c]) =>
     `<div class="loader-wrap"><div class="loader ${cls}">${plate}${c}</div><h3><span class="label-pick">${id}</span> ${name}</h3><p class="note">${desc}</p></div>`).join('');
@@ -664,7 +661,7 @@ footer { color: #fff; font-size: 15px; }
     r.animate(kf, { duration: 900, easing: 'cubic-bezier(.3,1.4,.5,1)', fill: 'forwards' });
     bindTilt(r.querySelector('.card'));
     if (isTop()) setTimeout(() => {
-      const cls = out === 'oneOfOne' ? 'l-gold' : 'l-label', plate = out === 'oneOfOne' ? '<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>' : `<div class="plate"><b>${ROLES[o.card.role]} Celestini</b><span>NUMERATA · 04 / 10</span></div>`;
+      const cls = out === 'oneOfOne' ? 'l-gold' : 'l-slab lab-navy', plate = out === 'oneOfOne' ? '<div class="plate"><b>1 / 1</b><span>COPIA UNICA AL MONDO</span></div>' : `<div class="plate"><b>${ROLES[o.card.role]} Celestini</b><span>NUMERATA 04 / 10</span><div class="grade">04</div></div><div class="bars"></div>`;
       r.style.width = '21cqw';
       r.innerHTML = `<div class="loader ${cls}">${plate}${card(o.card)}</div>`;
       r.firstElementChild.animate([{ transform: 'translateY(-60cqw)' }, { transform: 'translateY(2cqw)', offset: .8 }, { transform: 'translateY(0)' }], { duration: 700, easing: 'ease-in' });

@@ -1,6 +1,6 @@
 # Interfaccia gioco: decisioni prese con l'utente
 
-Stato: **decisioni raccolte, bozze visive da approvare** (pagina di prova: vedi "Bozze" in fondo). Quello che ha ancora bisogno di una scelta dell'utente è segnato **[da scegliere]**.
+Stato: **decisioni raccolte, bozze quasi tutte scelte** (pagina di prova: vedi "Bozze" in fondo). Quello che ha ancora bisogno di una scelta dell'utente è segnato **[da scegliere]**.
 
 ## Ordine di lavoro
 
@@ -132,6 +132,13 @@ Prima di usare un suono si controlla la licenza del singolo file.
 ## Lingue
 
 Italiano e inglese, scelti all'apertura. Tutti i testi stanno in un file di traduzioni, nessun testo scritto dentro il codice delle schermate.
+
+## Scelte sulle bozze
+
+- **Menu: M1, Cartoon tropicale**, col cambio di colore e sfondo quando si entra in una modalità.
+- **Holo**: Arcobaleno, Glitter, Lava, Prisma, Galassia senza puntini (fasce in `../ultimate-team/DESIGN.md`).
+- **Numerate**: teca graduata, **senza la targhetta rossa** (alternative L3a, L3b, L3c da scegliere). **1/1 Oro**: teca nera con bordo oro (L4).
+- **Pacchetti: P1, walkout a indizi**, con il personaggio 3D che esce camminando e fa una tra 10 esultanze a caso.
 
 ## Bozze
 
