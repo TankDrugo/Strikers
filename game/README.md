@@ -1,6 +1,6 @@
 # Gioco
 
-Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali), due squadre miste con i personaggi singoli (Leggende, Nazionali: `squads` in `roster.json`) e un editor della formazione che mette qualsiasi personaggio in qualsiasi posto: 15 personaggi, tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
+Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali), tre squadre miste con i personaggi singoli (Leggende, Nazionali, Avventurieri: `squads` in `roster.json`) e un editor della formazione che mette qualsiasi personaggio in qualsiasi posto: 20 personaggi, tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
 
 ## Stato
 
@@ -48,7 +48,7 @@ Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
 node tools/build.mjs --web --prova
 ```
 
-Poi si ripubblica `dist/web-prova/index.html` con i file di `dist/web-prova/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 74 MB con 15 personaggi, sopra il limite di 64 MB per pubblicazione: i file lasciati fuori da una pubblicazione restano online, quindi si pubblica in due passi sullo stesso `url`: prima `index.html`, `roster.json`, `walkout.json` e metà dei personaggi, poi l'altra metà. L'utente vuole sempre il gioco completo e aggiornato online.
+Poi si ripubblica `dist/web-prova/index.html` con i file di `dist/web-prova/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 97 MB con 20 personaggi (circa 4,8 MB l'uno), sopra il limite di 64 MB per pubblicazione: i file lasciati fuori da una pubblicazione restano online, quindi si pubblica in più passi sullo stesso `url`, al massimo 10 personaggi per passo: prima `index.html` con i personaggi nuovi e altri fino a 10, poi `roster.json`, `walkout.json` e i restanti (così il roster nuovo arriva quando tutti i suoi personaggi sono già online). Ogni versione dell'Artifact tiene al massimo 256 MB e 511 file: bastano per circa 50 personaggi. L'utente vuole sempre il gioco completo e aggiornato online.
 
 ## itch.io (privato, per gli amici)
 
@@ -56,7 +56,7 @@ Poi si ripubblica `dist/web-prova/index.html` con i file di `dist/web-prova/asse
 node tools/build.mjs --itch
 ```
 
-Scrive `dist/itch/` (pagina completa con `<!doctype html>`) e `dist/calcio-arcade-itch.zip` (circa 54 MB), da caricare come gioco HTML su una pagina itch.io con visibilità **Ristretta** (con password o lista di accesso), mai pubblica: contiene le animazioni del disco. La pagina è https://goleador0702.itch.io/strikers (Ristretta: chi non ha accesso vede un 404). Dopo ogni modifica al gioco Claude la aggiorna con butler (l'utente ha dato il permesso il 31 ottobre; si scarica da `https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default` nella cartella temporanea, la chiave la mette il proxy, a butler basta `BUTLER_API_KEY=dummy`):
+Scrive `dist/itch/` (pagina completa con `<!doctype html>`) e `dist/calcio-arcade-itch.zip` (circa 71 MB con 20 personaggi), da caricare come gioco HTML su una pagina itch.io con visibilità **Ristretta** (con password o lista di accesso), mai pubblica: contiene le animazioni del disco. La pagina è https://goleador0702.itch.io/strikers (Ristretta: chi non ha accesso vede un 404). Dopo ogni modifica al gioco Claude la aggiorna con butler (l'utente ha dato il permesso il 31 ottobre; si scarica da `https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default` nella cartella temporanea, la chiave la mette il proxy, a butler basta `BUTLER_API_KEY=dummy`):
 
 ```bash
 node tools/build.mjs --itch
@@ -179,4 +179,4 @@ Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md)
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Il file `gioco.html` pesa circa 131 MB con 15 personaggi (circa 8-9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
+- Il file `gioco.html` pesa circa 172 MB con 20 personaggi (circa 8-9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.

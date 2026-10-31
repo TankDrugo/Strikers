@@ -30,10 +30,10 @@ export function rng(seed) {
   return () => { s = (s + 0x6d2b79f5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
-// roster: game/assets/roster.json. Goalkeepers are the characters in slot 4 of the two teams.
+// roster: game/assets/roster.json. Goalkeepers are the characters in slot 4 of the teams and preset squads.
 export function cpuTeams(roster, key, count, seed) {
   const r = rng(seed);
-  const keepers = roster.teams.map((t) => t[4]);
+  const keepers = [...new Set([...roster.teams, ...(roster.squads || []).map((q) => q.slots)].map((t) => t[4]))];
   const fielders = roster.characters.map((c) => c.id).filter((id) => !keepers.includes(id));
   const names = [...(NAMES[key] || NAMES.jungle)];
   const out = [];

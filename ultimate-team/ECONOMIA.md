@@ -112,7 +112,7 @@ Come si legge:
 
 - Le ore per partita: il simulatore conta 9 partite all'ora (3 minuti di gioco più menu). Se le partite diventano più lunghe, i crediti all'ora scendono.
 - La forza della CPU nelle Divisioni dipende anche da come gioca l'IA, non solo dalla valutazione.
-- Con 15 personaggi (oggi) la collezione si completa in fretta: la curva è pensata per circa 40.
+- Con 20 personaggi (oggi) la collezione si completa in fretta: la curva è pensata per circa 40.
 
 ## Fonti
 

@@ -177,6 +177,56 @@
     "pas": 80,
     "con": 78
    }
+  },
+  "jak_paesibassi": {
+   "role": "ALA",
+   "team": "paesibassi",
+   "stats": {
+    "vel": 90,
+    "tir": 78,
+    "pas": 74,
+    "con": 62
+   }
+  },
+  "kairi_colombia": {
+   "role": "CEN",
+   "team": "colombia",
+   "stats": {
+    "vel": 76,
+    "tir": 66,
+    "pas": 83,
+    "con": 64
+   }
+  },
+  "piccolo_norvegia": {
+   "role": "POR",
+   "team": "norvegia",
+   "stats": {
+    "par": 84,
+    "rif": 82,
+    "usc": 80,
+    "vel": 70
+   }
+  },
+  "ratchet_inghilterra": {
+   "role": "ATT",
+   "team": "inghilterra",
+   "stats": {
+    "vel": 82,
+    "tir": 84,
+    "pas": 78,
+    "con": 66
+   }
+  },
+  "riku_uruguay": {
+   "role": "DIF",
+   "team": "uruguay",
+   "stats": {
+    "vel": 74,
+    "tir": 70,
+    "pas": 72,
+    "con": 82
+   }
   }
  }
 }

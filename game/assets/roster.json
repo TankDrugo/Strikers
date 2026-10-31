@@ -105,6 +105,41 @@
       "glb": "characters/goku_ssj_germania.glb",
       "clips": "characters/goku_ssj_germania.clips.json",
       "recolor": false
+    },
+    {
+      "id": "jak_paesibassi",
+      "name": "Jak",
+      "glb": "characters/jak_paesibassi.glb",
+      "clips": "characters/jak_paesibassi.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "kairi_colombia",
+      "name": "Kairi",
+      "glb": "characters/kairi_colombia.glb",
+      "clips": "characters/kairi_colombia.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "piccolo_norvegia",
+      "name": "Piccolo",
+      "glb": "characters/piccolo_norvegia.glb",
+      "clips": "characters/piccolo_norvegia.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "ratchet_inghilterra",
+      "name": "Ratchet",
+      "glb": "characters/ratchet_inghilterra.glb",
+      "clips": "characters/ratchet_inghilterra.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "riku_uruguay",
+      "name": "Riku",
+      "glb": "characters/riku_uruguay.glb",
+      "clips": "characters/riku_uruguay.clips.json",
+      "recolor": false
     }
   ],
   "teams": [
@@ -159,6 +194,18 @@
         "celestini_portiere"
       ],
       "captain": 1
+    },
+    {
+      "name": "Avventurieri",
+      "color": "#a66bff",
+      "slots": [
+        "riku_uruguay",
+        "kairi_colombia",
+        "jak_paesibassi",
+        "ratchet_inghilterra",
+        "piccolo_norvegia"
+      ],
+      "captain": 3
     }
   ]
 }

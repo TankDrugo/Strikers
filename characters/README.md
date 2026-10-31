@@ -9,6 +9,7 @@ Qui stanno i modelli originali dei personaggi, così come escono dal programma 3
 Fatto:
 - Celestini e Rivali in gioco: 10 personaggi, 5 ruoli per squadra
 - 5 personaggi nuovi con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ): in Gioco rapido (squadre Leggende e Nazionali, o formazione libera), Coppe, Ultimate Team e visualizzatore
+- Altri 5 (Jak, Kairi, Piccolo, Ratchet, Riku), squadra pronta Avventurieri con Piccolo in porta: 20 personaggi in tutto
 - Roster con i ruoli per posto in campo
 - Colori delle squadre su anelli, punteggio, tabellone e tifosi
 
@@ -32,10 +33,15 @@ Prossimo:
 | `dastardly_croazia.glb` | Croazia | ala (`ALA`, carta 74) | in gioco |
 | `goku_spagna.glb` | Spagna | attaccante (`ATT`, carta 84) | in gioco |
 | `goku_ssj_germania.glb` | Germania | attaccante (`ATT`, carta 90, numerate e 1/1) | in gioco |
+| `jak_paesibassi.glb` | Paesi Bassi | ala (`ALA`, carta 80) | in gioco |
+| `kairi_colombia.glb` | Colombia | centrocampista (`CEN`, carta 74) | in gioco |
+| `piccolo_norvegia.glb` | Norvegia | portiere (`POR`, carta 81) | in gioco |
+| `ratchet_inghilterra.glb` | Inghilterra | attaccante (`ATT`, carta 81) | in gioco |
+| `riku_uruguay.glb` | Uruguay | difensore (`DIF`, carta 77) | in gioco |
 
 Celestini in maglia celeste, Rivali in maglia verde. Il primo personaggio usato nel prototipo (`portiere.glb`) è stato tolto: resta nella storia del repository.
 
-Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I 5 personaggi singoli non hanno un posto in `teams`: stanno nelle squadre pronte di `squads` in `roster.json` (Leggende, Nazionali), nelle squadre CPU delle Coppe (che rimescolano tutto il roster), in Ultimate Team, e con l'editor della formazione ognuno può andare in qualsiasi posto. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
+Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I personaggi singoli non hanno un posto in `teams`: stanno nelle squadre pronte di `squads` in `roster.json` (Leggende, Nazionali, Avventurieri), nelle squadre CPU delle Coppe (che rimescolano tutto il roster; i portieri sono quelli del posto 4 di `teams` e `squads`, quindi un nuovo portiere va messo in porta in una squadra pronta), in Ultimate Team, e con l'editor della formazione ognuno può andare in qualsiasi posto. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
 
 I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in campo: 0 difensore e 1 centrocampista stanno indietro, 2 ala e 3 attaccante avanti, 4 è il portiere.
 
@@ -49,7 +55,7 @@ I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in 
    ```
 
    Scrive `game/assets/characters/<id>.glb` e `<id>.clips.json` e aggiunge il personaggio a `game/assets/roster.json`. Se il modello non ha uno scheletro Mixamo completo, lo salta e dice quali ossa mancano.
-3. Mettilo in squadra: in `game/assets/roster.json`, sotto `teams`, ogni squadra ha 5 posti. I posti 0–3 sono i giocatori di movimento, il posto 4 è il portiere.
+3. Mettilo in squadra: in `game/assets/roster.json`, sotto `teams` (le due squadre base) o `squads` (squadre pronte con nome, colore e capitano), ogni squadra ha 5 posti. I posti 0–3 sono i giocatori di movimento, il posto 4 è il portiere.
 
    ```json
    "teams": [
