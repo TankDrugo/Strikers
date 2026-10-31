@@ -11,8 +11,10 @@ Fatto:
 - Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco
 - Tutte le clip controllate su tutti i 25 personaggi
 - Scene .nis decodificate: corsa del tunnel e 2 esultanze per il walkout di Ultimate Team
+- Trigger `.trg` decodificati (`triggers.py`): 267 di Mario e 459 del portiere in `data/strikers_triggers.json`, con gli istanti delle parate
 
 Prossimo:
+- Usare i trigger nel gioco: tempi delle parate, contatto di tiri e passaggi, animazioni delle ulti
 - Comprimere le animazioni per alleggerire il gioco
 - Altre esultanze goal_winner dal disco (oggi 2 su 10)
 

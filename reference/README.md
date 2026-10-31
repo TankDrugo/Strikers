@@ -4,16 +4,17 @@ Misure e dinamiche di Super Mario Strikers, ricavate dai file del disco (version
 
 ## Stato
 
-**in verifica** · Misure e dinamiche del gioco originale, con le fonti. In corso il confronto di tutta la partita col codice ricostruito (`VERIFICA.md`).
+**verificato** · Misure e dinamiche del gioco originale, con le fonti; confronto completo col codice ricostruito e coi valori del disco (`VERIFICA.md`).
 
 Fatto:
 - Campo, porte, pallone, personaggi, portiere, tiri e contrasti misurati dal gioco originale, con le fonti
 - Confronto col codice ricostruito di parate, tiri, Super Strike, passaggi, contrasti, IA e animazioni (`VERIFICA.md`, 31 ottobre)
-- Corretto: la parata tira a sorte al momento del tiro (curva della difficoltà del tiratore), poi serve un'animazione che arrivi in tempo
+- Letti dal disco tutti i valori di `GameTweaks.ini`, dei 7 `Difficulty*.ini`, dei 13 personaggi e di `goalie.ini` (`STRIKERS_REFERENCE.md` §9 bis) e i trigger delle animazioni (`animation/data/strikers_triggers.json`)
+- Corretto: la parata tira a sorte al momento del tiro con la curva del livello scelto, uguale per le due squadre (1–55% secondo la barra), poi serve un'animazione che arrivi in tempo; carica del Super Strike 0,91 s
 
 Prossimo:
-- Leggere dal disco `GameTweaks.ini`, `Difficulty*.ini`, `mario.ini`, `goalie.ini` e i trigger `.trg`, poi correggere il gioco secondo `VERIFICA.md`
-- Da misurare: telecamera originale e altezza delle mesh
+- Correggere il gioco secondo `VERIFICA.md` (righe 1–7 per prime), poi le animazioni delle ulti
+- Da misurare: telecamera originale e altezza delle mesh; tiri dei gregari
 
 | File | Contenuto |
 |---|---|
