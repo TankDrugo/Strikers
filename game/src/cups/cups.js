@@ -1,6 +1,6 @@
 // Cups (stage 3 of interfaccia-gioco/DESIGN.md): four knockout cups, each a quote of a PS2 game, Normal and Hard
-// levels, three stars per match and a grade from D to Z. Until new characters arrive, CPU teams are the ten
-// existing characters remixed under new names and colours.
+// levels, three stars per match and a grade from D to Z. CPU teams remix every character of the roster under new
+// names and colours.
 
 // rounds: 3 = 8 teams, 4 = 16, 5 = 32. cpu: computer level per level (0 easy … 3 very hard), the final adds 0.5.
 export const CUPS = [

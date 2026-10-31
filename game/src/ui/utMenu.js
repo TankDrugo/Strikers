@@ -316,8 +316,7 @@ export function installUt(Menu) {
       await pk.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(1.6)', opacity: 0, filter: 'brightness(4)' }], { duration: 450, fill: 'forwards' }).finished;
       pk.remove();
       if (!walk) return finish();
-      const team = best.char.split('_')[0];
-      const clues = best.rarity === 'goldRare' ? [String(best.ovr)] : [t('ut.role.' + best.role), t('ut.team.' + team), String(best.ovr)];
+      const clues = best.rarity === 'goldRare' ? [String(best.ovr)] : [t('ut.role.' + best.role), t('ut.team.' + best.team), String(best.ovr)];
       if (best.rarity === 'numbered') clues.push(t('ut.numberedOf', { n: String(got[0].inst.serial).padStart(2, '0') }));
       if (best.rarity === 'oneOfOne') clues.push('1 / 1');
       for (const c of clues) await clue(c, c.includes('/') ? '#ffd21f' : '#fff');

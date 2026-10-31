@@ -8,11 +8,13 @@ Qui stanno i modelli originali dei personaggi, così come escono dal programma 3
 
 Fatto:
 - Celestini e Rivali in gioco: 10 personaggi, 5 ruoli per squadra
+- 5 personaggi nuovi con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ): in Coppe, Ultimate Team e visualizzatore
 - Roster con i ruoli per posto in campo
 - Colori delle squadre su anelli, punteggio, tabellone e tifosi
 
 Prossimo:
-- Nuovi personaggi: l'utente li ha già modellati e riggati, vanno aggiunti al gioco e a Ultimate Team (procedura sotto)
+- Gioco rapido: scelta della squadra (oggi solo Celestini contro Rivali), per far giocare anche i nuovi personaggi
+- Altri personaggi dell'utente (procedura sotto); con più personaggi il link online va pubblicato in più passi
 
 | File | Squadra | Ruolo (posto in `teams`) | Stato |
 |---|---|---|---|
@@ -26,10 +28,15 @@ Prossimo:
 | `rivali_ala.glb` | Rivali | ala (2) | in gioco |
 | `rivali_attaccante.glb` | Rivali | attaccante (3) | in gioco |
 | `rivali_portiere.glb` | Rivali | portiere (4) | in gioco |
+| `bigsmoke_belgio.glb` | Belgio | difensore (`DIF`, carta 76) | Coppe, Ultimate Team |
+| `crilin_giappone.glb` | Giappone | centrocampista (`CEN`, carta 78) | Coppe, Ultimate Team |
+| `dastardly_croazia.glb` | Croazia | ala (`ALA`, carta 74) | Coppe, Ultimate Team |
+| `goku_spagna.glb` | Spagna | attaccante (`ATT`, carta 84) | Coppe, Ultimate Team |
+| `goku_ssj_germania.glb` | Germania | attaccante (`ATT`, carta 90, numerate e 1/1) | Coppe, Ultimate Team |
 
 Celestini in maglia celeste, Rivali in maglia verde. Il primo personaggio usato nel prototipo (`portiere.glb`) è stato tolto: resta nella storia del repository.
 
-Tutti i modelli sono Mixamo, circa 30.000 triangoli. Nome dei file: `<squadra>_<ruolo>.glb`.
+Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I 5 personaggi singoli non hanno un posto in `teams`: giocano nelle squadre CPU delle Coppe (che rimescolano tutto il roster) e in Ultimate Team. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
 
 I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in campo: 0 difensore e 1 centrocampista stanno indietro, 2 ala e 3 attaccante avanti, 4 è il portiere.
 
@@ -54,6 +61,7 @@ I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in 
 
 4. Mettilo in Ultimate Team (senza questi due passi il personaggio gioca ma non ha carte):
    - in `ultimate-team/data/cards.json`, sotto `characters`, aggiungi `"<id>": {"role": "ATT", "stats": {"vel": 80, "tir": 82, "pas": 74, "con": 60}}` (ruoli `DIF`, `CEN`, `ALA`, `ATT`, `POR`; il portiere ha `par`, `rif`, `usc`, `vel`). La valutazione si calcola dalle statistiche: sotto 65 bronzo, 65-74 argento, da 75 oro con holo, da 85 anche numerate e 1/1;
+   - se la squadra o nazionale non è la parte dell'id prima del primo `_` (per esempio `goku_spagna`), aggiungi `"team": "spagna"`;
    - in `game/src/ui/i18n_ut.js` aggiungi il nome della carta, `'ut.char.<id>'`, in italiano e in inglese (e `'ut.team.<squadra>'` se la squadra è nuova).
 5. Ricompila e prova: `node game/tools/build.mjs`, poi `node game/tools/playtest.cjs` e `node game/tools/uttest.cjs`.
 6. Guarda le animazioni del nuovo personaggio nel visualizzatore del gioco (Impostazioni → Visualizzatore animazioni, scegli il personaggio in alto). Per confrontarle fotogramma per fotogramma con lo scheletro originale, servi la cartella principale del progetto (`python3 -m http.server 8000`) e apri `http://localhost:8000/game/dev/sheet.html?char=<id>&clips=idle,run_with_ball,gk_dive_catch_far_right_high`.

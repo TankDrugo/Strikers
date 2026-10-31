@@ -1,6 +1,6 @@
 # Gioco
 
-Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali, 10 personaggi), tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
+Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali) più 5 personaggi singoli con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ), che giocano in Coppe e Ultimate Team: 15 personaggi, tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
 
 ## Stato
 
@@ -43,7 +43,7 @@ Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
 node tools/build.mjs --web
 ```
 
-Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 48 MB, sotto il limite di 64 MB per pubblicazione.
+Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 74 MB con 15 personaggi, sopra il limite di 64 MB per pubblicazione: i file lasciati fuori da una pubblicazione restano online, quindi si mandano sempre `index.html`, `roster.json` e `walkout.json` più i soli personaggi nuovi o cambiati (se cambiano tutti, in più passi sullo stesso `url`).
 
 ## Comandi
 
@@ -153,4 +153,4 @@ Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md)
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Il file `gioco.html` pesa circa 91 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
+- Il file `gioco.html` pesa circa 131 MB con 15 personaggi (circa 8-9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.

@@ -70,6 +70,41 @@
       "glb": "characters/rivali_attaccante.glb",
       "clips": "characters/rivali_attaccante.clips.json",
       "recolor": false
+    },
+    {
+      "id": "bigsmoke_belgio",
+      "name": "Big Smoke",
+      "glb": "characters/bigsmoke_belgio.glb",
+      "clips": "characters/bigsmoke_belgio.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "crilin_giappone",
+      "name": "Crilin",
+      "glb": "characters/crilin_giappone.glb",
+      "clips": "characters/crilin_giappone.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "dastardly_croazia",
+      "name": "Dastardly",
+      "glb": "characters/dastardly_croazia.glb",
+      "clips": "characters/dastardly_croazia.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "goku_spagna",
+      "name": "Goku",
+      "glb": "characters/goku_spagna.glb",
+      "clips": "characters/goku_spagna.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "goku_ssj_germania",
+      "name": "Goku SSJ",
+      "glb": "characters/goku_ssj_germania.glb",
+      "clips": "characters/goku_ssj_germania.clips.json",
+      "recolor": false
     }
   ],
   "teams": [
