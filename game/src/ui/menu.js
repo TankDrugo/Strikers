@@ -215,7 +215,7 @@ export class Menu {
     l.el.querySelector('.tabs').innerHTML = `<button class="shoulder" data-dir="-1">LB</button>${names.map((n, i) => `<button class="tab${i === this.cur() ? ' on' : ''}" data-i="${i}">${n}</button>`).join('')}<button class="shoulder" data-dir="1">RB</button>`;
     // inside a mode the coloured tag says where you are; the lit tab says which section
     l.el.querySelector('.crumb').innerHTML = st.mode === 'main' ? names[st.tab] : `<span class="mode-tag">${this.modeName(st.mode)}</span>`;
-    l.el.querySelector('.chip-profile').innerHTML = `<span class="av" style="background:${p.color}">${esc(p.name[0].toUpperCase())}</span><div><b>${esc(p.name)}</b><small>${p.ultimate.credits.toLocaleString(getLang())} ${t('credits')}</small></div>`;
+    l.el.querySelector('.chip-profile').innerHTML = `<span class="av" style="background:${p.color}">${esc(p.name[0].toUpperCase())}</span><div><b>${esc(p.name)}</b><small>${p.ultimate.credits.toLocaleString(getLang())} ${t('credits')}${window.__PROVA ? ' · PROVA' : ''}</small></div>`;
     const id = this.viewId();
     const enter = st.mode === 'main' && (id === 'cups' || id === 'ut');
     l.el.querySelector('.footer').innerHTML = `<span><span class="btnA">A</span>${t(enter ? 'foot.enter' : 'foot.select')}</span>`

@@ -21,6 +21,8 @@ export function installUt(Menu) {
   P.club = function () {
     const p = save.active();
     const club = C.clubOf(p);
+    // test build (tools/build.mjs --prova): the club never runs short of credits, to try every pack
+    if (window.__PROVA && club.started && club.credits < window.__PROVA.credits / 2) club.credits = window.__PROVA.credits;
     const sold = C.settleMarket(club);
     if (sold.length) { save.store(); this.utSold = (this.utSold || []).concat(sold); }
     return club;

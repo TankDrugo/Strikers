@@ -11,6 +11,8 @@ Fatto:
 - Mercato simulato, Divisioni da 10 partite, obiettivi del giorno, Album con premi
 - Prova automatica (game/tools/uttest.cjs)
 - 15 personaggi con carta: anche Big Smoke, Crilin, Dastardly, Goku e Goku SSJ (nazionale nel walkout)
+- Capitano scelto nella Rosa (solo lui fa la Super Strike, mai il portiere)
+- Build di prova con 10 milioni di crediti sul link privato (`node game/tools/build.mjs --web --prova`, prova `game/tools/packtest.cjs`)
 
 Prossimo:
 - Più esultanze originali: servono altri file goal_winner dal disco (oggi 2 su 10)

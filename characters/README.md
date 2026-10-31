@@ -8,12 +8,11 @@ Qui stanno i modelli originali dei personaggi, così come escono dal programma 3
 
 Fatto:
 - Celestini e Rivali in gioco: 10 personaggi, 5 ruoli per squadra
-- 5 personaggi nuovi con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ): in Coppe, Ultimate Team e visualizzatore
+- 5 personaggi nuovi con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ): in Gioco rapido (squadre Leggende e Nazionali, o formazione libera), Coppe, Ultimate Team e visualizzatore
 - Roster con i ruoli per posto in campo
 - Colori delle squadre su anelli, punteggio, tabellone e tifosi
 
 Prossimo:
-- Gioco rapido: scelta della squadra (oggi solo Celestini contro Rivali), per far giocare anche i nuovi personaggi
 - Altri personaggi dell'utente (procedura sotto); con più personaggi il link online va pubblicato in più passi
 
 | File | Squadra | Ruolo (posto in `teams`) | Stato |
@@ -28,15 +27,15 @@ Prossimo:
 | `rivali_ala.glb` | Rivali | ala (2) | in gioco |
 | `rivali_attaccante.glb` | Rivali | attaccante (3) | in gioco |
 | `rivali_portiere.glb` | Rivali | portiere (4) | in gioco |
-| `bigsmoke_belgio.glb` | Belgio | difensore (`DIF`, carta 76) | Coppe, Ultimate Team |
-| `crilin_giappone.glb` | Giappone | centrocampista (`CEN`, carta 78) | Coppe, Ultimate Team |
-| `dastardly_croazia.glb` | Croazia | ala (`ALA`, carta 74) | Coppe, Ultimate Team |
-| `goku_spagna.glb` | Spagna | attaccante (`ATT`, carta 84) | Coppe, Ultimate Team |
-| `goku_ssj_germania.glb` | Germania | attaccante (`ATT`, carta 90, numerate e 1/1) | Coppe, Ultimate Team |
+| `bigsmoke_belgio.glb` | Belgio | difensore (`DIF`, carta 76) | in gioco |
+| `crilin_giappone.glb` | Giappone | centrocampista (`CEN`, carta 78) | in gioco |
+| `dastardly_croazia.glb` | Croazia | ala (`ALA`, carta 74) | in gioco |
+| `goku_spagna.glb` | Spagna | attaccante (`ATT`, carta 84) | in gioco |
+| `goku_ssj_germania.glb` | Germania | attaccante (`ATT`, carta 90, numerate e 1/1) | in gioco |
 
 Celestini in maglia celeste, Rivali in maglia verde. Il primo personaggio usato nel prototipo (`portiere.glb`) è stato tolto: resta nella storia del repository.
 
-Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I 5 personaggi singoli non hanno un posto in `teams`: giocano nelle squadre CPU delle Coppe (che rimescolano tutto il roster) e in Ultimate Team. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
+Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I 5 personaggi singoli non hanno un posto in `teams`: stanno nelle squadre pronte di `squads` in `roster.json` (Leggende, Nazionali), nelle squadre CPU delle Coppe (che rimescolano tutto il roster), in Ultimate Team, e con l'editor della formazione ognuno può andare in qualsiasi posto. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
 
 I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in campo: 0 difensore e 1 centrocampista stanno indietro, 2 ala e 3 attaccante avanti, 4 è il portiere.
 
