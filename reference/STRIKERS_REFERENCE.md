@@ -242,6 +242,58 @@ Le velocità sono misurate dal piede d'appoggio.
 
 ---
 
+## 9 bis. Valori letti dal disco (31 ottobre)
+
+Letti dall'ISO G4QP01 (`main.dol` SHA-1 `6dc83dc91d0a…`) col parser di `nlConfig.cpp` (chiavi senza maiuscole, `#` chiude il valore). Tra parentesi il valore di riserva del codice ricostruito.
+
+**`GameTweaks.ini` (`GameTweaks::Init`):** S2S Perfect First Button Time 0,84 · Second 0,16 · Perfect Distance Min 0,02 · Max 0,06 · 2 Button Press Yellow Dist **0,1** · S2S Slow Mo Min 0,68 · Max 0,78 · Perfect Pass Slow Mo **0,17** · Shot Windup Seconds 0,66 · Shot Net Open Angle 35 · Shot Ratings Weight **0,06** · Shot Net Open Weight 0,40 · Shot Player Distance Weight 0,25 · Chip Shot Goalie Out Weight 0,50 · Chip Shot Net Open Weight 0,40 · Shot Meter Max Onetimer Speed 0,8 · Shot Offset From Post 0,5 · Chip Shot Offset From Post 0,3 · High Shot Distance 19 · Shot Width/Height Variance 0,08/0,04 · Pass Speed Min/Max Dist 1/10 · Volley Pass Min Distance 3 · Slide Attack Maximum Time 0,35 · Fail Up Time 0,35 · Deceleration 0,66 · Do Slide Attack Radius 2,5 · Block Ball with LAttack under this Speed 0,5 · Fielder Attributes Weight **0** · Arrived In/Out Radius 0,8/1,3 · Near In/Out Radius 2,5/6,5 · Run To Strafe / Strafe To Run / Backwards To Strafe / Strafe To Backwards Angle 12000/8000/23000/25000 · Swap Controller No Swap Back Time 0,3, Dampen Facing Time 0,33. Mancano nel file e valgono la riserva: GetInPosition KeyFielder Min/Max Distance (2/12), At Target Position Min/Max Radius (0,3/0,6), At Target Remain At Position Min/Max Radius (1/4,5), Filter Dropoff Delay Time/Time (0,5/6). `FuzzyTweaks.ini`: Shot Distance Min 20, Max 7,5 (termine "distanza" del valore della barra).
+
+**Valore della barra** (`ShotMeter.cpp` `CalcScoreValue`): `Shooting × 0,06 + carica × 0,29 + porta aperta × 0,40 + vicinanza × 0,25` (vicinanza 0 a 20 m, 1 a 7,5 m; porta aperta su 35°). Pallonetto: `Shooting × 0,06 + carica × 0,04 + portiere fuori × 0,5 + porta aperta × 0,4`.
+
+**Personaggi (`FielderTweaks::Init`, `mario.ini` e gli altri):** S2S 1st Jump Frame 3 · S2S Nis Begin Frame 26 · S2S Kick Frame 27 · S2S Nis End Frame 106 (tutti i 13 personaggi uguali). Shooting 1 (capitani), 0,8 (superteam), 0 (gregari); Passing 0,6, Dekeing 0,6, Aggression 0,6 (capitani; gregari 0,5 di riserva). Shot Min/Max Speed 29/34, Chip Shot Min/Max Speed 8,5/15 (gregari: 0, riserva). WB Run Turbo Level 2 Speed 7,5 (gregari 7,4). Shot Windup Direction Seek Speed/Falloff 75000/4000 e Shot Windup Decel 6 non stanno nei `.ini`: sono in `g_pTweaks` (`CharacterTweaks.cpp`), trovato identico in `main.dol`.
+
+**Portiere (`GoalieTweaks::Init`, `goalie.ini`):** Catch Save Max Speed 0,3 · Fatigue Catch Threshold **90** (riserva 60) · Miss Save Delay 0,1 · Min/Max STS Stun Time 1/2 · Lob Shot Stumble Chance 0,3 · Catch Save Tolerance 0,6 · Intercept Save Tolerance 0,5 · Goalie Ball Time 2 · Save Turn Speed 100000, Falloff 4000 · Save Back Run Scale 1,5 · Save Ignore Margin 1 · Loose Ball Shot Distance 10 · Pounce Range 1 · STS Attack Close/Max Distance 1/**2** · STS Attack Chance Per Frame 0,01 · STS Attack Ball Speed Multiplier 0,3 · Fatica: default 10, presa 5, presa in tuffo 10, deviazione 7, deviazione in tuffo 15, pugno 7, gamba 6, STS parata 15, STS stordimento 25; recupero 2/s · High/Low Getup Energy 80/20 · Low Getup Speed 0,5 · Low Strafe Speed 0,8 · Throwing Turn Speed 50000.
+
+**Difficoltà (`SkillTweaks::Init`, `GameTweaks.cpp`).** Importante (`Game.cpp` `ApplyDifficulty`): ogni squadra legge la sua tabella (`DifficultyHuman.ini` se ha giocatori umani), ma **Shot Value/Chance, STS Windup Time, Attack Carrier Range, Loose Ball Range e Goalie Intercept Pass vengono poi sovrascritti per entrambe le squadre** con quelli del livello scelto (Braindead = allenamento, 0 Rookie, 1 Professional, 2 Superstar, 3 Legend). Il file Superhuman non è mai usato dai menu. Un valore assente vale 0,5 (*corsivo*).
+
+| Valore | Braindead | 0 | 1 | 2 | 3 | Superhuman | Human |
+|---|---|---|---|---|---|---|---|
+| Avoidance Effectiveness | 0,1 | 0,01 | 0,5 | 0,85 | 1 | 1 | 0,5 |
+| Deke Chance | 0 | 0 | 0,358 | 0,717 | 1 | 1 | 0,65 |
+| Ground Pass Chance | 0,01 | 0,05 | 0,3 | 0,672 | 0,85 | 1 | 0,75 |
+| Volley Pass Chance | 0 | 0,05 | 0,3 | 0,672 | 0,85 | 1 | 0,7 |
+| Shooting Chance | 0,01 | 0,1 | 0,525 | 0,95 | 1 | 1 | 0,95 |
+| Chip Shot Chance | 0 | 0,05 | 0,486 | 0,922 | 0,9 | 1 | 0,5 |
+| Captain ShootToScore Chance | 0 | 0,1 | 0,5 | 0,9 | 1 | 1 | 1 |
+| Ground / Volley OneTimer Chance | 0 / 0 | 0,05 / 0,05 | 0,475 / 0,525 | 0,9 / 1 | 1 / 1 | 1 / 1 | 0,8 / 0,8 |
+| OneTouch Ground = Volley Pass Chance | 0 | 0,15 | 0,25 | 0,694 | 0,85 | 1 | 0,5 |
+| PassReceive Hit / Powerup Chance | 0 / 0 | 0,1 / 0,1 | 0,3 / 0,3 | 0,683 / 0,683 | 0,8 / 1 | 1 / 1 | 0 / 0 |
+| Windup Deke / Pass / Powerup Chance | 0 / 0 / 0 | 0 / 0 / 0 | 0,25 / 0,25 / 0,25 | 0,667 / 0,672 / 0,65 | 1 / 0,983 / 1 | 1 | 0 |
+| Cut And Break Chance | 0 | 0,01 | 0,61 | 0,72 | 1 | 1 | 1 |
+| Turbo With Ball Chance | 0 | 0 | 0,333 | 0,667 | 1 | 1 | 0,75 |
+| Reaction | *0,5* | 0 | 0,25 | 0,667 | 1 | 1 | *0,5* |
+| Block Pass / Block Shot Chance | 0 / 0 | 0,02 / 0,02 | 0,15 / 0,2 | 0,55 / 0,55 | 1 / 1 | 1 | 0 / 0 |
+| Slide Attack / Heavy Attack Chance | 0 / 0 | 0,02 / 0,02 | 0,15 / 0,15 | 0,5 / 0,5 | 1 / 0,95 | 1 | 0 / 0 |
+| Defend VolleyPass Chance | 0 | 0,05 | 0,15 | 0,5 | 0,95 | 1 | 0 |
+| Marking Effectiveness | 0 | 0,05 | 0,2 | 0,55 | 1 | 1 | 0,6 |
+| Loose Heavy Attack / Shot Chance | 0 / 0 | 0,01 / 0,05 | 0,15 / 0,2 | 0,5 / 0,717 | 0,95 / 1 | 1 | 0 / 0 |
+| Loose Ground = Volley Pass Chance | 0 | 0,05 | 0,33 | 0,694 | 1 | 1 | 0 |
+| Captain S2S Perfect First = Second Button Chance | 0 | 0,2 | 0,33 | 0,6 | 0,975 | 1 | 0,4 |
+| Shot Value 1 / 2 / 3 | 0,25 / 0,6 / 0,75 | = | = | = | = | = | = |
+| Shot Chance 0 / 1 / 2 / 3 / 4 (%) | 1 / 1 / 15 / 35 / 55 | 1 / **5** / **20** / 35 / 55 | 1 / **3** / **17,5** / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 |
+| STS Windup Time | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 |
+| Attack Carrier Range | 1 | 2,5 | 3 | 4 | 4 | 4 | 4 |
+| Loose Ball Range | −1 | −1 | 1 | 2 | 2 | 2 | 2 |
+| Goalie Intercept Pass | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
+| Goalie Deke Chance | *0,5* | 0,5 | 0,5 | 0,5 | 0,5 | *0,5* | *0,5* |
+| Goalie Deke Speed | *0,5* | 1 | 1,1 | 1,2 | 1,3 | *0,5* | *0,5* |
+
+Curva del tiro a sorte (`cFielder::CalcRegularShot`): interpolazione lineare a tratti tra i punti (0; C0), (V1; C1), (V2; C2), (V3; C3), (1; C4); il portiere deve sbagliare se `100 × caso < valore`. Esempio Rookie: barra 0,25 → 5%, 0,6 → 20%, 0,75 → 35%, 1 → 55%. Carica del Super Strike: 0,66 + 0,25 = **0,91 s** a ogni livello. Uso dei power-up (`Offensive/Defensive/Loose <powerup> Chance`): nei file, non riportati qui; il gioco ignora le righe `Tornado`.
+
+**Trigger delle animazioni:** `animation/data/strikers_triggers.json` (script `animation/triggers.py`): `mario.trg` 267 trigger su 72 clip (8 clip che non abbiamo), `MarioGoalie.trg` 459 trigger su 81 clip; 53 clip del portiere hanno il trigger di contatto della parata (`0xCF84E7CD`), 35 i tre milestone.
+
+---
+
 ## 10. Cosa resta da misurare
 
 - **L'altezza esatta delle mesh**, dalla suola alla cima della testa: serve leggere i modelli `.glg`, che non sono ancora stati estratti.

@@ -1,0 +1,4409 @@
+{
+ "source": "art/animation/*.trg, disc G4QP01; t = frame / clip keys (normalized clip time)",
+ "event_names": {
+  "0x045424b9": "save_milestone_3",
+  "0x0f9524ba": "save_milestone_1",
+  "0x56264bbe": "save_milestone_0",
+  "0xcf84e7cd": "save_contact"
+ },
+ "characters": {
+  "mario": {
+   "wave": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xc5408ac8",
+      "frame": 21.0,
+      "t": 0.75
+     }
+    ]
+   },
+   "0x017155d7": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 4.5,
+      "t": null
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 10.7,
+      "t": null
+     }
+    ]
+   },
+   "sts_hit_react": {
+    "keys": 83,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 15.0,
+      "t": 0.18072
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 15.0,
+      "t": 0.18072
+     }
+    ]
+   },
+   "windup_kick": {
+    "keys": 22,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 2.0,
+      "t": 0.09091
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 16.0,
+      "t": 0.72727
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 16.0,
+      "t": 0.72727
+     }
+    ]
+   },
+   "onetimer_ground_1200": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 6.0,
+      "t": 0.21429
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 6.0,
+      "t": 0.21429
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 9.3,
+      "t": 0.33214
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 10.0,
+      "t": 0.35714
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 24.0,
+      "t": 0.85714
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 24.0,
+      "t": 0.85714
+     }
+    ]
+   },
+   "bomb_react_600": {
+    "keys": 81,
+    "triggers": [
+     {
+      "event": "0xa1638abb",
+      "frame": 26.0,
+      "t": 0.32099
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 26.0,
+      "t": 0.32099
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 41.0,
+      "t": 0.50617
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 41.0,
+      "t": 0.50617
+     }
+    ]
+   },
+   "strafe_hard_stop_right": {
+    "keys": 17,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 7.0,
+      "t": 0.41176
+     }
+    ]
+   },
+   "0x182df553": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.0,
+      "t": null
+     }
+    ]
+   },
+   "slide_tackle_react_1200": {
+    "keys": 51,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 2.0,
+      "t": 0.03922
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 13.0,
+      "t": 0.2549
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 13.0,
+      "t": 0.2549
+     }
+    ]
+   },
+   "pass_1200": {
+    "keys": 10,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 8.1,
+      "t": 0.81
+     }
+    ]
+   },
+   "arm_powerup": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 7.0,
+      "t": 0.30435
+     },
+     {
+      "event": "0x4ddc1c64",
+      "frame": 7.0,
+      "t": 0.30435
+     },
+     {
+      "event": "0x0f3e9247",
+      "frame": 18.0,
+      "t": 0.78261
+     }
+    ]
+   },
+   "pass_300": {
+    "keys": 10,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 8.1,
+      "t": 0.81
+     }
+    ]
+   },
+   "pass_600": {
+    "keys": 6,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 3.5,
+      "t": 0.58333
+     }
+    ]
+   },
+   "run_strafe_right": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 2.0,
+      "t": 0.10526
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 11.5,
+      "t": 0.60526
+     }
+    ]
+   },
+   "run_backwards": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 1.0,
+      "t": 0.05263
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 9.7,
+      "t": 0.51053
+     }
+    ]
+   },
+   "run_with_ball": {
+    "keys": 17,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 6.5,
+      "t": 0.38235
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 13.4,
+      "t": 0.78824
+     }
+    ]
+   },
+   "hit_react_300": {
+    "keys": 57,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 1.0,
+      "t": 0.01754
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0xac6452c8",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0x1333263b",
+      "frame": 10.0,
+      "t": 0.17544
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 15.0,
+      "t": 0.26316
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 22.0,
+      "t": 0.38596
+     },
+     {
+      "event": "0x6d249451",
+      "frame": 28.0,
+      "t": 0.49123
+     }
+    ]
+   },
+   "hit_react_600": {
+    "keys": 57,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 1.0,
+      "t": 0.01754
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 7.5,
+      "t": 0.13158
+     },
+     {
+      "event": "0xac6452c8",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0x1333263b",
+      "frame": 10.0,
+      "t": 0.17544
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 15.0,
+      "t": 0.26316
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 22.0,
+      "t": 0.38596
+     },
+     {
+      "event": "0x6d249451",
+      "frame": 28.0,
+      "t": 0.49123
+     }
+    ]
+   },
+   "deke_300": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 6.0,
+      "t": 0.33333
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 9.0,
+      "t": 0.5
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 12.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 12.6,
+      "t": 0.7
+     }
+    ]
+   },
+   "0x34e5594d": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0x77935c1c",
+      "frame": 7.0,
+      "t": null
+     }
+    ]
+   },
+   "hard_stop_recover_with_ball": {
+    "keys": 10,
+    "triggers": [
+     {
+      "event": "0x6580e428",
+      "frame": 0.0,
+      "t": 0.0
+     }
+    ]
+   },
+   "backwards_to_forwards_stop": {
+    "keys": 4,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 3.0,
+      "t": 0.75
+     }
+    ]
+   },
+   "hard_stop_turn_with_ball": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0x6580e428",
+      "frame": 0.0,
+      "t": 0.0
+     }
+    ]
+   },
+   "bomb_react_1200": {
+    "keys": 81,
+    "triggers": [
+     {
+      "event": "0xa1638abb",
+      "frame": 29.0,
+      "t": 0.35802
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 29.0,
+      "t": 0.35802
+     }
+    ]
+   },
+   "turbo_turn_with_ball_300": {
+    "keys": 10,
+    "triggers": [
+     {
+      "event": "0x6580e428",
+      "frame": 2.0,
+      "t": 0.2
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 6.5,
+      "t": 0.65
+     }
+    ]
+   },
+   "turbo_turn_with_ball_600": {
+    "keys": 13,
+    "triggers": [
+     {
+      "event": "0x6580e428",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 6.2,
+      "t": 0.47692
+     },
+     {
+      "event": "0x30755e7b",
+      "frame": 8.6,
+      "t": 0.66154
+     }
+    ]
+   },
+   "captain_shoot_to_score": {
+    "keys": 127,
+    "triggers": [
+     {
+      "event": "0x1df278fa",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x05120c87",
+      "frame": 14.0,
+      "t": 0.11024
+     },
+     {
+      "event": "0x0a9ad93f",
+      "frame": 16.0,
+      "t": 0.12598
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 16.0,
+      "t": 0.12598
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 16.0,
+      "t": 0.12598
+     },
+     {
+      "event": "0x2c8dabfa",
+      "frame": 21.0,
+      "t": 0.16535
+     },
+     {
+      "event": "0x85181b83",
+      "frame": 24.0,
+      "t": 0.18898
+     },
+     {
+      "event": "0xee2e062c",
+      "frame": 67.0,
+      "t": 0.52756
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 67.0,
+      "t": 0.52756
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 71.0,
+      "t": 0.55906
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 75.0,
+      "t": 0.59055
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 79.0,
+      "t": 0.62205
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 85.0,
+      "t": 0.66929
+     },
+     {
+      "event": "0x18f99186",
+      "frame": 87.0,
+      "t": 0.68504
+     },
+     {
+      "event": "0xfd96314e",
+      "frame": 104.0,
+      "t": 0.8189
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 116.0,
+      "t": 0.91339
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 116.0,
+      "t": 0.91339
+     }
+    ]
+   },
+   "0x54e0b9c0": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0xe36392c8",
+      "frame": 3.6,
+      "t": null
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 15.7,
+      "t": null
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 10.4,
+      "t": null
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 21.1,
+      "t": null
+     }
+    ]
+   },
+   "idle_onetimer_ground_1200": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 7.2,
+      "t": 0.26667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.77778
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 21.0,
+      "t": 0.77778
+     }
+    ]
+   },
+   "0x5f79f604": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 7.0,
+      "t": null
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 9.0,
+      "t": null
+     }
+    ]
+   },
+   "onetimer_air_300": {
+    "keys": 26,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 5.5,
+      "t": 0.21154
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 6.0,
+      "t": 0.23077
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 8.0,
+      "t": 0.30769
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 10.4,
+      "t": 0.4
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 23.0,
+      "t": 0.88462
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 23.0,
+      "t": 0.88462
+     }
+    ]
+   },
+   "onetimer_air_600": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 5.5,
+      "t": 0.2037
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 6.0,
+      "t": 0.22222
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 8.0,
+      "t": 0.2963
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 10.3,
+      "t": 0.38148
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 24.0,
+      "t": 0.88889
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 24.0,
+      "t": 0.88889
+     }
+    ]
+   },
+   "pass_receive_ground_1200": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 5.0,
+      "t": 0.3125
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 14.1,
+      "t": 0.88125
+     }
+    ]
+   },
+   "banana_peel_react_1200": {
+    "keys": 51,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 2.0,
+      "t": 0.03922
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.27451
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 14.0,
+      "t": 0.27451
+     }
+    ]
+   },
+   "pass_receive_air_onetimer_300": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 2.0,
+      "t": 0.10526
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.73684
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.0,
+      "t": 0.73684
+     }
+    ]
+   },
+   "pass_receive_air_onetimer_600": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 2.0,
+      "t": 0.10526
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.73684
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.0,
+      "t": 0.73684
+     }
+    ]
+   },
+   "onetimer_air_1200": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 6.5,
+      "t": 0.21667
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 7.0,
+      "t": 0.23333
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 10.3,
+      "t": 0.34333
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.66667
+     }
+    ]
+   },
+   "idle_onetimer_air_300": {
+    "keys": 37,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 2.5,
+      "t": 0.06757
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.08108
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 8.0,
+      "t": 0.21622
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 9.2,
+      "t": 0.24865
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 18.0,
+      "t": 0.48649
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 18.0,
+      "t": 0.48649
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 18.0,
+      "t": 0.48649
+     }
+    ]
+   },
+   "idle_onetimer_air_600": {
+    "keys": 37,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 2.5,
+      "t": 0.06757
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.08108
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 7.0,
+      "t": 0.18919
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 9.2,
+      "t": 0.24865
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 19.0,
+      "t": 0.51351
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 19.0,
+      "t": 0.51351
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 19.0,
+      "t": 0.51351
+     }
+    ]
+   },
+   "idle_onetimer_air_1200": {
+    "keys": 35,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 2.5,
+      "t": 0.07143
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.08571
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 7.0,
+      "t": 0.2
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 10.2,
+      "t": 0.29143
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 17.0,
+      "t": 0.48571
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 17.0,
+      "t": 0.48571
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 17.0,
+      "t": 0.48571
+     }
+    ]
+   },
+   "idle_to_run_turn_300": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 6.5,
+      "t": 0.59091
+     }
+    ]
+   },
+   "slide_tackle_up_fail": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 4.0,
+      "t": 0.13333
+     }
+    ]
+   },
+   "turbo_with_ball_level_1": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0xe36392c8",
+      "frame": 4.0,
+      "t": 0.17391
+     },
+     {
+      "event": "0xc28e3737",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0x9de91576",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 10.5,
+      "t": 0.45652
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 12.5,
+      "t": 0.54348
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 16.0,
+      "t": 0.69565
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 16.7,
+      "t": 0.72609
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 21.0,
+      "t": 0.91304
+     }
+    ]
+   },
+   "turbo_with_ball_level_2": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0xe36392c8",
+      "frame": 4.0,
+      "t": 0.14815
+     },
+     {
+      "event": "0xc28e3737",
+      "frame": 6.0,
+      "t": 0.22222
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 11.0,
+      "t": 0.40741
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 13.5,
+      "t": 0.5
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 15.7,
+      "t": 0.58148
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 19.7,
+      "t": 0.72963
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 21.0,
+      "t": 0.77778
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 25.1,
+      "t": 0.92963
+     }
+    ]
+   },
+   "turbo_with_ball_level_3": {
+    "keys": 32,
+    "triggers": [
+     {
+      "event": "0x3741435b",
+      "frame": 4.1,
+      "t": 0.12812
+     },
+     {
+      "event": "0xc28e3737",
+      "frame": 6.0,
+      "t": 0.1875
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 11.1,
+      "t": 0.34688
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 12.4,
+      "t": 0.3875
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 16.1,
+      "t": 0.50313
+     },
+     {
+      "event": "0xb26140f5",
+      "frame": 16.5,
+      "t": 0.51562
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 21.1,
+      "t": 0.65938
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 26.0,
+      "t": 0.8125
+     },
+     {
+      "event": "0xe36392c8",
+      "frame": 30.1,
+      "t": 0.94063
+     }
+    ]
+   },
+   "onetimer_ground_300": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 6.0,
+      "t": 0.21429
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 6.0,
+      "t": 0.21429
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 9.3,
+      "t": 0.33214
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 10.0,
+      "t": 0.35714
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 24.0,
+      "t": 0.85714
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 24.0,
+      "t": 0.85714
+     }
+    ]
+   },
+   "onetimer_ground_600": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 5.7,
+      "t": 0.20357
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 5.7,
+      "t": 0.20357
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 9.3,
+      "t": 0.33214
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 10.5,
+      "t": 0.375
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 24.0,
+      "t": 0.85714
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 24.0,
+      "t": 0.85714
+     }
+    ]
+   },
+   "slide_tackle_react_300": {
+    "keys": 51,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 2.0,
+      "t": 0.03922
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 13.0,
+      "t": 0.2549
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 13.0,
+      "t": 0.2549
+     }
+    ]
+   },
+   "slide_tackle_react_600": {
+    "keys": 51,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 2.0,
+      "t": 0.03922
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.27451
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 14.0,
+      "t": 0.27451
+     }
+    ]
+   },
+   "0xa09a5084": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 14.3,
+      "t": null
+     }
+    ]
+   },
+   "idle_pass_receive_air_1200": {
+    "keys": 24,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 3.0,
+      "t": 0.125
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.125
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 17.0,
+      "t": 0.70833
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 17.0,
+      "t": 0.70833
+     }
+    ]
+   },
+   "run_to_idle": {
+    "keys": 12,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 7.0,
+      "t": 0.58333
+     }
+    ]
+   },
+   "0xb3e350f4": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 14.3,
+      "t": null
+     }
+    ]
+   },
+   "0xb4cadf8b": {
+    "keys": null,
+    "triggers": [
+     {
+      "event": "0x6580e428",
+      "frame": 0.0,
+      "t": null
+     }
+    ]
+   },
+   "idle_to_run_with_ball_turn_300": {
+    "keys": 13,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.0,
+      "t": 0.61538
+     }
+    ]
+   },
+   "idle_to_run_with_ball_turn_600": {
+    "keys": 17,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 6.0,
+      "t": 0.35294
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 12.5,
+      "t": 0.73529
+     }
+    ]
+   },
+   "squash": {
+    "keys": 121,
+    "triggers": [
+     {
+      "event": "0x97831fa1",
+      "frame": 3.0,
+      "t": 0.02479
+     },
+     {
+      "event": "0x5251a784",
+      "frame": 24.0,
+      "t": 0.19835
+     },
+     {
+      "event": "0x00266a23",
+      "frame": 22.0,
+      "t": 0.18182
+     },
+     {
+      "event": "0x97831fa1",
+      "frame": 25.0,
+      "t": 0.20661
+     }
+    ]
+   },
+   "run_with_ball_to_idle": {
+    "keys": 20,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 6.0,
+      "t": 0.3
+     }
+    ]
+   },
+   "hit_react_1200": {
+    "keys": 57,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 1.0,
+      "t": 0.01754
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 6.5,
+      "t": 0.11404
+     },
+     {
+      "event": "0xac6452c8",
+      "frame": 6.0,
+      "t": 0.10526
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 7.0,
+      "t": 0.12281
+     },
+     {
+      "event": "0x1333263b",
+      "frame": 9.0,
+      "t": 0.15789
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 15.0,
+      "t": 0.26316
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 22.0,
+      "t": 0.38596
+     },
+     {
+      "event": "0x6d249451",
+      "frame": 25.0,
+      "t": 0.4386
+     }
+    ]
+   },
+   "pass_receive_air_1200": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 3.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 17.0,
+      "t": 0.62963
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 17.0,
+      "t": 0.62963
+     }
+    ]
+   },
+   "windup_powershot": {
+    "keys": 34,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 2.0,
+      "t": 0.05882
+     },
+     {
+      "event": "0xd4c678a2",
+      "frame": 2.0,
+      "t": 0.05882
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 22.0,
+      "t": 0.64706
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 22.0,
+      "t": 0.64706
+     }
+    ]
+   },
+   "pass_receive_air_onetimer_1200": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 2.0,
+      "t": 0.10526
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.73684
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.0,
+      "t": 0.73684
+     }
+    ]
+   },
+   "pass_receive_air_300": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 3.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x0c3a8b39",
+      "frame": 3.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 17.0,
+      "t": 0.62963
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 17.0,
+      "t": 0.62963
+     }
+    ]
+   },
+   "idle_onetimer_ground_300": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 7.2,
+      "t": 0.26667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.5,
+      "t": 0.75926
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.5,
+      "t": 0.75926
+     }
+    ]
+   },
+   "idle_onetimer_ground_600": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0xef7b7383",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x31ddc064",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x5f5115ce",
+      "frame": 7.2,
+      "t": 0.26667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.5,
+      "t": 0.75926
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.5,
+      "t": 0.75926
+     }
+    ]
+   },
+   "pass_receive_ground_300": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 5.0,
+      "t": 0.3125
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 14.1,
+      "t": 0.88125
+     }
+    ]
+   },
+   "pass_receive_ground_600": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 8.0,
+      "t": 0.44444
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 15.8,
+      "t": 0.87778
+     }
+    ]
+   },
+   "run_forwards_to_run_backwards": {
+    "keys": 9,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 6.0,
+      "t": 0.66667
+     }
+    ]
+   },
+   "turbo_run": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0xe36392c8",
+      "frame": 3.9,
+      "t": 0.35455
+     },
+     {
+      "event": "0x3741435b",
+      "frame": 9.3,
+      "t": 0.84545
+     }
+    ]
+   },
+   "banana_peel_react_600": {
+    "keys": 51,
+    "triggers": [
+     {
+      "event": "0x73819990",
+      "frame": 0.0,
+      "t": 0.0
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 2.0,
+      "t": 0.03922
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 16.0,
+      "t": 0.31373
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 16.0,
+      "t": 0.31373
+     }
+    ]
+   },
+   "slide_tackle_1200": {
+    "keys": 5,
+    "triggers": [
+     {
+      "event": "0x002ef345",
+      "frame": 1.0,
+      "t": 0.2
+     }
+    ]
+   },
+   "arm_powerup_600": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0x4ddc1c64",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0x0f3e9247",
+      "frame": 18.0,
+      "t": 0.78261
+     }
+    ]
+   }
+  },
+  "mariogoalie": {
+   "gk_trap_attack": {
+    "keys": 10,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.4
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.5,
+      "t": 0.45
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 6.5,
+      "t": 0.65
+     },
+     {
+      "event": "0xac6452c8",
+      "frame": 7.0,
+      "t": 0.7
+     }
+    ]
+   },
+   "gk_protect_front": {
+    "keys": 21,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 1.0,
+      "t": 0.04762
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 1.1,
+      "t": 0.05238
+     },
+     {
+      "event": "0x12d0b9bf",
+      "frame": 3.0,
+      "t": 0.14286
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 4.5,
+      "t": 0.21429
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 9.6,
+      "t": 0.45714
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 10.0,
+      "t": 0.47619
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 15.7,
+      "t": 0.74762
+     }
+    ]
+   },
+   "gk_protect_right": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0xacdb2215",
+      "frame": 2.5,
+      "t": 0.13889
+     },
+     {
+      "event": "0x12d0b9bf",
+      "frame": 4.0,
+      "t": 0.22222
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 8.5,
+      "t": 0.47222
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 15.5,
+      "t": 0.86111
+     }
+    ]
+   },
+   "gk_jog_forward_with_ball_1200": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 5.5,
+      "t": 0.30556
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 7.5,
+      "t": 0.41667
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 14.9,
+      "t": 0.82778
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 16.2,
+      "t": 0.9
+     }
+    ]
+   },
+   "gk_protect_left": {
+    "keys": 14,
+    "triggers": [
+     {
+      "event": "0x12d0b9bf",
+      "frame": 2.0,
+      "t": 0.14286
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 2.0,
+      "t": 0.14286
+     }
+    ]
+   },
+   "gk_dive_catch_600": {
+    "keys": 61,
+    "triggers": [
+     {
+      "event": "0x7d452499",
+      "frame": 0.5,
+      "t": 0.0082
+     },
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.06557
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.5,
+      "t": 0.10656
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.16393
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.5,
+      "t": 0.2377
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 15.0,
+      "t": 0.2459
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 20.0,
+      "t": 0.32787
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 20.0,
+      "t": 0.32787
+     }
+    ]
+   },
+   "gk_dive_catch_900": {
+    "keys": 61,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.06557
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.5,
+      "t": 0.10656
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.16393
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.5,
+      "t": 0.2377
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 15.0,
+      "t": 0.2459
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 20.0,
+      "t": 0.32787
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 20.0,
+      "t": 0.32787
+     }
+    ]
+   },
+   "gk_foot_flick_fwd": {
+    "keys": 33,
+    "triggers": [
+     {
+      "event": "0x7d452499",
+      "frame": 3.5,
+      "t": 0.10606
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 7.0,
+      "t": 0.21212
+     },
+     {
+      "event": "0x9913faa3",
+      "frame": 8.0,
+      "t": 0.24242
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 9.2,
+      "t": 0.27879
+     },
+     {
+      "event": "0x09656d24",
+      "frame": 21.5,
+      "t": 0.65152
+     }
+    ]
+   },
+   "gk_stand_defl_center_punch_high": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.9,
+      "t": 0.12609
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.1,
+      "t": 0.22174
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 18.0,
+      "t": 0.78261
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 18.0,
+      "t": 0.78261
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 18.0,
+      "t": 0.78261
+     }
+    ]
+   },
+   "gk_recover_with_ball_side": {
+    "keys": 20,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 9.5,
+      "t": 0.475
+     }
+    ]
+   },
+   "gk_catch_super_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.16667
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.1,
+      "t": 0.17
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 10.2,
+      "t": 0.34
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 10.2,
+      "t": 0.34
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.5,
+      "t": 0.35
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 21.0,
+      "t": 0.7
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.7
+     }
+    ]
+   },
+   "gk_catch_above": {
+    "keys": 24,
+    "triggers": [
+     {
+      "event": "0x8f5f00cf",
+      "frame": 6.2,
+      "t": 0.25833
+     },
+     {
+      "event": "0x8f5ed456",
+      "frame": 7.3,
+      "t": 0.30417
+     }
+    ]
+   },
+   "gk_stand_defl_right_parry_super_high_jump": {
+    "keys": 31,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.12903
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.8,
+      "t": 0.1871
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.9,
+      "t": 0.19032
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.32258
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 20.5,
+      "t": 0.66129
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.5,
+      "t": 0.66129
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.5,
+      "t": 0.66129
+     }
+    ]
+   },
+   "gk_run_to_position": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 14.0,
+      "t": 0.875
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.0,
+      "t": 0.5
+     }
+    ]
+   },
+   "gk_dvng_defl_parry_far_right_low": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.1,
+      "t": 0.26522
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.43478
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 19.0,
+      "t": 0.82609
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.86957
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.86957
+     }
+    ]
+   },
+   "gk_dvng_defl_parry_far_right_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.7,
+      "t": 0.24783
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.8,
+      "t": 0.25217
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.43478
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 19.0,
+      "t": 0.82609
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.86957
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 21.0,
+      "t": 0.91304
+     }
+    ]
+   },
+   "gk_stand_defl_center_parry_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.2,
+      "t": 0.20667
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.3,
+      "t": 0.21
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 9.0,
+      "t": 0.3
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 18.0,
+      "t": 0.6
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 18.0,
+      "t": 0.6
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 18.0,
+      "t": 0.6
+     }
+    ]
+   },
+   "gk_catch_miss_chip": {
+    "keys": 45,
+    "triggers": [
+     {
+      "event": "0x8f6b5826",
+      "frame": 6.6,
+      "t": 0.14667
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 6.6,
+      "t": 0.14667
+     },
+     {
+      "event": "0x7bee7ea1",
+      "frame": 10.0,
+      "t": 0.22222
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 10.5,
+      "t": 0.23333
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 12.0,
+      "t": 0.26667
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 12.5,
+      "t": 0.27778
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 15.0,
+      "t": 0.33333
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 17.5,
+      "t": 0.38889
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 18.0,
+      "t": 0.4
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 19.0,
+      "t": 0.42222
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 21.0,
+      "t": 0.46667
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 24.5,
+      "t": 0.54444
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 29.0,
+      "t": 0.64444
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 31.5,
+      "t": 0.7
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 35.0,
+      "t": 0.77778
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 38.0,
+      "t": 0.84444
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 41.0,
+      "t": 0.91111
+     }
+    ]
+   },
+   "gk_catch_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.0,
+      "t": 0.2
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.1,
+      "t": 0.20333
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 9.7,
+      "t": 0.32333
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 9.7,
+      "t": 0.32333
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.5,
+      "t": 0.35
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.66667
+     }
+    ]
+   },
+   "gk_s2s_knocked_out_start": {
+    "keys": 35,
+    "triggers": [
+     {
+      "event": "0xcf84e7cd",
+      "frame": 11.2,
+      "t": 0.32
+     },
+     {
+      "event": "0xf2da216b",
+      "frame": 15.0,
+      "t": 0.42857
+     }
+    ]
+   },
+   "gk_kick_goal_fast": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 5.0,
+      "t": 0.16667
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 7.0,
+      "t": 0.23333
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 7.4,
+      "t": 0.24667
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 8.0,
+      "t": 0.26667
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 10.7,
+      "t": 0.35667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.5,
+      "t": 0.68333
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.5,
+      "t": 0.68333
+     }
+    ]
+   },
+   "gk_kick_long": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 2.0,
+      "t": 0.07143
+     },
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.14286
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 5.0,
+      "t": 0.17857
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 5.4,
+      "t": 0.19286
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 6.5,
+      "t": 0.23214
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 8.0,
+      "t": 0.28571
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.71429
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.71429
+     }
+    ]
+   },
+   "gk_dvng_defl_parry_near_right_high": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.1,
+      "t": 0.26522
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 8.4,
+      "t": 0.36522
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.91304
+     }
+    ]
+   },
+   "gk_step_right_1200": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.0,
+      "t": 0.5
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 15.0,
+      "t": 0.9375
+     }
+    ]
+   },
+   "gk_catch_low": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.5,
+      "t": 0.19444
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.5,
+      "t": 0.25
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.0,
+      "t": 0.61111
+     }
+    ]
+   },
+   "gk_catch_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.0,
+      "t": 0.08696
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.0,
+      "t": 0.17391
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 12.5,
+      "t": 0.54348
+     }
+    ]
+   },
+   "gk_recover_dejected_2": {
+    "keys": 78,
+    "triggers": [
+     {
+      "event": "0xc7114630",
+      "frame": 40.0,
+      "t": 0.51282
+     },
+     {
+      "event": "0x35b0f74e",
+      "frame": 45.5,
+      "t": 0.58333
+     }
+    ]
+   },
+   "gk_right_leg_low": {
+    "keys": 28,
+    "triggers": [
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.5,
+      "t": 0.19643
+     }
+    ]
+   },
+   "gk_step_forward_1200": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.5,
+      "t": 0.53125
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 15.0,
+      "t": 0.9375
+     }
+    ]
+   },
+   "gk_stand_defl_center_parry_high": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.5,
+      "t": 0.2037
+     },
+     {
+      "event": "0xf2da216b",
+      "frame": 9.0,
+      "t": 0.33333
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 16.0,
+      "t": 0.59259
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 16.0,
+      "t": 0.59259
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 16.0,
+      "t": 0.59259
+     }
+    ]
+   },
+   "gk_strafe_300": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 5.0,
+      "t": 0.45455
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 7.5,
+      "t": 0.68182
+     }
+    ]
+   },
+   "gk_stand_defl_center_parry_super_high_jump": {
+    "keys": 32,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.2,
+      "t": 0.1
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.1,
+      "t": 0.19062
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.2,
+      "t": 0.19375
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.5,
+      "t": 0.32812
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.0,
+      "t": 0.625
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.625
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 20.0,
+      "t": 0.625
+     }
+    ]
+   },
+   "gk_strafe_forward_1200": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 3.0,
+      "t": 0.27273
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 8.5,
+      "t": 0.77273
+     }
+    ]
+   },
+   "gk_run_fwd": {
+    "keys": 25,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 5.1,
+      "t": 0.204
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 11.4,
+      "t": 0.456
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 17.6,
+      "t": 0.704
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 23.9,
+      "t": 0.956
+     }
+    ]
+   },
+   "gk_dvng_defl_parry_near_right_low": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.5,
+      "t": 0.23913
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.6,
+      "t": 0.24348
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.5,
+      "t": 0.28261
+     },
+     {
+      "event": "0xc19cb638",
+      "frame": 7.0,
+      "t": 0.30435
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 14.0,
+      "t": 0.6087
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.0,
+      "t": 0.6087
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 14.0,
+      "t": 0.6087
+     }
+    ]
+   },
+   "gk_dvng_defl_parry_near_right_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.5,
+      "t": 0.23913
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.6,
+      "t": 0.24348
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.5,
+      "t": 0.28261
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 19.0,
+      "t": 0.82609
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 20.0,
+      "t": 0.86957
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 20.0,
+      "t": 0.86957
+     }
+    ]
+   },
+   "gk_recover_dejected": {
+    "keys": 78,
+    "triggers": []
+   },
+   "gk_dvng_defl_parry_far_right_high": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.13043
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.7,
+      "t": 0.24783
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.8,
+      "t": 0.25217
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.43478
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 22.0,
+      "t": 0.95652
+     }
+    ]
+   },
+   "gk_stand_defl_right_punch_high": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.2,
+      "t": 0.13913
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.1,
+      "t": 0.22174
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 17.0,
+      "t": 0.73913
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 17.2,
+      "t": 0.74783
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 17.2,
+      "t": 0.74783
+     }
+    ]
+   },
+   "gk_dive_catch_forward": {
+    "keys": 47,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 3.0,
+      "t": 0.06383
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.5,
+      "t": 0.11702
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.21277
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 14.5,
+      "t": 0.30851
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 15.0,
+      "t": 0.31915
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 18.3,
+      "t": 0.38936
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 18.3,
+      "t": 0.38936
+     }
+    ]
+   },
+   "gk_recover_dejected_loop": {
+    "keys": 110,
+    "triggers": [
+     {
+      "event": "0x42e9f9cf",
+      "frame": 64.0,
+      "t": 0.58182
+     }
+    ]
+   },
+   "gk_catch_right_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.0,
+      "t": 0.2
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.1,
+      "t": 0.20333
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.0,
+      "t": 0.33333
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.7
+     }
+    ]
+   },
+   "gk_ball_swat": {
+    "keys": 45,
+    "triggers": [
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.0,
+      "t": 0.11111
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 6.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 23.5,
+      "t": 0.52222
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 26.7,
+      "t": 0.59333
+     },
+     {
+      "event": "0x95014e78",
+      "frame": 28.5,
+      "t": 0.63333
+     },
+     {
+      "event": "0x12d0b9bf",
+      "frame": 28.5,
+      "t": 0.63333
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 28.5,
+      "t": 0.63333
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 29.7,
+      "t": 0.66
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 30.8,
+      "t": 0.68444
+     }
+    ]
+   },
+   "gk_s2s_defl_knocked_out_recovery": {
+    "keys": 31,
+    "triggers": [
+     {
+      "event": "0x21001b24",
+      "frame": 6.5,
+      "t": 0.20968
+     }
+    ]
+   },
+   "gk_wave_high_with_ball": {
+    "keys": 48,
+    "triggers": [
+     {
+      "event": "0xa9bf9e5a",
+      "frame": 12.0,
+      "t": 0.25
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 12.5,
+      "t": 0.26042
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 26.7,
+      "t": 0.55625
+     }
+    ]
+   },
+   "gk_dive_catch_near_right_low": {
+    "keys": 18,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.16667
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.5,
+      "t": 0.36111
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.6,
+      "t": 0.36667
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 7.5,
+      "t": 0.41667
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 10.8,
+      "t": 0.6
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 15.0,
+      "t": 0.83333
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 15.0,
+      "t": 0.83333
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 15.0,
+      "t": 0.83333
+     }
+    ]
+   },
+   "gk_dive_catch_near_right_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 5.5,
+      "t": 0.23913
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 9.0,
+      "t": 0.3913
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 9.1,
+      "t": 0.39565
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 10.5,
+      "t": 0.45652
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 15.0,
+      "t": 0.65217
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.91304
+     }
+    ]
+   },
+   "gk_catch_super_right_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.13333
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.16667
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.1,
+      "t": 0.17
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 11.0,
+      "t": 0.36667
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 11.0,
+      "t": 0.36667
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 11.0,
+      "t": 0.36667
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 20.0,
+      "t": 0.66667
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 20.4,
+      "t": 0.68
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 21.0,
+      "t": 0.7
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 21.0,
+      "t": 0.7
+     }
+    ]
+   },
+   "gk_dive_catch_far_right_high": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 8.0,
+      "t": 0.2963
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 8.1,
+      "t": 0.3
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 11.6,
+      "t": 0.42963
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 14.5,
+      "t": 0.53704
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 26.0,
+      "t": 0.96296
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 26.0,
+      "t": 0.96296
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 26.0,
+      "t": 0.96296
+     }
+    ]
+   },
+   "gk_stand_defl_center_parry_low": {
+    "keys": 21,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.5,
+      "t": 0.11905
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.5,
+      "t": 0.16667
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.0,
+      "t": 0.2381
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 7.0,
+      "t": 0.33333
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 10.0,
+      "t": 0.47619
+     }
+    ]
+   },
+   "gk_stand_defl_center_parry_med": {
+    "keys": 25,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 1.0,
+      "t": 0.04
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 2.0,
+      "t": 0.08
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 3.0,
+      "t": 0.12
+     },
+     {
+      "event": "0xf2da216b",
+      "frame": 7.0,
+      "t": 0.28
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.0,
+      "t": 0.44
+     }
+    ]
+   },
+   "gk_pick_up": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 10.5,
+      "t": 0.45652
+     }
+    ]
+   },
+   "gk_stand_defl_right_parry_high": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.8,
+      "t": 0.1037
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.5,
+      "t": 0.2037
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 5.6,
+      "t": 0.20741
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.2,
+      "t": 0.22963
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 15.3,
+      "t": 0.56667
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 16.0,
+      "t": 0.59259
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 16.0,
+      "t": 0.59259
+     }
+    ]
+   },
+   "gk_s2s_blast_into_net": {
+    "keys": 68,
+    "triggers": [
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.0,
+      "t": 0.05882
+     },
+     {
+      "event": "0x884cbc6e",
+      "frame": 5.0,
+      "t": 0.07353
+     },
+     {
+      "event": "0x93e76d8e",
+      "frame": 17.0,
+      "t": 0.25
+     },
+     {
+      "event": "0xd847abd3",
+      "frame": 28.0,
+      "t": 0.41176
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 32.0,
+      "t": 0.47059
+     }
+    ]
+   },
+   "gk_recover_trap_without_ball": {
+    "keys": 14,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 10.5,
+      "t": 0.75
+     }
+    ]
+   },
+   "gk_s2s_spin": {
+    "keys": 73,
+    "triggers": [
+     {
+      "event": "0xcf84e7cd",
+      "frame": 0.5,
+      "t": 0.00685
+     },
+     {
+      "event": "0x00266a23",
+      "frame": 1.0,
+      "t": 0.0137
+     },
+     {
+      "event": "0x8758b65a",
+      "frame": 4.0,
+      "t": 0.05479
+     },
+     {
+      "event": "0x64d870a7",
+      "frame": 4.0,
+      "t": 0.05479
+     },
+     {
+      "event": "0x1db5c7ff",
+      "frame": 27.0,
+      "t": 0.36986
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 46.0,
+      "t": 0.63014
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 48.0,
+      "t": 0.65753
+     }
+    ]
+   },
+   "gk_kick_posession": {
+    "keys": 47,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 2.0,
+      "t": 0.04255
+     },
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.08511
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.0,
+      "t": 0.12766
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 6.5,
+      "t": 0.1383
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 7.4,
+      "t": 0.15745
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 10.0,
+      "t": 0.21277
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 15.0,
+      "t": 0.31915
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 16.5,
+      "t": 0.35106
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 17.0,
+      "t": 0.3617
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 23.5,
+      "t": 0.5
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 25.7,
+      "t": 0.54681
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 28.5,
+      "t": 0.60638
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 28.7,
+      "t": 0.61064
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 31.3,
+      "t": 0.66596
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 42.0,
+      "t": 0.89362
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 42.0,
+      "t": 0.89362
+     }
+    ]
+   },
+   "gk_dejected_01": {
+    "keys": 91,
+    "triggers": [
+     {
+      "event": "0x2ef4fa11",
+      "frame": 7.5,
+      "t": 0.08242
+     },
+     {
+      "event": "0x479f48a7",
+      "frame": 42.0,
+      "t": 0.46154
+     },
+     {
+      "event": "0x21001b24",
+      "frame": 46.0,
+      "t": 0.50549
+     }
+    ]
+   },
+   "gk_dejected_02": {
+    "keys": 111,
+    "triggers": [
+     {
+      "event": "0xc7114630",
+      "frame": 12.0,
+      "t": 0.10811
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 12.0,
+      "t": 0.10811
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 18.0,
+      "t": 0.16216
+     },
+     {
+      "event": "0x25642360",
+      "frame": 22.1,
+      "t": 0.1991
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 32.0,
+      "t": 0.28829
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 44.0,
+      "t": 0.3964
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 60.0,
+      "t": 0.54054
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 75.0,
+      "t": 0.67568
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 90.0,
+      "t": 0.81081
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 105.0,
+      "t": 0.94595
+     }
+    ]
+   },
+   "gk_dejected_03": {
+    "keys": 85,
+    "triggers": [
+     {
+      "event": "0x42e9f9cf",
+      "frame": 39.0,
+      "t": 0.45882
+     }
+    ]
+   },
+   "gk_dejected_04": {
+    "keys": 82,
+    "triggers": [
+     {
+      "event": "0x7d452499",
+      "frame": 9.3,
+      "t": 0.11341
+     },
+     {
+      "event": "0x2ef4fa11",
+      "frame": 19.0,
+      "t": 0.23171
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 25.4,
+      "t": 0.30976
+     }
+    ]
+   },
+   "gk_dejected_05": {
+    "keys": 91,
+    "triggers": [
+     {
+      "event": "0xc7114630",
+      "frame": 34.0,
+      "t": 0.37363
+     },
+     {
+      "event": "0xacdb2215",
+      "frame": 34.0,
+      "t": 0.37363
+     }
+    ]
+   },
+   "gk_dive_catch_near_right_high": {
+    "keys": 27,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 5.0,
+      "t": 0.18519
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 8.0,
+      "t": 0.2963
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 8.1,
+      "t": 0.3
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 12.0,
+      "t": 0.44444
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 22.0,
+      "t": 0.81481
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 25.0,
+      "t": 0.92593
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 25.0,
+      "t": 0.92593
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 25.0,
+      "t": 0.92593
+     }
+    ]
+   },
+   "gk_s2s_jump_crossbar_hit": {
+    "keys": 48,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 4.0,
+      "t": 0.08333
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.0,
+      "t": 0.125
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 9.0,
+      "t": 0.1875
+     },
+     {
+      "event": "0xf2da216b",
+      "frame": 10.0,
+      "t": 0.20833
+     },
+     {
+      "event": "0x9f338b11",
+      "frame": 14.0,
+      "t": 0.29167
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 22.0,
+      "t": 0.45833
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 24.0,
+      "t": 0.5
+     }
+    ]
+   },
+   "gk_dive_catch_far_right_low": {
+    "keys": 19,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.5,
+      "t": 0.23684
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.5,
+      "t": 0.34211
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.6,
+      "t": 0.34737
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 10.5,
+      "t": 0.55263
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 11.0,
+      "t": 0.57895
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 16.8,
+      "t": 0.88421
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 16.8,
+      "t": 0.88421
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 17.0,
+      "t": 0.89474
+     }
+    ]
+   },
+   "gk_dive_catch_far_right_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 4.0,
+      "t": 0.17391
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.0,
+      "t": 0.26087
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.1,
+      "t": 0.26522
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 7.5,
+      "t": 0.32609
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 11.5,
+      "t": 0.5
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 14.0,
+      "t": 0.6087
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 21.0,
+      "t": 0.91304
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 22.0,
+      "t": 0.95652
+     }
+    ]
+   },
+   "gk_stand_defl_right_parry_low": {
+    "keys": 25,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.7,
+      "t": 0.108
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.7,
+      "t": 0.148
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.8,
+      "t": 0.192
+     },
+     {
+      "event": "0xfce1230c",
+      "frame": 5.2,
+      "t": 0.208
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 12.0,
+      "t": 0.48
+     }
+    ]
+   },
+   "gk_stand_defl_right_parry_med": {
+    "keys": 25,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 1.7,
+      "t": 0.068
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 2.5,
+      "t": 0.1
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 3.1,
+      "t": 0.124
+     },
+     {
+      "event": "0xf2da216b",
+      "frame": 6.0,
+      "t": 0.24
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.0,
+      "t": 0.44
+     }
+    ]
+   },
+   "gk_catch_right_low": {
+    "keys": 22,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.0,
+      "t": 0.09091
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.0,
+      "t": 0.13636
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.0,
+      "t": 0.18182
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.0,
+      "t": 0.5
+     }
+    ]
+   },
+   "gk_catch_right_med": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 2.0,
+      "t": 0.08696
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 3.5,
+      "t": 0.15217
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 4.5,
+      "t": 0.19565
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 12.0,
+      "t": 0.52174
+     }
+    ]
+   },
+   "gk_throw_underhand": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0x0618ecf3",
+      "frame": 1.0,
+      "t": 0.04348
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 3.5,
+      "t": 0.15217
+     }
+    ]
+   },
+   "gk_strafe_back_1200": {
+    "keys": 11,
+    "triggers": [
+     {
+      "event": "0x50df765d",
+      "frame": 4.0,
+      "t": 0.36364
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 9.0,
+      "t": 0.81818
+     }
+    ]
+   },
+   "gk_attack_s2s_high": {
+    "keys": 37,
+    "triggers": [
+     {
+      "event": "0x05120c87",
+      "frame": 3.0,
+      "t": 0.08108
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 3.0,
+      "t": 0.08108
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 5.5,
+      "t": 0.14865
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 5.6,
+      "t": 0.15135
+     },
+     {
+      "event": "0x12d0b9bf",
+      "frame": 12.0,
+      "t": 0.32432
+     },
+     {
+      "event": "0xef7b7383",
+      "frame": 12.0,
+      "t": 0.32432
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 13.0,
+      "t": 0.35135
+     },
+     {
+      "event": "0xa89ac233",
+      "frame": 22.0,
+      "t": 0.59459
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 23.0,
+      "t": 0.62162
+     }
+    ]
+   },
+   "gk_throw_over_hand": {
+    "keys": 22,
+    "triggers": [
+     {
+      "event": "0x7d452499",
+      "frame": 1.0,
+      "t": 0.04545
+     },
+     {
+      "event": "0x0618ecf3",
+      "frame": 4.5,
+      "t": 0.20455
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 5.2,
+      "t": 0.23636
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 5.2,
+      "t": 0.23636
+     },
+     {
+      "event": "0xb631c31a",
+      "frame": 5.5,
+      "t": 0.25
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 12.6,
+      "t": 0.57273
+     }
+    ]
+   },
+   "gk_dive_catch_back": {
+    "keys": 31,
+    "triggers": [
+     {
+      "event": "0x8f6b5826",
+      "frame": 5.2,
+      "t": 0.16774
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 5.2,
+      "t": 0.16774
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.0,
+      "t": 0.19355
+     },
+     {
+      "event": "0x7e987e12",
+      "frame": 8.0,
+      "t": 0.25806
+     },
+     {
+      "event": "0x05120c87",
+      "frame": 10.0,
+      "t": 0.32258
+     },
+     {
+      "event": "0xd4dedcaf",
+      "frame": 13.0,
+      "t": 0.41935
+     },
+     {
+      "event": "0x09656d24",
+      "frame": 24.5,
+      "t": 0.79032
+     }
+    ]
+   },
+   "gk_catch_right_high": {
+    "keys": 29,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.0,
+      "t": 0.10345
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.17241
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 5.5,
+      "t": 0.18966
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 10.2,
+      "t": 0.35172
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 10.2,
+      "t": 0.35172
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.5,
+      "t": 0.39655
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 11.5,
+      "t": 0.39655
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 12.0,
+      "t": 0.41379
+     }
+    ]
+   },
+   "gk_catch_miss_chip_short": {
+    "keys": 23,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 1.0,
+      "t": 0.04348
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 3.5,
+      "t": 0.15217
+     },
+     {
+      "event": "0x7bee7ea1",
+      "frame": 5.0,
+      "t": 0.21739
+     },
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 7.0,
+      "t": 0.30435
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 8.0,
+      "t": 0.34783
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 9.0,
+      "t": 0.3913
+     },
+     {
+      "event": "0x002ef345",
+      "frame": 10.0,
+      "t": 0.43478
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 15.0,
+      "t": 0.65217
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 18.0,
+      "t": 0.78261
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 19.0,
+      "t": 0.82609
+     }
+    ]
+   },
+   "gk_catch_high": {
+    "keys": 29,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.5,
+      "t": 0.12069
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 5.0,
+      "t": 0.17241
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 5.7,
+      "t": 0.19655
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 6.0,
+      "t": 0.2069
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 11.5,
+      "t": 0.39655
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 12.0,
+      "t": 0.41379
+     },
+     {
+      "event": "0x77935c1c",
+      "frame": 12.0,
+      "t": 0.41379
+     }
+    ]
+   },
+   "gk_dive_catch_far_right_high_special_twist": {
+    "keys": 66,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 6.0,
+      "t": 0.09091
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 8.5,
+      "t": 0.12879
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 8.6,
+      "t": 0.1303
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 14.0,
+      "t": 0.21212
+     },
+     {
+      "event": "0x7d452499",
+      "frame": 16.0,
+      "t": 0.24242
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 28.0,
+      "t": 0.42424
+     },
+     {
+      "event": "0x19076c94",
+      "frame": 28.0,
+      "t": 0.42424
+     },
+     {
+      "event": "0xac6452c8",
+      "frame": 29.0,
+      "t": 0.43939
+     },
+     {
+      "event": "0x8f6b5826",
+      "frame": 33.0,
+      "t": 0.5
+     }
+    ]
+   },
+   "gk_stand_defl_right_parry_high_jump": {
+    "keys": 30,
+    "triggers": [
+     {
+      "event": "0x56264bbe",
+      "frame": 3.9,
+      "t": 0.13
+     },
+     {
+      "event": "0x0f9524ba",
+      "frame": 6.3,
+      "t": 0.21
+     },
+     {
+      "event": "0xb8684601",
+      "frame": 6.4,
+      "t": 0.21333
+     },
+     {
+      "event": "0xcf84e7cd",
+      "frame": 8.5,
+      "t": 0.28333
+     },
+     {
+      "event": "0x045424b9",
+      "frame": 19.5,
+      "t": 0.65
+     },
+     {
+      "event": "0xd900f524",
+      "frame": 19.5,
+      "t": 0.65
+     },
+     {
+      "event": "0x0e4e0f3f",
+      "frame": 19.5,
+      "t": 0.65
+     }
+    ]
+   },
+   "gk_step_back_1200": {
+    "keys": 16,
+    "triggers": [
+     {
+      "event": "0xc9f4f4b0",
+      "frame": 7.0,
+      "t": 0.4375
+     },
+     {
+      "event": "0x50df765d",
+      "frame": 15.0,
+      "t": 0.9375
+     }
+    ]
+   }
+  }
+ }
+}

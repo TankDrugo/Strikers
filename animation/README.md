@@ -48,6 +48,14 @@ Valori di `audit.py` per `portiere` (soglie nel file):
 
 Tutte le 183 clip sono state controllate anche a occhio, con `game/dev/sheet.html` (fotogrammi del modello affiancati allo scheletro originale).
 
+## Trigger (`.trg`)
+
+`data/strikers_triggers.json`: per ogni clip di `mario.trg` e `mariogoalie.trg` (nomi come in `game/assets/characters/*.clips.json`, il portiere col prefisso `gk_`) l'evento (hash), il fotogramma e il tempo normalizzato `t` = fotogramma / chiavi. Gli eventi delle parate: `0xcf84e7cd` contatto, `0x56264bbe`, `0x0f9524ba`, `0x045424b9` milestone 0, 1, 3 (`GoalieSave::TriggerCallback`). Rigenerarlo (accetta l'`.iso` o la cartella del disco estratto):
+
+```bash
+python3 animation/triggers.py PERCORSO_DISCO animation/data/strikers_triggers.json
+```
+
 ## Rifare il pacchetto dal disco
 
 Serve solo se cambia la decodifica. I file del disco non vanno mai nel repository.
