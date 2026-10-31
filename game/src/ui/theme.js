@@ -113,7 +113,7 @@ const CSS = `
 .ui .cardbox{position:relative;width:100%;container-type:inline-size}
 .ui .card{--mx:50;--my:50;position:relative;aspect-ratio:5/7;width:100%;container-type:inline-size;border-radius:7cqw;border:4cqw solid var(--ink);overflow:hidden;isolation:isolate;
   background:linear-gradient(160deg,#fff0a0,#e8a91a 55%,#9a5d05);transform:perspective(700px) rotateY(calc((var(--mx) - 50) * .22deg)) rotateX(calc((50 - var(--my)) * .18deg));box-shadow:0 3cqw 0 #00000040;font-family:var(--fd);color:var(--ink)}
-.ui .card .art{position:absolute;inset:14% 8% 26% 8%;z-index:1}.ui .card .art svg{width:100%;height:100%;display:block}
+.ui .card .art{position:absolute;inset:5% 3% 19% 17%;z-index:1}.ui .card .art svg{width:100%;height:100%;display:block}
 .ui .card .ovr{position:absolute;z-index:3;left:7%;top:4%;font-size:17cqw;line-height:.9;-webkit-text-stroke:1.2cqw #fff;paint-order:stroke fill}
 .ui .card .role{position:absolute;z-index:3;left:8%;top:20%;font-size:8cqw;-webkit-text-stroke:.8cqw #fff;paint-order:stroke fill}
 .ui .card .nm{position:absolute;z-index:3;left:5%;right:5%;bottom:8%;text-align:center;background:var(--ink);color:#fff;border-radius:3cqw;font-size:8.4cqw;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline:2cqw}

@@ -71,7 +71,7 @@ export function installUt(Menu) {
   };
 
   P.utSquadView = function (club) {
-    const pos = [['DIF', '2 / 4'], ['CEN', '3 / 2'], ['ALA', '1 / 2'], ['ATT', '2 / 1'], ['POR', '2 / 5']]; // grid column / row
+    const pos = [['DIF', '2 / 3'], ['CEN', '3 / 2'], ['ALA', '1 / 2'], ['ATT', '2 / 1'], ['POR', '2 / 4']]; // grid column / row
     const slots = C.SLOTS.map((role, i) => {
       const card = C.cardOf(club, club.squad[i]), inst = C.inst(club, club.squad[i]);
       const [col, row] = pos[i][1].split(' / ');
@@ -83,7 +83,7 @@ export function installUt(Menu) {
       return `<button class="slotc" data-nav data-act="ut-bench" data-b="${b}" style="width:5em">${card ? this.utCard(card, { serial: inst.serial }) : `<div class="empty" style="font-size:1.3em;border-color:var(--ink);color:var(--ink)">+</div>`}</button>`;
     }).join('');
     return `<div class="view" style="grid-template-columns:1.5fr 1fr;grid-template-rows:auto 1fr auto">
-      <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(5,auto);font-size:.62em">${slots}</div>
+      <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(4,1fr);font-size:.62em;container-type:size">${slots}</div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default;flex-direction:row;align-items:center;gap:1em"><span class="big">${C.squadRating(club)}</span><div><h3>${t('ut.squad.rating')}</h3><p style="font-size:.8em">${t('ut.squad.rule')}</p></div></div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default"><h3>${t('ut.squad.bench')}</h3><p>${t('ut.squad.benchText')}</p><div style="display:flex;gap:.6em;margin-top:auto;font-size:.8em">${bench}</div></div>
       <div class="row-btns"><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>

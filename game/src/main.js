@@ -68,9 +68,14 @@ async function loadAssets(onProgress = () => {}) {
   return { ...first, roster, byId, teams, walkout, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
 }
 
-// Card art for Ultimate Team: each character rendered once in its idle pose, transparent background.
+// Card art for Ultimate Team (and the line-up editor): each character rendered once, transparent background,
+// framed like a FUT card from mid-thigh to the top of the hair. The frame comes from the skinned vertices of the
+// pose, so big bodies, tall hair and short characters all fit without cutting the head.
+const PORTRAIT_W = 264, PORTRAIT_H = 352;
 function makePortraits(renderer, template) {
   const cache = {};
+  const v = new THREE.Vector3();
+  const bone = (root, suffix) => { let b = null; root.traverse((o) => { if (!b && o.isBone && o.name.replace(':', '').endsWith(suffix)) b = o.getWorldPosition(new THREE.Vector3()); }); return b; };
   return (charId, gk) => {
     const key = charId + (gk ? ':gk' : '');
     if (cache[key] !== undefined) return cache[key];
@@ -81,14 +86,34 @@ function makePortraits(renderer, template) {
     const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(1, 2, 3); scene.add(d);
     const p = new Player({ scene, teams: [{ color: '#fff' }] }, tpl, 0, gk ? 'goalie' : 'fielder', 0);
     p.ring.visible = false; p.shadow.visible = false;
-    p.play(gk ? 'gk_ready_idle' : 'idle', { loop: true, fade: 0 });
+    p.play('idle', { loop: true, fade: 0 }); // standing pose for keepers too: the crouch hid their faces
     p.mixer.update(0.3);
-    p.root.rotation.y = 0.35;
-    const h = p.cfg.height;
-    const cam = new THREE.PerspectiveCamera(26, 168 / 160, 0.05, 20);
-    cam.position.set(0, h * 0.78, h * 1.7); cam.lookAt(0, h * 0.6, 0);
-    const W = 168, H = 160;
-    const rt = new THREE.WebGLRenderTarget(W, H, { colorSpace: THREE.SRGBColorSpace });
+    p.root.rotation.y = 0.3;
+    p.root.updateMatrixWorld(true);
+    const hips = bone(p.model, 'Hips'), knee = bone(p.model, 'LeftLeg'), head = bone(p.model, 'Head');
+    const shL = bone(p.model, 'LeftArm'), shR = bone(p.model, 'RightArm');
+    const cut = hips && knee ? (hips.y + knee.y) / 2 : p.cfg.height * 0.35;
+    const box = new THREE.Box3();
+    p.model.traverse((o) => {
+      if (!o.isSkinnedMesh) return;
+      const pos = o.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i += 3) {
+        o.getVertexPosition(i, v); v.applyMatrix4(o.matrixWorld);
+        if (v.y >= cut) box.expandByPoint(v);
+      }
+    });
+    if (box.isEmpty()) box.set(new THREE.Vector3(-0.4, cut, -0.2), new THREE.Vector3(0.4, p.cfg.height, 0.2));
+    const top = box.max.y + (box.max.y - cut) * 0.06;
+    // width from the shoulders (hands may leave the frame, as on FUT cards), but never narrower than the body is
+    const shoulders = shL && shR ? Math.abs(shL.x - shR.x) * 2 : (box.max.x - box.min.x);
+    const w = Math.min(box.max.x - box.min.x, shoulders) * 1.05, h = top - cut, aspect = PORTRAIT_W / PORTRAIT_H;
+    const visH = Math.max(h, w / aspect);
+    const fov = 24, dist = visH / 2 / Math.tan(THREE.MathUtils.degToRad(fov / 2));
+    const cx = head && hips ? (head.x + hips.x) / 2 : (box.min.x + box.max.x) / 2, cy = top - visH / 2, cz = (box.min.z + box.max.z) / 2;
+    const cam = new THREE.PerspectiveCamera(fov, aspect, 0.05, 50);
+    cam.position.set(cx, cy, cz + dist + (box.max.z - cz)); cam.lookAt(cx, cy, cz);
+    const W = PORTRAIT_W, H = PORTRAIT_H;
+    const rt = new THREE.WebGLRenderTarget(W, H, { colorSpace: THREE.SRGBColorSpace, samples: 4 });
     const prev = renderer.getRenderTarget(), prevColor = renderer.getClearColor(new THREE.Color()), prevAlpha = renderer.getClearAlpha();
     renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, cam);
     const px = new Uint8Array(W * H * 4);

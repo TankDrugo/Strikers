@@ -61,6 +61,7 @@ const CSS = `
 .ui .slotc{position:relative;width:min(7.5em,100%);background:none;border:0;padding:0;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:.2em}
 .ui .slotc .lab{font-family:var(--fn);font-size:.75em;background:var(--ink);color:#fff;border-radius:.5em;padding:0 .5em}
 .ui .slotc.focus .cardbox{transform:scale(1.08)}.ui .slotc:focus{outline:none}
+.ui .pitch .slotc{width:min(7.5em,100%,16cqh)} /* four rows of cards always fit the pitch */
 .ui .slotc .empty{width:100%;aspect-ratio:5/7;border:.25em dashed #fff;border-radius:.8em;display:grid;place-items:center;font-family:var(--fd);font-size:2em;color:#fff}
 /* P1 theatre */
 .ui .theatre{position:absolute;inset:0;z-index:5;overflow:hidden;container-type:size;background:radial-gradient(ellipse at 50% 70%,#3e1d8a,#140a33 70%)}
@@ -114,6 +115,9 @@ const BUST = (seed) => {
     <circle cx="50" cy="40" r="23" fill="${skin}" stroke="#1b1036" stroke-width="3.5"/><path d="M27 36 Q30 12 52 14 Q74 14 74 36 Q66 26 56 28 Q44 22 27 36Z" fill="${hair}" stroke="#1b1036" stroke-width="3"/></svg>`;
 };
 
+// long names get a smaller font instead of being cut ("Centrocampista Celestini")
+const nmSize = (n) => (n.length > 20 ? ' style="font-size:6cqw"' : n.length > 15 ? ' style="font-size:7cqw"' : '');
+
 // card: catalogue entry (ut/cards.js); serial: number of a numbered card; portrait: data URL or null
 export function utCardHtml(card, { serial = null, portrait = null, idle = false, name } = {}) {
   const keys = STAT_KEYS[card.gk ? 'goalie' : 'fielder'];
@@ -122,7 +126,7 @@ export function utCardHtml(card, { serial = null, portrait = null, idle = false,
     : card.rarity === 'oneOfOne' ? '<div class="serial foil-num">1/1</div>' : '';
   return `<div class="cardbox"><div class="card r-${card.rarity} ${card.fx}${idle ? ' idle' : ''}"><div class="art">${portrait ? `<img src="${portrait}" alt="">` : BUST(card.char.length)}</div>
     <div class="foil"></div><div class="glare"></div><div class="ovr">${card.ovr}</div><div class="role">${t('ut.role.' + card.role)}</div>
-    <div class="nm">${name || t('ut.char.' + card.char)}</div><div class="st">${st}</div>${ser}</div></div>`;
+    <div class="nm"${nmSize(name || t('ut.char.' + card.char))}>${name || t('ut.char.' + card.char)}</div><div class="st">${st}</div>${ser}</div></div>`;
 }
 
 // numbered and 1/1 in their case (L3b, L4)
