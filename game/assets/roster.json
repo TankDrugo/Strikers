@@ -140,6 +140,41 @@
       "glb": "characters/riku_uruguay.glb",
       "clips": "characters/riku_uruguay.clips.json",
       "recolor": false
+    },
+    {
+      "id": "roxas_senegal",
+      "name": "Roxas",
+      "glb": "characters/roxas_senegal.glb",
+      "clips": "characters/roxas_senegal.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "snake_usa",
+      "name": "Snake",
+      "glb": "characters/snake_usa.glb",
+      "clips": "characters/snake_usa.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "sora_argentina",
+      "name": "Sora",
+      "glb": "characters/sora_argentina.glb",
+      "clips": "characters/sora_argentina.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "spike_brasile",
+      "name": "Spike",
+      "glb": "characters/spike_brasile.glb",
+      "clips": "characters/spike_brasile.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "vegeta_italia",
+      "name": "Vegeta",
+      "glb": "characters/vegeta_italia.glb",
+      "clips": "characters/vegeta_italia.clips.json",
+      "recolor": false
     }
   ],
   "teams": [
@@ -203,6 +238,18 @@
         "kairi_colombia",
         "jak_paesibassi",
         "ratchet_inghilterra",
+        "piccolo_norvegia"
+      ],
+      "captain": 3
+    },
+    {
+      "name": "Campioni",
+      "color": "#ff4f8b",
+      "slots": [
+        "snake_usa",
+        "sora_argentina",
+        "roxas_senegal",
+        "vegeta_italia",
         "piccolo_norvegia"
       ],
       "captain": 3

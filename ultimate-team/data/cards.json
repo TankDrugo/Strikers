@@ -227,6 +227,56 @@
     "pas": 72,
     "con": 82
    }
+  },
+  "roxas_senegal": {
+   "role": "ALA",
+   "team": "senegal",
+   "stats": {
+    "vel": 86,
+    "tir": 76,
+    "pas": 76,
+    "con": 64
+   }
+  },
+  "snake_usa": {
+   "role": "DIF",
+   "team": "usa",
+   "stats": {
+    "vel": 72,
+    "tir": 74,
+    "pas": 76,
+    "con": 86
+   }
+  },
+  "sora_argentina": {
+   "role": "ATT",
+   "team": "argentina",
+   "stats": {
+    "vel": 86,
+    "tir": 85,
+    "pas": 80,
+    "con": 70
+   }
+  },
+  "spike_brasile": {
+   "role": "CEN",
+   "team": "brasile",
+   "stats": {
+    "vel": 84,
+    "tir": 78,
+    "pas": 82,
+    "con": 70
+   }
+  },
+  "vegeta_italia": {
+   "role": "ATT",
+   "team": "italia",
+   "stats": {
+    "vel": 90,
+    "tir": 92,
+    "pas": 76,
+    "con": 80
+   }
   }
  }
 }

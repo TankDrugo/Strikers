@@ -9,12 +9,14 @@ Qui stanno i modelli originali dei personaggi, così come escono dal programma 3
 Fatto:
 - Celestini e Rivali in gioco: 10 personaggi, 5 ruoli per squadra
 - 5 personaggi nuovi con la loro nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ): in Gioco rapido (squadre Leggende e Nazionali, o formazione libera), Coppe, Ultimate Team e visualizzatore
-- Altri 5 (Jak, Kairi, Piccolo, Ratchet, Riku), squadra pronta Avventurieri con Piccolo in porta: 20 personaggi in tutto
+- Altri 5 (Jak, Kairi, Piccolo, Ratchet, Riku), squadra pronta Avventurieri con Piccolo in porta
+- Ultimi 5 (Roxas, Snake, Sora, Spike, Vegeta), squadra pronta Campioni con Vegeta capitano: 25 personaggi in tutto, lavoro sui personaggi finito (31 ottobre)
 - Roster con i ruoli per posto in campo
 - Colori delle squadre su anelli, punteggio, tabellone e tifosi
 
 Prossimo:
-- Altri personaggi dell'utente (procedura sotto); con più personaggi il link online va pubblicato in più passi
+- Animazioni delle mosse speciali (ulti) per personaggio, dopo le regole del gioco (ordine dei lavori in `CLAUDE.md`)
+- Eventuali altri personaggi dell'utente: procedura sotto; il link online va pubblicato in più passi da 10 personaggi
 
 | File | Squadra | Ruolo (posto in `teams`) | Stato |
 |---|---|---|---|
@@ -38,10 +40,15 @@ Prossimo:
 | `piccolo_norvegia.glb` | Norvegia | portiere (`POR`, carta 81) | in gioco |
 | `ratchet_inghilterra.glb` | Inghilterra | attaccante (`ATT`, carta 81) | in gioco |
 | `riku_uruguay.glb` | Uruguay | difensore (`DIF`, carta 77) | in gioco |
+| `roxas_senegal.glb` | Senegal | ala (`ALA`, carta 79) | in gioco |
+| `snake_usa.glb` | Stati Uniti | difensore (`DIF`, carta 80) | in gioco |
+| `sora_argentina.glb` | Argentina | attaccante (`ATT`, carta 83) | in gioco |
+| `spike_brasile.glb` | Brasile | centrocampista (`CEN`, carta 79) | in gioco |
+| `vegeta_italia.glb` | Italia | attaccante (`ATT`, carta 88, numerate e 1/1) | in gioco |
 
 Celestini in maglia celeste, Rivali in maglia verde. Il primo personaggio usato nel prototipo (`portiere.glb`) è stato tolto: resta nella storia del repository.
 
-Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I personaggi singoli non hanno un posto in `teams`: stanno nelle squadre pronte di `squads` in `roster.json` (Leggende, Nazionali, Avventurieri), nelle squadre CPU delle Coppe (che rimescolano tutto il roster; i portieri sono quelli del posto 4 di `teams` e `squads`, quindi un nuovo portiere va messo in porta in una squadra pronta), in Ultimate Team, e con l'editor della formazione ognuno può andare in qualsiasi posto. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
+Tutti i modelli sono Mixamo. Nome dei file: `<squadra>_<ruolo>.glb` per le due squadre, `<personaggio>_<nazionale>.glb` per i personaggi singoli. I personaggi singoli non hanno un posto in `teams`: stanno nelle squadre pronte di `squads` in `roster.json` (Leggende, Nazionali, Avventurieri, Campioni), nelle squadre CPU delle Coppe (che rimescolano tutto il roster; i portieri sono quelli del posto 4 di `teams` e `squads`, quindi un nuovo portiere va messo in porta in una squadra pronta), in Ultimate Team, e con l'editor della formazione ognuno può andare in qualsiasi posto. In Ultimate Team la nazionale si vede nel walkout del pacchetto: è il campo `team` della carta in `cards.json` (senza, vale la parte dell'id prima del primo `_`).
 
 I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in campo: 0 difensore e 1 centrocampista stanno indietro, 2 ala e 3 attaccante avanti, 4 è il portiere.
 
@@ -78,5 +85,6 @@ I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in 
 - `recolor` in `roster.json` ricolora di rosso le parti gialle della maglia per la seconda squadra. Era servito per il primo personaggio; oggi è `false` per tutti, perché ogni squadra ha i suoi modelli.
 - Nomi e colori delle squadre stanno in `teamInfo` di `roster.json`: `color` colora anelli sotto i piedi, punteggio, scritta GOL!, tabellone e tifosi; `shirt` è il colore della maglia preso dalle texture. Per i Rivali `color` è un verde più chiaro della maglia (`#1b5a3c`), che sull'erba non si vedrebbe.
 - Il controllo automatico dei Rivali dà gli stessi risultati dei Celestini. Il centrocampista dei Rivali ha 2 clip in più segnalate come "leggermente sollevate" (`idle_onetimer_air_600`, `banana_peel_react_600`): dipende dai capelli voluminosi, che alzano la cima della testa; a occhio le pose sono corrette.
+- Spike ha qualche clip in più segnalata come sollevata dal controllo automatico (19 contro 14-16 degli altri): sono i capelli alti a punta, come per il centrocampista dei Rivali; a occhio le pose sono giuste.
 - Altezza in campo: tutti i giocatori di movimento sono alti uguali (`FIELDER.height` in `game/src/config.js`), il portiere un po' di più. Il modello viene scalato, le proporzioni restano le sue.
 - I modelli in questa cartella possono essere pesanti (texture a piena risoluzione). Il gioco usa le copie in `game/assets/characters/`, con le texture ridotte.
