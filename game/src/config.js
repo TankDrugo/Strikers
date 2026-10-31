@@ -187,13 +187,30 @@ export const SUPER = {
 };
 
 export const TACKLE = {
-  slideConsiderRadius: 2.5,
-  slideTime: 0.35, slideRecover: 0.35, slideSpeed: 9.0,
-  hitRange: 1.2 * SIZE,
-  stunSlide: 1.7, stunHit: 1.9, // react clip lengths
+  slideConsiderRadius: 2.5, // Do Slide Attack Radius (GameTweaks.ini, riserva 2.15): the CPU considers a slide within 2.5 m
+  slideTime: 0.35, // Slide Attack Maximum Time: the slide lasts while the button is held, at most 0.35 s
+  slideRecover: 0.35, // Slide Attack Fail Up Time: then it brakes for 0.35 s (slide_tackle_up_fail)
+  slideDecel: 0.66, // Slide Attack Deceleration: exponential brake (per 0.1 s: our reading of the unit)
+  slideInterceptTime: 0.7, // FA InitActionSlideAttack: aimed at the target's intercept point within 0.7 s
+  // the slide speed is WB Run Turbo Level 2 Speed (FIELDER.turboWithBall[1], mario.ini 7.5) (F GetSlideAttackSpeed)
+  footReach: 0.45 * SIZE, footRadius: (0.05 + 0.18) * SIZE, // the "ball" bone of the slider touching the ball (radius 0.05 + 0.18 ×SIZE)
+  hitFrames: [4, 14], hitRate: 1.5, // FA InitActionHit: speed = clip move between frames 4 and 14 / 0.333 s; clip at 1.5× with root motion
+  hitReach: 2 * (0.33 / 2 + 0.1) * SIZE, // contact: the two capsules touch (FIELDER.capsuleRadius × 2)
+  stunSlide: 1.7, stunHit: 1.9, // react clip lengths: down for the whole clip (InitActionHitReact)
+  decisionTime: 0.3, // estimate: how often a CPU player re-rolls the table chances of his situation
 };
 
-export const PASS = { minDist: 1.0, maxDist: 10.0, volleyMinDist: 3.0 };
+// Player.cpp DoCalculatePassSpeed: from the minimum at 1 m to the maximum at 10 m, minus half the speed at which the
+// receiver comes towards the passer; DoClampPassSpeed keeps it within the ground pass limits, also for the lob
+export const PASS = {
+  minDist: 1.0, maxDist: 10.0, // Pass Speed Min/Max Dist (GameTweaks.ini)
+  volleyMinDist: 3.0, // Volley Pass Min Distance
+  approachShare: 0.5,
+  groundUp: [0.5, 2.0], // ground pass: vertical speed from 0.5 to 2 m/s with the distance
+  lobMaxUp: 14, // lob (ShootAtFast with time = distance / speed): vertical at most 14 m/s
+  release: 0.12, // FA ActionPass: TestTrigger(0.12), 12% of the clip
+  leadMax: 1.5, // estimate: the intercept point is looked for within 1.5 s
+};
 
 export const MATCH = { seconds: 180, goalPause: 3.0 };
 

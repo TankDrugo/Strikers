@@ -96,12 +96,6 @@ export class Game {
     return Array.isArray(a) ? a.map((v, j) => v + (b[j] - v) * k) : a + (b - a) * k;
   }
 
-  // temporary: the Super Strike CPU numbers and the CPU speed still use it (removed with steps 3 and 4)
-  cpuTune(table) {
-    const l = Math.max(0, Math.min(table.length - 1, this.cpuLevel)), i = Math.floor(l), k = l - i;
-    return table[i] + ((table[i + 1] ?? table[i]) - table[i]) * k;
-  }
-
   // Fielder.cpp CalcRegularShot: chance (0..1) that the keeper must miss, from the bar value and the chosen level's curve
   shotMissChance(value) {
     const c = this.skill('shotChance'), v = [0, ...SKILL.shotValue, 1];
@@ -262,28 +256,65 @@ export class Game {
 
   // ------------------------------------------------------------- actions
 
+  // CalcInterceptXY: where a target moving at velocity (vx, vz) meets something leaving `from` at `speed`; null if never
+  // within `maxT` seconds
+  interceptPoint(from, pos, vx, vz, speed, maxT) {
+    const dx = pos.x - from.x, dz = pos.z - from.z;
+    const a = vx * vx + vz * vz - speed * speed, b = 2 * (dx * vx + dz * vz), c = dx * dx + dz * dz;
+    let T;
+    if (Math.abs(a) < 1e-6) T = b < 0 ? -c / b : null;
+    else {
+      const disc = b * b - 4 * a * c;
+      if (disc < 0) return null;
+      const r = Math.sqrt(disc), t1 = (-b - r) / (2 * a), t2 = (-b + r) / (2 * a);
+      T = [t1, t2].filter((x) => x > 0).sort((x, y) => x - y)[0] ?? null;
+    }
+    if (T === null || T > maxT) return null;
+    return { x: pos.x + vx * T, z: pos.z + vz * T, t: T };
+  }
+
   doPass(p, target, lob) {
-    if (!this.ball.owner === p) return;
+    if (this.ball.owner !== p) return;
     const b = this.ball;
-    const dx = target.pos.x - p.pos.x, dz = target.pos.z - p.pos.z, d = Math.hypot(dx, dz);
-    const f = Math.max(0, Math.min(1, (d - PASS.minDist) / (PASS.maxDist - PASS.minDist)));
+    const d0 = Math.hypot(target.pos.x - p.pos.x, target.pos.z - p.pos.z);
+    // the receiver keeps running as he is (jog or run): SuggestPassTargetPosition + CalcInterceptXY
+    const vx = Math.cos(target.facing) * target.speed, vz = Math.sin(target.facing) * target.speed;
+    // Player.cpp DoCalculatePassSpeed: by the distance, minus half the speed at which he comes towards the passer
     const range = p.isGoalie ? p.cfg.pass : lob ? p.cfg.passVolley : p.cfg.passGround;
-    const speed = range[0] + (range[1] - range[0]) * f;
-    let t = lob ? Math.max(0.6, d / speed * 1.6) : Math.max(0.15, d / speed);
-    // lead the receiver
-    const lead = Math.min(t, 1.2);
-    const tx = target.pos.x + Math.cos(target.facing) * target.speed * lead * 0.8;
-    const tz = target.pos.z + Math.sin(target.facing) * target.speed * lead * 0.8;
-    const from = b.pos.clone();
-    const to = new THREE.Vector3(tx, lob ? 0.9 : R, tz);
-    let vel = shootAtFast(from, to, t);
+    const approach = -(vx * (target.pos.x - p.pos.x) + vz * (target.pos.z - p.pos.z)) / Math.max(0.01, d0);
+    let speed = lerpRange(range[0], range[1], PASS.minDist, PASS.maxDist, d0) - PASS.approachShare * Math.max(0, approach);
+    const lim = p.isGoalie ? p.cfg.pass : p.cfg.passGround; // DoClampPassSpeed: always within the ground pass limits
+    speed = Math.max(lim[0], Math.min(lim[1], speed));
+    const meet = this.interceptPoint(b.pos, target.pos, vx, vz, speed, PASS.leadMax) || { x: target.pos.x, z: target.pos.z };
+    const tx = Math.max(-FIELD.halfLength + 0.5, Math.min(FIELD.halfLength - 0.5, meet.x)), tz = Math.max(-FIELD.halfWidth + 0.5, Math.min(FIELD.halfWidth - 0.5, meet.z));
+    const from = b.pos.clone(), d = Math.hypot(tx - from.x, tz - from.z);
+    let vel;
+    if (lob) {
+      // ShootAtFast with time = distance / speed, vertical at most 14 m/s
+      vel = shootAtFast(from, new THREE.Vector3(tx, 0.9, tz), Math.max(0.2, d / speed));
+      vel.y = Math.min(vel.y, PASS.lobMaxUp);
+    } else {
+      // straight at the speed, with a small vertical push of 0.5..2 m/s by the distance
+      vel = new THREE.Vector3((tx - from.x) / Math.max(0.01, d) * speed, lerpRange(PASS.groundUp[0], PASS.groundUp[1], PASS.minDist, PASS.maxDist, d), (tz - from.z) / Math.max(0.01, d) * speed);
+    }
     if (p.cfg.passError) vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() * 2 - 1) * p.cfg.passError); // card passing stat
-    if (!lob) { vel.y = Math.min(vel.y, 1.2); }
-    p.facing = Math.atan2(tz - p.pos.z, tx - p.pos.x);
     p.setState('pass', { vel, lob, target });
-    const clipName = p.isGoalie ? (d > GOALIE.throwMinDist ? 'gk_throw_over_hand' : 'gk_throw_underhand') : 'pass_1200';
-    p.play(clipName, { fade: 0.05 });
-    p.stateData.release = this.template.meta[clipName]?.contact ?? 0.05;
+    let clipName, mirror = false;
+    if (p.isGoalie) {
+      clipName = d > GOALIE.throwMinDist ? 'gk_throw_over_hand' : 'gk_throw_underhand';
+      p.facing = Math.atan2(tz - p.pos.z, tx - p.pos.x);
+    } else {
+      // InitActionPass: pass_1200 / 300 / 600 / 900 (the 300 mirrored) by the angle to the receiver
+      const rel = angleDiff(p.facing, Math.atan2(tz - p.pos.z, tx - p.pos.x));
+      if (Math.abs(rel) <= Math.PI / 4) clipName = 'pass_1200';
+      else if (Math.abs(rel) >= 3 * Math.PI / 4) clipName = 'pass_600';
+      else { clipName = 'pass_300'; mirror = rel < 0; }
+      if (!this.template.clips[clipName]) { clipName = 'pass_1200'; mirror = false; }
+    }
+    p.play(clipName, { fade: 0, mirror }); // globalanimproperties.cpp: passes blend in 0 s
+    const dur = this.template.meta[clipName]?.duration ?? 0.33;
+    p.stateData.release = p.isGoalie ? (this.template.meta[clipName]?.contact ?? 0.05) : PASS.release * dur; // ActionPass: TestTrigger(0.12)
+    p.stateData.end = p.isGoalie ? 0.6 : dur;
     this.stats.passes[p.team]++;
   }
 
@@ -381,17 +412,51 @@ export class Game {
     if (gk) this.keeper.onShot(gk);
   }
 
+  // the nearest opponent with the ball, or the loose ball: what a slide or a shoulder charge is aimed at
+  tackleTarget(p) {
+    const b = this.ball;
+    if (b.owner && b.owner.team !== p.team && !b.owner.isGoalie) {
+      const o = b.owner;
+      return { pos: o.pos, vx: Math.cos(o.facing) * o.speed, vz: Math.sin(o.facing) * o.speed };
+    }
+    if (!b.owner) return { pos: b.pos, vx: b.vel.x, vz: b.vel.z };
+    return null;
+  }
+
+  // aim at the target's intercept point (FA InitActionSlideAttack / InitActionHit), if it is roughly ahead
+  aimTackle(p, speed) {
+    const tg = this.tackleTarget(p);
+    if (!tg) return;
+    const m = this.interceptPoint(p.pos, tg.pos, tg.vx, tg.vz, speed, TACKLE.slideInterceptTime);
+    if (!m) return;
+    const dir = Math.atan2(m.z - p.pos.z, m.x - p.pos.x);
+    if (Math.abs(angleDiff(p.facing, dir)) < Math.PI / 2) p.facing = dir;
+  }
+
   startSlide(p) {
-    p.setState('slide', { hit: false });
+    // F GetSlideAttackSpeed: WB Run Turbo Level 2 Speed (card tackling: ±0.4 % per point)
+    const speed = p.cfg.turboWithBall[1] * (p.cfg.slideSpeed ?? 1);
+    this.aimTackle(p, speed);
+    p.setState('slide', { hit: false, held: true, foot: null });
     p.play('slide_tackle_1200', { fade: 0.05 });
-    p.speed = Math.max(p.speed, TACKLE.slideSpeed * (p.cfg.slideSpeed ?? 1));
+    p.speed = speed;
     p.tackleCooldown = 1.2;
     this.stats.tackles[p.team]++;
   }
 
+  // FA InitActionHit: speed = the clip's move between frames 4 and 14 over 0.333 s (for the aim); clip at 1.5×
+  hitSpeed(p) {
+    const r = this.template.meta.hit_1200?.root;
+    if (!r) return 7.5;
+    const [f0, f1] = TACKLE.hitFrames;
+    return (r[Math.min(f1, r.length - 1)][0] - r[f0][0]) * (p.cfg.height / p.rigHeight) / ((f1 - f0) / FPS);
+  }
+
   startHit(p) {
+    this.aimTackle(p, this.hitSpeed(p));
     p.setState('hit', { done: false });
-    p.play('hit_1200', { fade: 0.05 });
+    p.play('hit_1200', { fade: 0.05, rate: TACKLE.hitRate });
+    p.speed = 0;
     p.tackleCooldown = 1.0;
   }
 
@@ -411,9 +476,17 @@ export class Game {
     }
     if (b.owner === victim && attacker.team !== victim.team) this.emit('steal', { team: attacker.team });
     if (b.owner === victim) {
-      const dir = Math.atan2(victim.pos.z - attacker.pos.z, victim.pos.x - attacker.pos.x) + (Math.random() - 0.5);
-      b.kick(new THREE.Vector3(Math.cos(dir) * 5, 2.5, Math.sin(dir) * 5), null, { noPickup: 0.35 });
-      b.lastTouch = attacker;
+      if (kind === 'slide') {
+        // the slider's foot is on the ball: he takes it (PickupBall)
+        b.owner = attacker; b.passTarget = null; b.shotTimer = 0; b.lastTouch = attacker;
+        if (attacker.team !== this.possTeam) { this.passChain[attacker.team] = 0; this.possTeam = attacker.team; }
+        this.giveToTeamHuman(attacker);
+      } else {
+        // ShootBallDueToContact: the ball goes on with the attacker's speed
+        const sp = this.hitSpeed(attacker) * TACKLE.hitRate * 0.6;
+        b.kick(new THREE.Vector3(Math.cos(attacker.facing) * sp, 1.5, Math.sin(attacker.facing) * sp), null, { noPickup: 0.25 });
+        b.lastTouch = attacker;
+      }
     }
     // pick the react clip by where the hit came from: 1200 front, 300 right, 600 back, 900 left (mirrored 300)
     const rel = angleDiff(victim.facing, Math.atan2(attacker.pos.z - victim.pos.z, attacker.pos.x - victim.pos.x));
@@ -423,10 +496,12 @@ export class Game {
     else if (rel < -0.8) { dirName = '300'; mirror = true; }
     const base = kind === 'slide' ? 'slide_tackle_react_' : 'hit_react_';
     const name = kind === 'slide' ? base + dirName : base + dirName;
+    const clip = this.template.clips[name] ? name : base + '1200';
     victim.setState('react', {});
-    victim.stun = (kind === 'slide' ? TACKLE.stunSlide : TACKLE.stunHit) * (victim.cfg.stunTime ?? 1);
+    // InitActionHitReact: down for the whole clip (card tackling of the victim: shorter)
+    victim.stun = (this.template.meta[clip]?.duration ?? (kind === 'slide' ? TACKLE.stunSlide : TACKLE.stunHit)) * (victim.cfg.stunTime ?? 1);
     victim.speed = 0;
-    victim.play(this.template.clips[name] ? name : base + '1200', { fade: 0.05, mirror });
+    victim.play(clip, { fade: 0.067, mirror });
     this.hud.sfx('hit');
   }
 
@@ -769,8 +844,7 @@ export class Game {
       case 'free':
         if (p.isGoalie) this.goalieAI(p, dt);
         else if (!p.humanControlled) {
-          fielderAI(this, p, dt);
-          if (this.isCpuTeam(p.team)) p.desiredSpeed *= this.cpuTune([0.9, 1, 1.05, 1.08]);
+          fielderAI(this, p, dt); // the CPU runs at the speeds of the .ini files at every level
         }
         if (p.state === 'free') p.locomotion(dt);
         break;
@@ -780,7 +854,7 @@ export class Game {
         if (!p.stateData.released && p.stateTime >= p.stateData.release) {
           if (this.ball.owner === p) this.releasePass(p); else p.stateData.released = true;
         }
-        if (p.stateTime > (p.isGoalie ? 0.6 : 0.3)) p.setState('free');
+        if (p.stateTime > (p.stateData.end ?? 0.3)) p.setState('free');
         break;
       case 'windup': {
         // asmRunningWB: turn towards the goal (Shot Windup Direction Seek Speed/Falloff), brake to a stop by the end
@@ -818,41 +892,49 @@ export class Game {
         if (p.stateTime > (p.stateData.end ?? 0.55)) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
         break;
       case 'slide': {
-        const slideEnd = TACKLE.slideTime;
-        if (p.stateTime < slideEnd) {
-          p.speed = Math.max(3, p.speed - 8 * dt);
-          p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
-          // ball first: a clean tackle wins it
-          const fx = p.pos.x + Math.cos(p.facing) * 0.45, fz = p.pos.z + Math.sin(p.facing) * 0.45;
-          const b = this.ball;
-          if (Math.hypot(b.pos.x - fx, b.pos.z - fz) < 0.55 * SIZE && b.pos.y < 0.6 * SIZE && !p.stateData.hit) {
+        // ActionSlideAttack: on while the button is held, at most Slide Attack Maximum Time; then the exponential brake
+        const d = p.stateData, ctl = p.humanControlled && this.controllerOf(p);
+        if (d.held && (p.stateTime >= TACKLE.slideTime || (ctl && !ctl.input.shootHeld))) {
+          d.held = false; d.brakeAt = p.stateTime;
+          if (this.ball.owner !== p) p.play('slide_tackle_up_fail', { fade: 0.08 });
+        }
+        if (!d.held) p.speed *= Math.pow(TACKLE.slideDecel, dt * 10);
+        p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
+        if (d.held && !d.hit) {
+          // the slider's "ball" bone: a point ahead of him, swept since the last step so a fast slide cannot skip the ball
+          const fx = p.pos.x + Math.cos(p.facing) * TACKLE.footReach, fz = p.pos.z + Math.sin(p.facing) * TACKLE.footReach;
+          const px = d.foot ? d.foot[0] : fx, pz = d.foot ? d.foot[1] : fz;
+          d.foot = [fx, fz];
+          const b = this.ball, sx = fx - px, sz = fz - pz, L2 = sx * sx + sz * sz;
+          const k = L2 > 1e-9 ? Math.max(0, Math.min(1, ((b.pos.x - px) * sx + (b.pos.z - pz) * sz) / L2)) : 0;
+          if (Math.hypot(b.pos.x - (px + sx * k), b.pos.z - (pz + sz * k)) < TACKLE.footRadius + R && b.pos.y < 0.6 * SIZE) {
             const victim = b.owner;
-            if (victim && victim.team !== p.team) { this.knockDown(victim, p, 'slide'); p.stateData.hit = true; }
-            else if (!victim) { b.kick(new THREE.Vector3(Math.cos(p.facing) * 7, 0.5, Math.sin(p.facing) * 7), null, { noPickup: 0.1 }); b.lastTouch = p; p.stateData.hit = true; }
+            if (victim && victim.team !== p.team && !victim.isGoalie) { this.knockDown(victim, p, 'slide'); d.hit = true; }
+            else if (!victim && b.noPickup <= 0) { b.owner = p; b.vel.set(0, 0, 0); b.passTarget = null; b.shotTimer = 0; b.lastTouch = p; this.giveToTeamHuman(p); d.hit = true; }
           }
           for (const o of this.players) {
-            if (o.team === p.team || o.isGoalie || o.state === 'react' || p.stateData.hit) continue;
-            if (Math.hypot(o.pos.x - fx, o.pos.z - fz) < 0.55 * SIZE) { this.knockDown(o, p, 'slide'); p.stateData.hit = true; }
+            if (o.team === p.team || o.isGoalie || o.state === 'react' || d.hit) continue;
+            if (Math.hypot(o.pos.x - fx, o.pos.z - fz) < FIELDER.capsuleRadius * 1.5) { this.knockDown(o, p, 'slide'); d.hit = true; }
           }
-        } else if (!p.stateData.recover) {
-          p.stateData.recover = true;
-          p.play('slide_tackle_up_fail', { fade: 0.08, rate: 1.6 });
-        } else {
-          p.speed = Math.max(0, p.speed - 20 * dt);
-          if (p.stateTime > slideEnd + TACKLE.slideRecover + 0.25) p.setState('free');
+        }
+        // with the ball: up after the brake; without: the whole slide_tackle_up_fail
+        const upFail = this.template.meta.slide_tackle_up_fail?.duration ?? 1.0;
+        if (!d.held && p.stateTime >= d.brakeAt + (this.ball.owner === p ? TACKLE.slideRecover : Math.max(TACKLE.slideRecover, upFail))) {
+          p.setState('free');
+          if (this.ball.owner === p) p.play('run_with_ball', { loop: true, fade: 0.1 });
         }
         break;
       }
       case 'hit': {
-        if (p.stateTime < 0.3) {
-          p.speed = 7.5;
-          p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
-          if (!p.stateData.done) for (const o of this.players) {
-            if (o.team === p.team || o.isGoalie || o.state === 'react') continue;
-            if (Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < TACKLE.hitRange * 0.75 * (p.cfg.tackleReach ?? 1)) { this.knockDown(o, p, 'hit'); p.stateData.done = true; }
-          }
-        } else p.speed = Math.max(0, p.speed - 25 * dt);
-        if (p.stateTime > 0.75) p.setState('free');
+        // root motion of hit_1200 at 1.5×; contact during frames 4..14 of the clip
+        const ct = p.stateTime * TACKLE.hitRate;
+        p.applyRootMotion(ct);
+        const [f0, f1] = TACKLE.hitFrames;
+        if (!p.stateData.done && ct >= f0 / FPS && ct <= f1 / FPS) for (const o of this.players) {
+          if (o.team === p.team || o.isGoalie || o.state === 'react') continue;
+          if (Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < TACKLE.hitReach * (p.cfg.tackleReach ?? 1)) { this.knockDown(o, p, 'hit'); p.stateData.done = true; }
+        }
+        if (ct >= (this.template.meta.hit_1200?.duration ?? 0.9)) p.setState('free');
         break;
       }
       case 'deke':
