@@ -564,7 +564,7 @@ export class Game {
     const dur = this.template.meta.captain_shoot_to_score?.duration ?? 127 / FPS;
     if (!s || s.p !== p || s.phase === 'flight') {
       // the ball is gone (or the strike was stopped): the clip runs to its end, then play on
-      if (p.stateTime >= dur - 0.05) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
+      if (p.stateTime >= dur - 0.05) { p.setState('free'); p.play('idle', { loop: true, fade: 0.133 }); }
       return;
     }
     s.t += dt; // the clip plays at rate 1 in game time
@@ -771,7 +771,7 @@ export class Game {
       if (b.owner === c && dc < g.cfg.catchTolerance + 0.5 * SIZE) {
         if (this.superStrike && this.superStrike.p === c) { this.superStrike = null; this.timeScale = 1; }
         b.owner = g; b.vel.set(0, 0, 0); b.superStrike = null; b.passTarget = null;
-        c.setState('react', {}); c.stun = TACKLE.stunHit; c.play('hit_react_1200', { fade: 0.05 });
+        c.setState('react', {}); c.stun = TACKLE.stunHit; c.play('hit_react_1200', { fade: 0.067 });
         this.stats.saves[g.team]++;
         this.emit('save', { team: g.team, superStrike: true });
       }
@@ -889,7 +889,7 @@ export class Game {
         if (!p.stateData.released && p.stateTime >= p.stateData.release) {
           if (this.ball.owner === p) this.shootBall(p); else p.stateData.released = true;
         }
-        if (p.stateTime > (p.stateData.end ?? 0.55)) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
+        if (p.stateTime > (p.stateData.end ?? 0.55)) { p.setState('free'); p.play('idle', { loop: true, fade: 0.133 }); }
         break;
       case 'slide': {
         // ActionSlideAttack: on while the button is held, at most Slide Attack Maximum Time; then the exponential brake

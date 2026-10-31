@@ -1,7 +1,7 @@
 # Graph Report - Strikers  (2026-10-31)
 
 ## Corpus Check
-- 67 files · ~110,043 words
+- 67 files · ~110,086 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0a13abd4`
+- Built from commit: `c42443e9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -292,7 +292,7 @@ Cohesion: 0.14
 Nodes (18): integrate(), predict(), shootAtFast(), tmp, BALL, FIELD, PASS, PHYSICS_DT (+10 more)
 
 ## Knowledge Gaps
-- **73 isolated node(s):** `Pagina sviluppo gioco senza build (dev/index.html)`, `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/`, `Controller Xbox stile EA FC`, `Coppe complete` (+68 more)
+- **73 isolated node(s):** `Pagina sviluppo gioco senza build (dev/index.html)`, `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/`, `Chat delle regole del gioco (prossima, ramo magical-ride, VERIFICA.md, strikers_triggers.json)`, `Indicatore G1-G4 stile FIFA` (+68 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 283 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -300,7 +300,7 @@ Nodes (18): integrate(), predict(), shootAtFast(), tmp, BALL, FIELD, PASS, PHYSI
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Tabella aree del progetto (scritta da make_map.py)` connect `make_map.py` to `Gioco (README)`, `Stato personaggi: completo (25 personaggi, lavoro finito)`, `Animazioni (area, clip controllate su 25 personaggi)`?**
-  _High betweenness centrality (0.279) - this node is a cross-community bridge._
+  _High betweenness centrality (0.284) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `boot()` (e.g. with `.tick()` and `.show()`) actually correct?**
   _`boot()` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Pagina sviluppo gioco senza build (dev/index.html)`, `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/` to the rest of the system?**
@@ -308,8 +308,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Game` be split into smaller, more focused modules?**
   _Cohesion score 0.10338680926916222 - nodes in this community are weakly interconnected._
 - **Why does `Riferimento: il gioco originale` connect `make_map.py` to `game.js`?**
-  _High betweenness centrality (0.192) - this node is a cross-community bridge._
+  _High betweenness centrality (0.195) - this node is a cross-community bridge._
 - **Should `t` be split into smaller, more focused modules?**
   _Cohesion score 0.0735930735930736 - nodes in this community are weakly interconnected._
 - **Why does `Calcio arcade (progetto)` connect `make_map.py` to `Economia di Ultimate Team (crediti, pacchetti, mercato)`, `Stato personaggi: completo (25 personaggi, lavoro finito)`, `build.mjs`, `Animazioni (area, clip controllate su 25 personaggi)`, `Gioco (README)`, `Regole del progetto`, `Interfaccia gioco: decisioni prese con l'utente`?**
-  _High betweenness centrality (0.171) - this node is a cross-community bridge._
+  _High betweenness centrality (0.176) - this node is a cross-community bridge._

@@ -210,7 +210,11 @@ export class Player {
     else name = 'run_with_ball'; // ANIM_RUN and ANIM_RUN_WB both use this clip
     const m = this.meta[name];
     let rate = 1;
-    if (this.speed >= 0.3 && m && m.linear_speed > 0.1) {
+    // Character.cpp MatchAnimSpeedToCharacterSpeed only for the clips with the flag (jog, run, strafe, backwards):
+    // the turbo run plays at 1×, the turbo with the ball at 2× (RUNNING_WB_TURBO)
+    if (name === 'turbo_run') rate = 1;
+    else if (name.startsWith('turbo_with_ball')) rate = 2;
+    else if (this.speed >= 0.3 && m && m.linear_speed > 0.1) {
       rate = Math.min(ANIM_RATE_MAX, Math.max(ANIM_RATE_MIN, this.speed / (m.linear_speed * (this.cfg.height / this.rigHeight))));
     }
     this.play(name, { loop: true, rate, restart: false, fade: 0.133 });
