@@ -1,6 +1,6 @@
 # Gioco
 
-Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali, 10 personaggi), tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
+Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIKERS_REFERENCE.md`](../reference/STRIKERS_REFERENCE.md). I personaggi in campo sono scelti in [`assets/roster.json`](assets/roster.json); ci sono due squadre da 5 (Celestini e Rivali), due squadre miste con i personaggi singoli (Leggende, Nazionali: `squads` in `roster.json`) e un editor della formazione che mette qualsiasi personaggio in qualsiasi posto: 15 personaggi, tutti con le 183 animazioni originali adattate al loro scheletro Mixamo.
 
 ## Stato
 
@@ -13,10 +13,13 @@ Fatto:
 - Partita a due giocatori (uno contro uno o insieme contro la CPU), difficoltà della CPU
 - Link online privato, aggiornato a ogni modifica
 - Statistiche per giocatore dalle carte di Ultimate Team (`src/stats.js`)
+- Super Strike del capitano come nell'originale (`SUPER` in `src/config.js`), indicatore G1–G4 stile FIFA sopra il giocatore controllato
+- Build di prova con 10 milioni di crediti (`--prova`) e build per itch.io (`--itch`), caricata sulla pagina ristretta https://goleador0702.itch.io/strikers
 
 Prossimo:
 - Pallone oltre il limite di 50 m/s in alcuni tiri
-- Power-up, Super Strike
+- Power-up
+- Opzioni della pagina itch.io dal sito (gioco nel browser, 1280×720, schermo intero, accesso agli amici)
 
 ## Avvio
 
@@ -35,15 +38,34 @@ Il file contiene dati di animazione estratti dalla tua copia del gioco: tienilo 
 
 Il gioco è anche online, aggiornato a ogni modifica: https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH
 
+Dal 31 ottobre il link privato ospita la **build di prova** (`--prova`): è il gioco normale, ma ogni club di Ultimate Team torna a 10 milioni di crediti quando scende sotto i 5 milioni, per provare tutti i pacchetti (nel menu, accanto ai crediti, compare "PROVA"). La versione normale va su itch.io.
+
 Funziona anche col controller Xbox (verificato dall'utente). È un Artifact di claude.ai **privato**: lo apre solo il proprietario dell'account. Non va condiviso, perché contiene le animazioni ricavate dal disco.
 
 Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
 
 ```bash
-node tools/build.mjs --web
+node tools/build.mjs --web --prova
 ```
 
-Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 48 MB, sotto il limite di 64 MB per pubblicazione.
+Poi si ripubblica `dist/web-prova/index.html` con i file di `dist/web-prova/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 74 MB con 15 personaggi, sopra il limite di 64 MB per pubblicazione: i file lasciati fuori da una pubblicazione restano online, quindi si pubblica in due passi sullo stesso `url`: prima `index.html`, `roster.json`, `walkout.json` e metà dei personaggi, poi l'altra metà. L'utente vuole sempre il gioco completo e aggiornato online.
+
+## itch.io (privato, per gli amici)
+
+```bash
+node tools/build.mjs --itch
+```
+
+Scrive `dist/itch/` (pagina completa con `<!doctype html>`) e `dist/calcio-arcade-itch.zip` (circa 54 MB), da caricare come gioco HTML su una pagina itch.io con visibilità **Ristretta** (con password o lista di accesso), mai pubblica: contiene le animazioni del disco. La pagina è https://goleador0702.itch.io/strikers (Ristretta: chi non ha accesso vede un 404). Dopo ogni modifica al gioco Claude la aggiorna con butler (l'utente ha dato il permesso il 31 ottobre; si scarica da `https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default` nella cartella temporanea, la chiave la mette il proxy, a butler basta `BUTLER_API_KEY=dummy`):
+
+```bash
+node tools/build.mjs --itch
+```
+```bash
+BUTLER_API_KEY=dummy butler push dist/itch goleador0702/strikers:html5 --userversion "$(git rev-parse --short HEAD)"
+```
+
+Prima build caricata il 31 ottobre (canale `html5`). Le opzioni della pagina (gioco nel browser, dimensioni 1280×720, schermo intero, chi può accedere) si cambiano solo dal sito, nella modifica del progetto.
 
 ## Comandi
 
@@ -62,6 +84,8 @@ Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo *
 | View ⧉ (nella pausa) | ricomincia la partita | |
 
 Nei menu (stile EA FC): **LB / RB** cambiano scheda, croce o levetta si spostano, **A** conferma, **B** torna indietro. Funzionano tutti i controller collegati. Nel visualizzatore: croce su/giù per cambiare animazione, X per specchiarla, B per uscire.
+
+**Super Strike** (vale 2 gol): solo il capitano (© sopra la testa e nell'editor della formazione; in Ultimate Team si sceglie nella Rosa, mai il portiere). Nella metà campo avversaria tieni premuto B (tastiera: K) oltre la barra piena: il capitano brilla d'oro e dopo 1,6 s salta. Al rallentatore passano due lancette: premi B quando la prima è sul verde scuro a destra e quando la seconda è sul verde scuro a sinistra. Tutte e due sul verde scuro: imparabile. Una appena fuori: gol lo stesso. Altrimenti il portiere respinge e resta a terra 1–2 s. Se ti placcano mentre carichi, la perdi.
 
 Il controller va collegato prima di aprire il gioco, oppure basta premere un suo tasto con la pagina aperta: il browser lo rende visibile solo dopo la prima pressione. Funziona in Chrome, Edge e Firefox.
 
@@ -126,7 +150,7 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 
 ## Non ancora presente
 
-Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici).
+Power-up, falli e rigori, suoni veri (solo segnali sintetici).
 
 ## Sviluppo e prove
 
@@ -148,9 +172,11 @@ Esce con errore se la pagina dà errori o se una posizione diventa NaN. Se la mo
 node tools/uttest.cjs
 ```
 
+Altre prove: `node tools/squadtest.cjs` (scelta della squadra e formazione), `node tools/supertest.cjs` (Super Strike: perfetta +2, respinta, metà campo sbagliata, non capitano, CPU), `node tools/packtest.cjs` (build di prova: crediti, 1.000 pacchetti, tutte le carte del catalogo col ritratto).
+
 Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md).
 
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Il file `gioco.html` pesa circa 91 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
+- Il file `gioco.html` pesa circa 131 MB con 15 personaggi (circa 8-9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.

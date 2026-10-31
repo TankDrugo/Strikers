@@ -21,6 +21,8 @@ export function installUt(Menu) {
   P.club = function () {
     const p = save.active();
     const club = C.clubOf(p);
+    // test build (tools/build.mjs --prova): the club never runs short of credits, to try every pack
+    if (window.__PROVA && club.started && club.credits < window.__PROVA.credits / 2) club.credits = window.__PROVA.credits;
     const sold = C.settleMarket(club);
     if (sold.length) { save.store(); this.utSold = (this.utSold || []).concat(sold); }
     return club;
@@ -71,11 +73,11 @@ export function installUt(Menu) {
   };
 
   P.utSquadView = function (club) {
-    const pos = [['DIF', '2 / 4'], ['CEN', '3 / 2'], ['ALA', '1 / 2'], ['ATT', '2 / 1'], ['POR', '2 / 5']]; // grid column / row
+    const pos = [['DIF', '2 / 3'], ['CEN', '3 / 2'], ['ALA', '1 / 2'], ['ATT', '2 / 1'], ['POR', '2 / 4']]; // grid column / row
     const slots = C.SLOTS.map((role, i) => {
       const card = C.cardOf(club, club.squad[i]), inst = C.inst(club, club.squad[i]);
       const [col, row] = pos[i][1].split(' / ');
-      return `<button class="slotc" data-nav data-act="ut-slot" data-slot="${i}" style="grid-column:${col};grid-row:${row}"><span class="lab">${t('ut.role.' + role)}</span>
+      return `<button class="slotc" data-nav data-act="ut-slot" data-slot="${i}" style="grid-column:${col};grid-row:${row}"><span class="lab">${t('ut.role.' + role)}${i === (club.captain ?? 3) ? ' ©' : ''}</span>
         ${card ? this.utCard(card, { serial: inst.serial }) : `<div class="empty">+</div>`}</button>`;
     }).join('');
     const bench = club.bench.map((u, b) => {
@@ -83,10 +85,10 @@ export function installUt(Menu) {
       return `<button class="slotc" data-nav data-act="ut-bench" data-b="${b}" style="width:5em">${card ? this.utCard(card, { serial: inst.serial }) : `<div class="empty" style="font-size:1.3em;border-color:var(--ink);color:var(--ink)">+</div>`}</button>`;
     }).join('');
     return `<div class="view" style="grid-template-columns:1.5fr 1fr;grid-template-rows:auto 1fr auto">
-      <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(5,auto);font-size:.62em">${slots}</div>
+      <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(4,1fr);font-size:.62em;container-type:size">${slots}</div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default;flex-direction:row;align-items:center;gap:1em"><span class="big">${C.squadRating(club)}</span><div><h3>${t('ut.squad.rating')}</h3><p style="font-size:.8em">${t('ut.squad.rule')}</p></div></div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default"><h3>${t('ut.squad.bench')}</h3><p>${t('ut.squad.benchText')}</p><div style="display:flex;gap:.6em;margin-top:auto;font-size:.8em">${bench}</div></div>
-      <div class="row-btns"><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>
+      <div class="row-btns"><button class="btn" data-nav data-act="ut-captain" title="${t('ut.squad.captainHint')}">${t('ut.squad.captain', { name: (() => { const c = C.cardOf(club, club.squad[club.captain ?? 3]); return c ? charName(c) : '–'; })() })}</button><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>
     </div>`;
   };
 
@@ -140,6 +142,7 @@ export function installUt(Menu) {
       case 'ut-slot': return this.utPickSlot(+b.dataset.slot), true;
       case 'ut-bench': return this.utPickBench(+b.dataset.b), true;
       case 'ut-auto': C.autoSquad(club); this.utSave(); this.renderHub(false); return true;
+      case 'ut-captain': C.cycleCaptain(club); this.utSave(); this.renderHub(false); this.nav.focus(this.hub.el.querySelector('[data-act="ut-captain"]'), false); return true;
       case 'ut-tabdiv': return this.setTab(3), true; // the Divisions tab (Club, Rosa, Mercato, Divisioni, Album)
       case 'ut-mk-buy': return this.utOffers(false), true;
       case 'ut-mk-watch': return this.utOffers(true), true;
@@ -316,8 +319,7 @@ export function installUt(Menu) {
       await pk.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(1.6)', opacity: 0, filter: 'brightness(4)' }], { duration: 450, fill: 'forwards' }).finished;
       pk.remove();
       if (!walk) return finish();
-      const team = best.char.split('_')[0];
-      const clues = best.rarity === 'goldRare' ? [String(best.ovr)] : [t('ut.role.' + best.role), t('ut.team.' + team), String(best.ovr)];
+      const clues = best.rarity === 'goldRare' ? [String(best.ovr)] : [t('ut.role.' + best.role), t('ut.team.' + best.team), String(best.ovr)];
       if (best.rarity === 'numbered') clues.push(t('ut.numberedOf', { n: String(got[0].inst.serial).padStart(2, '0') }));
       if (best.rarity === 'oneOfOne') clues.push('1 / 1');
       for (const c of clues) await clue(c, c.includes('/') ? '#ffd21f' : '#fff');
@@ -506,7 +508,7 @@ export function installUt(Menu) {
         this.onStart({
           kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: this.setup.seconds,
           cpuLevel: C.cpuLevel(club.division.div),
-          lineups: [C.lineup(club, p.name, p.color), { name: opp.name, color: opp.color, slots: opp.slots, stats: opp.stats }],
+          lineups: [C.lineup(club, p.name, p.color), { name: opp.name, color: opp.color, slots: opp.slots, stats: opp.stats, captain: opp.captain }],
           onFinish: (res) => this.utAfterMatch(res),
           onQuit: () => this.utBackToUt(3),
         });

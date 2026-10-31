@@ -1,5 +1,5 @@
 {
-  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one. teamInfo: name and colour of each team (colour = rings, score, crowd; shirt = sampled from the models' textures).",
+  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one. teamInfo: name and colour of each team (colour = rings, score, crowd; shirt = sampled from the models' textures). squads: extra preset teams for quick play and cups (same slots; captain = slot 0-3 of the Super Strike player).",
   "characters": [
     {
       "id": "celestini_portiere",
@@ -70,6 +70,41 @@
       "glb": "characters/rivali_attaccante.glb",
       "clips": "characters/rivali_attaccante.clips.json",
       "recolor": false
+    },
+    {
+      "id": "bigsmoke_belgio",
+      "name": "Big Smoke",
+      "glb": "characters/bigsmoke_belgio.glb",
+      "clips": "characters/bigsmoke_belgio.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "crilin_giappone",
+      "name": "Crilin",
+      "glb": "characters/crilin_giappone.glb",
+      "clips": "characters/crilin_giappone.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "dastardly_croazia",
+      "name": "Dastardly",
+      "glb": "characters/dastardly_croazia.glb",
+      "clips": "characters/dastardly_croazia.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "goku_spagna",
+      "name": "Goku",
+      "glb": "characters/goku_spagna.glb",
+      "clips": "characters/goku_spagna.clips.json",
+      "recolor": false
+    },
+    {
+      "id": "goku_ssj_germania",
+      "name": "Goku SSJ",
+      "glb": "characters/goku_ssj_germania.glb",
+      "clips": "characters/goku_ssj_germania.clips.json",
+      "recolor": false
     }
   ],
   "teams": [
@@ -98,6 +133,32 @@
       "name": "Rivali",
       "color": "#2bd17e",
       "shirt": "#1b5a3c"
+    }
+  ],
+  "squads": [
+    {
+      "name": "Leggende",
+      "color": "#ffd21f",
+      "slots": [
+        "bigsmoke_belgio",
+        "crilin_giappone",
+        "dastardly_croazia",
+        "goku_ssj_germania",
+        "rivali_portiere"
+      ],
+      "captain": 3
+    },
+    {
+      "name": "Nazionali",
+      "color": "#ff7b1c",
+      "slots": [
+        "bigsmoke_belgio",
+        "goku_spagna",
+        "dastardly_croazia",
+        "goku_ssj_germania",
+        "celestini_portiere"
+      ],
+      "captain": 1
     }
   ]
 }

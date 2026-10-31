@@ -9,7 +9,7 @@ Tutto quello che porta le animazioni del gioco originale sui personaggi del nost
 Fatto:
 - 183 clip originali decodificate (84 giocatore, 99 portiere)
 - Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco
-- Tutte le clip controllate su tutti i 10 personaggi
+- Tutte le clip controllate su tutti i 15 personaggi
 - Scene .nis decodificate: corsa del tunnel e 2 esultanze per il walkout di Ultimate Team
 
 Prossimo:

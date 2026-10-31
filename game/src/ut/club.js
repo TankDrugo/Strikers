@@ -11,7 +11,7 @@ const pick = (list, rnd) => list[Math.floor(rnd() * list.length)];
 
 export function newClub() {
   return { v: 1, started: false, credits: 0, cards: [], squad: [null, null, null, null, null], bench: new Array(ECO.start.benchSize).fill(null),
-    album: {}, albumPaid: {}, pity: 0, packsOpened: 0, nextUid: 1,
+    album: {}, albumPaid: {}, pity: 0, packsOpened: 0, nextUid: 1, captain: 3,
     division: { div: 0, played: 0, pts: 0, w: 0, d: 0, l: 0, seasons: 0, best: 0, last: null },
     daily: { day: '', played: 0, won: 0, goals: 0, paid: [] }, market: { day: '', bought: [], listings: [], watch: [], log: [] } };
 }
@@ -253,8 +253,10 @@ export function opponent(club, profileId) {
     const c = near[Math.floor(hash(seed + role) * near.length)];
     used.add(c.char); slots.push(c.char); stats.push(c.stats); cards.push(c.id);
   });
+  // CPU captain: its best fielder
+  const captain = [0, 1, 2, 3].reduce((b, i) => (CARD[cards[i]].ovr > CARD[cards[b]].ovr ? i : b), 3);
   return { name: UT_TEAMS[Math.floor(hash(seed + 'n') * UT_TEAMS.length)], color: UT_COLORS[Math.floor(hash(seed + 'c') * UT_COLORS.length)],
-    slots, stats, cards, rating: target };
+    slots, stats, cards, rating: target, captain };
 }
 
 // After a Divisions match: credits (× division), season points, promotion or relegation after 10 matches.
@@ -324,5 +326,8 @@ export function albumRewards(club) {
 // Line-up for a match: characters and stats by slot (main.js withLineups).
 export function lineup(club, name, color) {
   const cards = squadCards(club);
-  return { name, color, slots: cards.map((c) => c.char), stats: cards.map((c) => c.stats) };
+  return { name, color, slots: cards.map((c) => c.char), stats: cards.map((c) => c.stats), captain: club.captain ?? 3 };
 }
+
+// The captain does the Super Strike: one of the four fielder slots (0-3), never the keeper (CLAUDE.md, handoff).
+export function cycleCaptain(club, d = 1) { club.captain = (((club.captain ?? 3) + d) % 4 + 4) % 4; return club.captain; }

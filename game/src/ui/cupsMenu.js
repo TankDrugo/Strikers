@@ -5,6 +5,7 @@ import { t } from './i18n.js';
 import { save } from './save.js';
 import { CUPS, cupById, cpuTeams, baseTeams, makeBracket, nextRound, simulate, roundKey, progress, grade, unlocked, rng } from '../cups/cups.js';
 import { drawObjectives } from '../cups/objectives.js';
+import { cloneLineup, presetLineup, lineupLabel, sidesColors } from './squads.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cupName = (run) => run.cupId ? t('cups.' + run.cupId) : t('cup.private');
@@ -54,14 +55,14 @@ export function installCups(Menu) {
     const cup = cupById(cupId), idx = CUPS.indexOf(cup), p = save.active();
     if (!unlocked(idx, p.cups)) { this.toastLayer(t('cup.lockedHint')); return; }
     const rec = save.cupRecord(p.id, cupId), pct = progress(cup, rec);
-    const st = { level: rec.normalWon ? 'hard' : 'normal', squad: this.setup.team };
+    const st = { level: rec.normalWon ? 'hard' : 'normal', lineup: cloneLineup(this.sides()[0]) };
     const run = save.run(p.id);
     const hasRun = run && run.cupId === cupId;
     const rows = () => {
       const lv = st.level === 'hard' ? t('cup.hard') : t('cup.normal');
-      const teams = baseTeams(this.roster);
       return `<button class="opt-row" data-nav data-opt="level"><span class="lbl">${t('cup.level')}</span><span class="val"><span class="arrow">◀</span>${lv}<span class="arrow">▶</span></span></button>
-        <button class="opt-row" data-nav data-opt="squad"><span class="lbl">${t('cup.yourTeam')}</span><span class="val"><span class="arrow">◀</span>${esc(teams[st.squad].name)}<span class="arrow">▶</span></span></button>
+        <button class="opt-row" data-nav data-opt="squad"><span class="lbl">${t('cup.yourTeam')}</span><span class="val"><span class="arrow">◀</span>${lineupLabel(st.lineup)}<span class="arrow">▶</span></span></button>
+        <button class="opt-row" data-nav data-opt="edit"><span class="lbl">${t('setup.lineup')}</span><span class="val">${t('setup.lineupEdit')} <span class="btnA" style="margin-left:.4em">A</span></span></button>
         <p class="err" id="cerr" style="min-height:0"></p>`;
     };
     const sum = (o) => Object.values(o || {}).reduce((a, b) => a + b, 0);
@@ -74,13 +75,13 @@ export function installCups(Menu) {
       <div class="row-btns">${hasRun ? `<button class="btn primary" data-nav data-act="continue" data-autofocus>${t('cup.continue')}</button>` : ''}
         <button class="btn${hasRun ? '' : ' primary'}" data-nav data-act="solo">${hasRun ? t('cup.restart') : t('cup.solo')}</button>
         <button class="btn" data-nav data-act="friends">${t('cup.friends')}</button><button class="btn" data-nav data-act="back">${t('foot.back')}</button></div></div></div>`, {
-      onMove: (dx, dy, cur) => { if (!dx || !cur || !cur.dataset.opt) return false; change(cur.dataset.opt); return true; },
+      onMove: (dx, dy, cur) => { if (!dx || !cur || !cur.dataset.opt || cur.dataset.opt === 'edit') return false; change(cur.dataset.opt, dx); return true; },
       act: (a) => {
         if (a === 'back') return this.nav.pop(l);
         if (a === 'continue') { this.nav.pop(l); return this.showBracket(run); }
         if (a === 'solo') {
           this.nav.pop(l);
-          const r = this.createRun({ cup, level: st.level, humans: [{ profileId: p.id, name: p.name, color: p.color, squad: st.squad }] });
+          const r = this.createRun({ cup, level: st.level, humans: [{ profileId: p.id, name: p.name, color: p.color, lineup: st.lineup }] });
           save.setRun(p.id, r);
           return this.showBracket(r);
         }
@@ -88,9 +89,10 @@ export function installCups(Menu) {
       },
       onBack: () => this.nav.pop(l),
     });
-    const change = (k) => {
+    const change = (k, d = 1) => {
+      if (k === 'edit') { this.showLineup(st.lineup, (lu) => { st.lineup = lu; this.sides()[0] = cloneLineup(lu); l.el.querySelector('#rows').innerHTML = rows(); this.nav.focus(l.el.querySelector('[data-opt="edit"]'), false); }); return; }
       if (k === 'level') { if (!rec.normalWon) { l.el.querySelector('#cerr').textContent = t('cup.hardLocked'); return; } st.level = st.level === 'hard' ? 'normal' : 'hard'; }
-      if (k === 'squad') { st.squad = 1 - st.squad; this.setup.team = st.squad; }
+      if (k === 'squad') { st.lineup = this.cyclePreset(st.lineup, d); this.sides()[0] = cloneLineup(st.lineup); }
       this.sfx('tab');
       l.el.querySelector('#rows').innerHTML = rows();
       this.nav.focus(l.el.querySelector(`[data-opt="${k}"]`), false);
@@ -110,15 +112,15 @@ export function installCups(Menu) {
   P.showTournamentSetup = function (cup, level = 'normal') {
     const profiles = save.profiles(), me = save.active();
     const st = { n: 2, size: 8, seconds: this.setup.seconds, cpuLevel: this.setup.cpuLevel,
-      players: [0, 1, 2, 3].map((i) => ({ who: i === 0 ? profiles.indexOf(me) : -1 - i, squad: i % 2 })) };
+      players: [0, 1, 2, 3].map((i) => ({ who: i === 0 ? profiles.indexOf(me) : -1 - i, lineup: presetLineup(this.roster, i) })) };
     // who >= 0: profile index; who < 0: guest number -who
     const whoName = (w) => w >= 0 ? profiles[w].name : t('cup.guest', { n: -w });
     const cycleWho = (w, d) => { const opts = [...profiles.keys(), -1, -2, -3, -4]; return opts[(opts.indexOf(w) + d + opts.length) % opts.length]; };
-    const squads = baseTeams(this.roster);
     const row = (k, lbl, val) => `<button class="opt-row" data-nav data-opt="${k}"><span class="lbl">${lbl}</span><span class="val"><span class="arrow">◀</span>${val}<span class="arrow">▶</span></span></button>`;
     const rows = () => [
       row('n', t('cup.players'), st.n),
-      ...st.players.slice(0, st.n).flatMap((pl, i) => [row('who' + i, `${t('cup.player', { n: i + 1 })} · ${t('cup.profile')}`, esc(whoName(pl.who))), row('squad' + i, `${t('cup.player', { n: i + 1 })} · ${t('cup.team')}`, esc(squads[pl.squad].name))]),
+      ...st.players.slice(0, st.n).flatMap((pl, i) => [row('who' + i, `${t('cup.player', { n: i + 1 })} · ${t('cup.profile')}`, esc(whoName(pl.who))), row('squad' + i, `${t('cup.player', { n: i + 1 })} · ${t('cup.team')}`, lineupLabel(pl.lineup)),
+        `<button class="opt-row" data-nav data-opt="edit${i}"><span class="lbl">${t('cup.player', { n: i + 1 })} · ${t('setup.lineup')}</span><span class="val">${t('setup.lineupEdit')} <span class="btnA" style="margin-left:.4em">A</span></span></button>`]),
       ...(cup ? [] : [row('size', t('cup.size'), st.size), row('time', t('setup.time'), t('setup.minutes', { n: st.seconds / 60 })), row('cpu', t('setup.cpu'), [t('setup.easy'), t('setup.normal'), t('setup.hard')][st.cpuLevel])]),
     ].join('') + '<p class="err" id="terr" style="min-height:0"></p>';
     const l = this.layer('dim', `<div class="center"><div class="panel" style="${this.cupColors(cup)}">
@@ -126,7 +128,7 @@ export function installCups(Menu) {
       <p class="sub">${cup ? `${t('cup.friendsHint')} ${t('cup.level')}: <b>${level === 'hard' ? t('cup.hard') : t('cup.normal')}</b>` : t('cup.privateHint')}</p>
       <div class="grid" id="rows" style="gap:.5em">${rows()}</div>
       <div class="row-btns"><button class="btn primary" data-nav data-act="go">${t('setup.go')}</button><button class="btn" data-nav data-act="back">${t('foot.back')}</button></div></div></div>`, {
-      onMove: (dx, dy, cur) => { if (!dx || !cur || !cur.dataset.opt) return false; change(cur.dataset.opt, dx); return true; },
+      onMove: (dx, dy, cur) => { if (!dx || !cur || !cur.dataset.opt || cur.dataset.opt.startsWith('edit')) return false; change(cur.dataset.opt, dx); return true; },
       act: (a) => {
         if (a === 'back') return this.nav.pop(l);
         const used = st.players.slice(0, st.n).map((p) => p.who).filter((w) => w >= 0);
@@ -134,7 +136,7 @@ export function installCups(Menu) {
         this.showJoin(st.n, l, (devices) => {
           const humans = st.players.slice(0, st.n).map((pl) => {
             const prof = pl.who >= 0 ? profiles[pl.who] : null;
-            return { profileId: prof ? prof.id : null, name: whoName(pl.who), color: prof ? prof.color : '#ffffff', squad: pl.squad };
+            return { profileId: prof ? prof.id : null, name: whoName(pl.who), color: prof ? prof.color : '#ffffff', lineup: pl.lineup };
           });
           const run = this.createRun({ cup, level, humans, size: st.size, seconds: st.seconds, cpuLevel: st.cpuLevel });
           run.bindings = devices.map((d) => d === 'kb' ? { device: 'kb' } : { device: 'pad', index: +d.slice(3) });
@@ -147,9 +149,14 @@ export function installCups(Menu) {
       onBack: () => this.nav.pop(l),
     });
     const change = (k, d) => {
+      if (k.startsWith('edit')) {
+        const p = st.players[+k.slice(4)];
+        this.showLineup(p.lineup, (lu) => { p.lineup = lu; l.el.querySelector('#rows').innerHTML = rows(); this.nav.focus(l.el.querySelector(`[data-opt="${k}"]`), false); });
+        return;
+      }
       if (k === 'n') st.n = Math.min(4, Math.max(2, st.n + d));
       else if (k.startsWith('who')) { const p = st.players[+k.slice(3)]; p.who = cycleWho(p.who, d); }
-      else if (k.startsWith('squad')) { const p = st.players[+k.slice(5)]; p.squad = 1 - p.squad; }
+      else if (k.startsWith('squad')) { const p = st.players[+k.slice(5)]; p.lineup = this.cyclePreset(p.lineup, d); }
       else if (k === 'size') { const o = [4, 8, 16]; st.size = o[(o.indexOf(st.size) + d + 3) % 3]; }
       else if (k === 'time') { const o = [120, 180, 300]; st.seconds = o[(o.indexOf(st.seconds) + d + 3) % 3]; }
       else if (k === 'cpu') st.cpuLevel = (st.cpuLevel + d + 3) % 3;
@@ -168,7 +175,8 @@ export function installCups(Menu) {
     const rounds = cup ? cup.rounds : Math.round(Math.log2(size));
     const n = 2 ** rounds, seed = `${cup ? cup.id : 'p'}-${level}-${Date.now()}`;
     const squads = baseTeams(this.roster);
-    const teams = humans.map((h, i) => ({ ...squads[h.squad], human: { ...h, slot: i } }));
+    // h.lineup: chosen in the set-up (presets or custom); h.squad: runs saved before line-ups existed
+    const teams = humans.map((h, i) => ({ ...(h.lineup ? { name: h.lineup.name, color: h.lineup.color, slots: [...h.lineup.slots], captain: h.lineup.captain, rating: 1.1 } : squads[h.squad]), human: { ...h, slot: i } }));
     teams.push(...cpuTeams(this.roster, cup ? cup.teamsKey : 'race', n - humans.length, cup ? cup.id : seed));
     return { cupId: cup ? cup.id : null, level, rounds, seconds, cpuLevel, teams, bracket: makeBracket(n, humans.map((_, i) => i), seed), seed, view: 0 };
   };
@@ -259,7 +267,7 @@ export function installCups(Menu) {
         this.onStart({
           kind: 'cup', humans, bindings, seconds: run.seconds, knockout: true, objectives,
           cpuLevel: cup ? cup.cpu[run.level] + (final ? 0.5 : 0) : run.cpuLevel,
-          lineups: [A, B].map((tm) => ({ name: tm.name, color: tm.color, slots: tm.slots })),
+          lineups: sidesColors(...[A, B].map((tm) => ({ name: tm.name, color: tm.color, slots: tm.slots, captain: tm.captain }))),
           onFinish: (res) => this.afterCupMatch(run, nx, res),
           onQuit: () => this.showBracket(run),
         });

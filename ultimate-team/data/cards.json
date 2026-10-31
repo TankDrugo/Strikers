@@ -1,5 +1,5 @@
 {
- "_doc": "Ultimate Team cards: one base card per character, its tier comes from the overall (bronze <65, silver 65-74, gold 75+). Variants (gold rare, holo, numbered, 1/1) add ovrBonus from economy.json to every stat. Overall = weighted stats (weights per role). At 75 a stat plays like the original game (game/src/stats.js). Edit the stats here; the overall follows.",
+ "_doc": "Ultimate Team cards: one base card per character, its tier comes from the overall (bronze <65, silver 65-74, gold 75+). Variants (gold rare, holo, numbered, 1/1) add ovrBonus from economy.json to every stat. Overall = weighted stats (weights per role). At 75 a stat plays like the original game (game/src/stats.js). Edit the stats here; the overall follows. Optional \"team\": the team or nation shown in the pack walkout (default: the id up to the first \"_\").",
  "tiers": {
   "bronze": 0,
   "silver": 65,
@@ -126,6 +126,56 @@
     "tir": 89,
     "pas": 77,
     "con": 71
+   }
+  },
+  "bigsmoke_belgio": {
+   "role": "DIF",
+   "team": "belgio",
+   "stats": {
+    "vel": 58,
+    "tir": 70,
+    "pas": 70,
+    "con": 88
+   }
+  },
+  "crilin_giappone": {
+   "role": "CEN",
+   "team": "giappone",
+   "stats": {
+    "vel": 82,
+    "tir": 72,
+    "pas": 84,
+    "con": 70
+   }
+  },
+  "dastardly_croazia": {
+   "role": "ALA",
+   "team": "croazia",
+   "stats": {
+    "vel": 88,
+    "tir": 66,
+    "pas": 70,
+    "con": 52
+   }
+  },
+  "goku_spagna": {
+   "role": "ATT",
+   "team": "spagna",
+   "stats": {
+    "vel": 88,
+    "tir": 86,
+    "pas": 76,
+    "con": 72
+   }
+  },
+  "goku_ssj_germania": {
+   "role": "ATT",
+   "team": "germania",
+   "stats": {
+    "vel": 93,
+    "tir": 95,
+    "pas": 80,
+    "con": 78
    }
   }
  }

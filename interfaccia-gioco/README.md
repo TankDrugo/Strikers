@@ -11,6 +11,9 @@ Fatto:
 - Coppe complete: 4 coppe, stelle, Difficile, voto da D a Z, bacheca, tornei fino a 4 giocatori
 - Bozze scelte: stile M1, holo, teca delle numerate, walkout P1
 - Ultimate Team: Club, Rosa, Mercato, Divisioni, Album e apertura P1 con walkout 3D
+- Scelta della squadra in Gioco rapido, Coppe e tornei: squadre pronte o formazione libera con capitano (`game/src/ui/squads.js`)
+- Carte con ritratto a mezzo busto stile FUT, calcolato dalla posa (testa e capelli mai tagliati)
+- In partita: indicatore G1–G4 stile FIFA sopra il giocatore controllato, barra della Super Strike
 
 Prossimo:
 - Suoni veri (CC0)

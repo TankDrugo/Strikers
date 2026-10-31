@@ -113,7 +113,7 @@ const CSS = `
 .ui .cardbox{position:relative;width:100%;container-type:inline-size}
 .ui .card{--mx:50;--my:50;position:relative;aspect-ratio:5/7;width:100%;container-type:inline-size;border-radius:7cqw;border:4cqw solid var(--ink);overflow:hidden;isolation:isolate;
   background:linear-gradient(160deg,#fff0a0,#e8a91a 55%,#9a5d05);transform:perspective(700px) rotateY(calc((var(--mx) - 50) * .22deg)) rotateX(calc((50 - var(--my)) * .18deg));box-shadow:0 3cqw 0 #00000040;font-family:var(--fd);color:var(--ink)}
-.ui .card .art{position:absolute;inset:14% 8% 26% 8%;z-index:1}.ui .card .art svg{width:100%;height:100%;display:block}
+.ui .card .art{position:absolute;inset:5% 3% 19% 17%;z-index:1}.ui .card .art svg{width:100%;height:100%;display:block}
 .ui .card .ovr{position:absolute;z-index:3;left:7%;top:4%;font-size:17cqw;line-height:.9;-webkit-text-stroke:1.2cqw #fff;paint-order:stroke fill}
 .ui .card .role{position:absolute;z-index:3;left:8%;top:20%;font-size:8cqw;-webkit-text-stroke:.8cqw #fff;paint-order:stroke fill}
 .ui .card .nm{position:absolute;z-index:3;left:5%;right:5%;bottom:8%;text-align:center;background:var(--ink);color:#fff;border-radius:3cqw;font-size:8.4cqw;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline:2cqw}
@@ -140,7 +140,7 @@ const CSS = `
 /* HUD and the old screens get the same look */
 .hud .score{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;background:#1b1036e0;border:3px solid #fff}
 .hud .flash{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;-webkit-text-stroke:3px #1b1036;paint-order:stroke fill}
-.hud .ptag{position:absolute;font-family:"Bungee","Arial Black",sans-serif;font-size:13px;color:#fff;background:#1b1036;border:2px solid #fff;border-radius:8px;padding:0 6px;transform:translate(-50%,-100%);white-space:nowrap}
+.hud .ptag{position:absolute;font-family:"Bungee","Arial Black",sans-serif;font-size:14px;line-height:1.25;color:#fff;background:var(--pc,#2b8cff);border:2px solid #fff;border-radius:7px;padding:0 7px;transform:translate(-50%,calc(-100% - 11px));white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.45);text-shadow:0 1px 0 rgba(0,0,0,.5)}.hud .ptag::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:8px solid transparent;border-top:10px solid #fff;margin-top:1px}.hud .ptag::before{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top:8px solid var(--pc,#2b8cff);z-index:1}
 `;
 
 export function installTheme() {

@@ -28,7 +28,7 @@ CHARACTERS.forEach((char, ci) => {
     const bonus = rarity === 'goldRare' ? 2 : ECO.rarities[rarity]?.ovrBonus || 0; // gold rare: +2 like tools/economy_sim.py
     const stats = Object.fromEntries(Object.entries(c.stats).map(([k, v]) => [k, Math.min(99, v + bonus)]));
     const fx = HOLO_FX[rarity] ? HOLO_FX[rarity][ci % HOLO_FX[rarity].length] : '';
-    CATALOG.push({ id: `${char}:${rarity}`, char, role: c.role, gk: c.role === 'POR', rarity, baseOvr, ovr: ovrOf(c.role, stats), stats, fx });
+    CATALOG.push({ id: `${char}:${rarity}`, char, team: c.team || char.split('_')[0], role: c.role, gk: c.role === 'POR', rarity, baseOvr, ovr: ovrOf(c.role, stats), stats, fx });
   }
 });
 export const CARD = Object.fromEntries(CATALOG.map((c) => [c.id, c]));

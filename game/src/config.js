@@ -97,6 +97,24 @@ export const SHOT = {
   maxOnetimer: 0.8,
 };
 
+// Super Strike (Shoot-to-Score), captain only, never the keeper. Original values from reference/STRIKERS_REFERENCE.md
+// (Super Strike §5, goalie §6); the ones marked "estimate" are not in the files we have and were tuned by hand.
+export const SUPER = {
+  chargeSeconds: 1.6,     // estimate: hold the shot this long (normal bar full at 0.66 s, then the captain glows)
+  slowMotion: 0.72,       // original 0.68-0.78
+  needleSeconds: 0.9,     // estimate: one sweep of a needle across the meter, in game time
+  marks: [0.84, 0.16],    // first needle goes up and stops near 0.84, the second comes down to 0.16 (original)
+  perfect: 0.05,          // dark green: within ±0.05 of the mark (original ±0.02-0.06)
+  near: 0.13,             // light green around it (estimate)
+  hangClip: [0.9, 2.0],   // captain_shoot_to_score: in the air from 0.9 s to 2.0 s (the meter runs here), kick at 'contact'
+  kickRate: 1.35,         // the part after the meter, a little faster (estimate)
+  speed: 30,              // m/s of the strike (estimate: faster than any normal shot)
+  points: 2,              // a Super Strike goal counts double
+  keeperStun: [1, 2],     // seconds the keeper stays down after stopping one (original 1-2 s)
+  cpuChance: [0.25, 0.4, 0.55, 0.7], // CPU captain tries it on this share of its shots, per difficulty (estimate)
+  cpuError: [0.16, 0.1, 0.06, 0.035], // CPU needle error, per difficulty (estimate)
+};
+
 export const TACKLE = {
   slideConsiderRadius: 2.5,
   slideTime: 0.35, slideRecover: 0.35, slideSpeed: 9.0,
