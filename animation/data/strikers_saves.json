@@ -1,0 +1,2426 @@
+{
+ "source": "gSaveInfo (GoalieSave.cpp) + mariogoalie.trg + MarioGoalie.sanim; metres at original size",
+ "net": [
+  5.692,
+  2.559
+ ],
+ "saves": [
+  {
+   "clip": "gk_catch_super_high_jump",
+   "mirrored": false,
+   "id": 47,
+   "label": "Ctch Ctr XHiJmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.16667,
+    "contact": 0.35,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_center_parry_super_high_jump",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    null,
+    48,
+    52,
+    57
+   ],
+   "ball_at_contact": [
+    0.532,
+    0.022,
+    3.732
+   ],
+   "grid_cell": [
+    3,
+    4
+   ],
+   "save_time": 0.2167,
+   "save_time_from_takeoff": 0.1833
+  },
+  {
+   "clip": "gk_catch_high_jump",
+   "mirrored": false,
+   "id": 48,
+   "label": "Ctch Ctr Hi Jmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.2,
+    "contact": 0.35,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_center_parry_high_jump",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    47,
+    49,
+    53,
+    58
+   ],
+   "ball_at_contact": [
+    0.532,
+    0.022,
+    2.514
+   ],
+   "grid_cell": [
+    3,
+    4
+   ],
+   "save_time": 0.2167,
+   "save_time_from_takeoff": 0.15
+  },
+  {
+   "clip": "gk_catch_high",
+   "mirrored": false,
+   "id": 49,
+   "label": "Catch Ctr Hi",
+   "type": "catch",
+   "duration": 0.9667,
+   "milestones": {
+    "crouch": 0.12069,
+    "takeoff": 0.17241,
+    "contact": 0.2069,
+    "end": 0.39655
+   },
+   "fail": {
+    "clip": "gk_stand_defl_center_parry_high",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    48,
+    50,
+    54,
+    59
+   ],
+   "ball_at_contact": [
+    0.274,
+    -0.06,
+    1.662
+   ],
+   "grid_cell": [
+    3,
+    3
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_med",
+   "mirrored": false,
+   "id": 50,
+   "label": "Catch Ctr Med",
+   "type": "catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.08696,
+    "takeoff": 0.13043,
+    "contact": 0.17391,
+    "end": 0.54348
+   },
+   "fail": {
+    "clip": "gk_stand_defl_center_parry_med",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    49,
+    51,
+    55,
+    60
+   ],
+   "ball_at_contact": [
+    0.75,
+    -0.003,
+    1.002
+   ],
+   "grid_cell": [
+    3,
+    1
+   ],
+   "save_time": 0.0667,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_low",
+   "mirrored": false,
+   "id": 51,
+   "label": "Catch Ctr Lo",
+   "type": "catch",
+   "duration": 0.6,
+   "milestones": {
+    "crouch": 0.11111,
+    "takeoff": 0.19444,
+    "contact": 0.25,
+    "end": 0.61111
+   },
+   "fail": {
+    "clip": "gk_stand_defl_center_parry_low",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    50,
+    null,
+    56,
+    61
+   ],
+   "ball_at_contact": [
+    0.729,
+    -0.035,
+    0.179
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_super_right_high_jump",
+   "mirrored": false,
+   "id": 52,
+   "label": "Catch Rt XHiJmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.16667,
+    "contact": 0.36667,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_super_high_jump",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    null,
+    53,
+    null,
+    47
+   ],
+   "ball_at_contact": [
+    0.406,
+    0.456,
+    3.759
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.2
+  },
+  {
+   "clip": "gk_catch_right_high_jump",
+   "mirrored": false,
+   "id": 53,
+   "label": "Catch Rt Hi Jmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.2,
+    "contact": 0.33333,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_high_jump",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    52,
+    54,
+    null,
+    48
+   ],
+   "ball_at_contact": [
+    0.494,
+    0.45,
+    2.487
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.2,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_catch_right_high",
+   "mirrored": false,
+   "id": 54,
+   "label": "Catch Rt Hi",
+   "type": "catch",
+   "duration": 0.9667,
+   "milestones": {
+    "crouch": 0.10345,
+    "takeoff": 0.17241,
+    "contact": 0.18966,
+    "end": 0.39655
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_high",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    53,
+    55,
+    null,
+    49
+   ],
+   "ball_at_contact": [
+    0.41,
+    0.433,
+    1.654
+   ],
+   "grid_cell": [
+    4,
+    3
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0167
+  },
+  {
+   "clip": "gk_catch_right_med",
+   "mirrored": false,
+   "id": 55,
+   "label": "Catch Rt Med",
+   "type": "catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.08696,
+    "takeoff": 0.15217,
+    "contact": 0.19565,
+    "end": 0.52174
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_med",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    54,
+    56,
+    null,
+    50
+   ],
+   "ball_at_contact": [
+    0.667,
+    0.511,
+    0.947
+   ],
+   "grid_cell": [
+    4,
+    1
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_right_low",
+   "mirrored": false,
+   "id": 56,
+   "label": "Catch Rt Lo",
+   "type": "catch",
+   "duration": 0.7333,
+   "milestones": {
+    "crouch": 0.09091,
+    "takeoff": 0.13636,
+    "contact": 0.18182,
+    "end": 0.5
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_low",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    55,
+    null,
+    null,
+    51
+   ],
+   "ball_at_contact": [
+    0.859,
+    0.503,
+    0.179
+   ],
+   "grid_cell": [
+    4,
+    0
+   ],
+   "save_time": 0.0667,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_super_right_high_jump",
+   "mirrored": true,
+   "id": 57,
+   "label": "Catch Lf XHiJmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.16667,
+    "contact": 0.36667,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_super_high_jump",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    null,
+    58,
+    47,
+    null
+   ],
+   "ball_at_contact": [
+    0.406,
+    -0.456,
+    3.759
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.2
+  },
+  {
+   "clip": "gk_catch_right_high_jump",
+   "mirrored": true,
+   "id": 58,
+   "label": "Catch Lft HiJmp",
+   "type": "catch",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.2,
+    "contact": 0.33333,
+    "end": 0.66667
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_high_jump",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    57,
+    59,
+    48,
+    null
+   ],
+   "ball_at_contact": [
+    0.494,
+    -0.45,
+    2.487
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.2,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_catch_right_high",
+   "mirrored": true,
+   "id": 59,
+   "label": "Catch Lft Hi",
+   "type": "catch",
+   "duration": 0.9667,
+   "milestones": {
+    "crouch": 0.10345,
+    "takeoff": 0.17241,
+    "contact": 0.18966,
+    "end": 0.39655
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_high",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    58,
+    60,
+    49,
+    null
+   ],
+   "ball_at_contact": [
+    0.41,
+    -0.433,
+    1.654
+   ],
+   "grid_cell": [
+    2,
+    3
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0167
+  },
+  {
+   "clip": "gk_catch_right_med",
+   "mirrored": true,
+   "id": 60,
+   "label": "Catch Lft Med",
+   "type": "catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.08696,
+    "takeoff": 0.15217,
+    "contact": 0.19565,
+    "end": 0.52174
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_med",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    59,
+    61,
+    50,
+    null
+   ],
+   "ball_at_contact": [
+    0.667,
+    -0.511,
+    0.947
+   ],
+   "grid_cell": [
+    2,
+    1
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_catch_right_low",
+   "mirrored": true,
+   "id": 61,
+   "label": "Catch Lft Lo",
+   "type": "catch",
+   "duration": 0.7333,
+   "milestones": {
+    "crouch": 0.09091,
+    "takeoff": 0.13636,
+    "contact": 0.18182,
+    "end": 0.5
+   },
+   "fail": {
+    "clip": "gk_stand_defl_right_parry_med",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    60,
+    null,
+    51,
+    null
+   ],
+   "ball_at_contact": [
+    0.859,
+    -0.503,
+    0.179
+   ],
+   "grid_cell": [
+    2,
+    0
+   ],
+   "save_time": 0.0667,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dive_catch_far_right_high_special_twist",
+   "mirrored": false,
+   "id": 106,
+   "label": "DiveCatchRHiSpc",
+   "type": "dive_catch",
+   "duration": 2.2,
+   "milestones": {
+    "crouch": 0.09091,
+    "takeoff": 0.12879,
+    "contact": 0.21212,
+    "end": 0.42424
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_high",
+    "mirrored": false
+   },
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.467,
+    2.657,
+    2.487
+   ],
+   "grid_cell": [
+    6,
+    4
+   ],
+   "save_time": 0.2667,
+   "save_time_from_takeoff": 0.1833
+  },
+  {
+   "clip": "gk_dive_catch_far_right_high_special_twist",
+   "mirrored": true,
+   "id": 107,
+   "label": "DiveCatchLHiSpc",
+   "type": "dive_catch",
+   "duration": 2.2,
+   "milestones": {
+    "crouch": 0.09091,
+    "takeoff": 0.12879,
+    "contact": 0.21212,
+    "end": 0.42424
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_high",
+    "mirrored": true
+   },
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.467,
+    -2.657,
+    2.487
+   ],
+   "grid_cell": [
+    0,
+    4
+   ],
+   "save_time": 0.2667,
+   "save_time_from_takeoff": 0.1833
+  },
+  {
+   "clip": "gk_dive_catch_near_right_high",
+   "mirrored": false,
+   "id": 62,
+   "label": "Dive Catch R Hi",
+   "type": "dive_catch",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.18519,
+    "takeoff": 0.2963,
+    "contact": 0.44444,
+    "end": 0.92593
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_high",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    63,
+    68,
+    null
+   ],
+   "ball_at_contact": [
+    0.226,
+    0.579,
+    2.276
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_dive_catch_near_right_med",
+   "mirrored": false,
+   "id": 63,
+   "label": "Dive Catch R Md",
+   "type": "dive_catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.23913,
+    "takeoff": 0.3913,
+    "contact": 0.45652,
+    "end": 0.91304
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_med",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    62,
+    64,
+    69,
+    null
+   ],
+   "ball_at_contact": [
+    0.436,
+    0.6,
+    1.416
+   ],
+   "grid_cell": [
+    4,
+    2
+   ],
+   "save_time": 0.1667,
+   "save_time_from_takeoff": 0.05
+  },
+  {
+   "clip": "gk_dive_catch_near_right_low",
+   "mirrored": false,
+   "id": 64,
+   "label": "Dive Catch R Lo",
+   "type": "dive_catch",
+   "duration": 0.6,
+   "milestones": {
+    "crouch": 0.16667,
+    "takeoff": 0.36111,
+    "contact": 0.41667,
+    "end": 0.83333
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_low",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    63,
+    null,
+    70,
+    null
+   ],
+   "ball_at_contact": [
+    0.126,
+    1.039,
+    0.413
+   ],
+   "grid_cell": [
+    4,
+    0
+   ],
+   "save_time": 0.15,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dive_catch_near_right_high",
+   "mirrored": true,
+   "id": 65,
+   "label": "Dive Catch L Hi",
+   "type": "dive_catch",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.18519,
+    "takeoff": 0.2963,
+    "contact": 0.44444,
+    "end": 0.92593
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_high",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    66,
+    null,
+    71
+   ],
+   "ball_at_contact": [
+    0.226,
+    -0.579,
+    2.276
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_dive_catch_near_right_med",
+   "mirrored": true,
+   "id": 66,
+   "label": "Dive Catch L Md",
+   "type": "dive_catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.23913,
+    "takeoff": 0.3913,
+    "contact": 0.45652,
+    "end": 0.91304
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_med",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    65,
+    67,
+    null,
+    72
+   ],
+   "ball_at_contact": [
+    0.436,
+    -0.6,
+    1.416
+   ],
+   "grid_cell": [
+    2,
+    2
+   ],
+   "save_time": 0.1667,
+   "save_time_from_takeoff": 0.05
+  },
+  {
+   "clip": "gk_dive_catch_near_right_low",
+   "mirrored": true,
+   "id": 67,
+   "label": "Dive Catch L Lo",
+   "type": "dive_catch",
+   "duration": 0.6,
+   "milestones": {
+    "crouch": 0.16667,
+    "takeoff": 0.36111,
+    "contact": 0.41667,
+    "end": 0.83333
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_near_right_low",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    66,
+    null,
+    null,
+    73
+   ],
+   "ball_at_contact": [
+    0.126,
+    -1.039,
+    0.413
+   ],
+   "grid_cell": [
+    2,
+    0
+   ],
+   "save_time": 0.15,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dive_catch_far_right_high",
+   "mirrored": false,
+   "id": 68,
+   "label": "DiveCtch RHiFar",
+   "type": "dive_catch",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.18519,
+    "takeoff": 0.2963,
+    "contact": 0.53704,
+    "end": 0.96296
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_high",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    69,
+    null,
+    62
+   ],
+   "ball_at_contact": [
+    0.058,
+    2.798,
+    2.411
+   ],
+   "grid_cell": [
+    6,
+    4
+   ],
+   "save_time": 0.3167,
+   "save_time_from_takeoff": 0.2167
+  },
+  {
+   "clip": "gk_dive_catch_far_right_med",
+   "mirrored": false,
+   "id": 69,
+   "label": "DiveCtch RMdFar",
+   "type": "dive_catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.17391,
+    "takeoff": 0.26087,
+    "contact": 0.5,
+    "end": 0.91304
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_med",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    68,
+    70,
+    null,
+    63
+   ],
+   "ball_at_contact": [
+    0.067,
+    2.843,
+    1.675
+   ],
+   "grid_cell": [
+    6,
+    3
+   ],
+   "save_time": 0.25,
+   "save_time_from_takeoff": 0.1833
+  },
+  {
+   "clip": "gk_dive_catch_far_right_low",
+   "mirrored": false,
+   "id": 70,
+   "label": "DiveCtch RLoFar",
+   "type": "dive_catch",
+   "duration": 0.6333,
+   "milestones": {
+    "crouch": 0.23684,
+    "takeoff": 0.34211,
+    "contact": 0.57895,
+    "end": 0.88421
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_low",
+    "mirrored": false
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": false
+   },
+   "connected": [
+    69,
+    null,
+    null,
+    64
+   ],
+   "ball_at_contact": [
+    -0.162,
+    2.732,
+    0.384
+   ],
+   "grid_cell": [
+    6,
+    0
+   ],
+   "save_time": 0.2167,
+   "save_time_from_takeoff": 0.15
+  },
+  {
+   "clip": "gk_dive_catch_far_right_high",
+   "mirrored": true,
+   "id": 71,
+   "label": "DiveCtch LHiFar",
+   "type": "dive_catch",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.18519,
+    "takeoff": 0.2963,
+    "contact": 0.53704,
+    "end": 0.96296
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_high",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    72,
+    65,
+    null
+   ],
+   "ball_at_contact": [
+    0.058,
+    -2.798,
+    2.411
+   ],
+   "grid_cell": [
+    0,
+    4
+   ],
+   "save_time": 0.3167,
+   "save_time_from_takeoff": 0.2167
+  },
+  {
+   "clip": "gk_dive_catch_far_right_med",
+   "mirrored": true,
+   "id": 72,
+   "label": "DiveCtch LMdFar",
+   "type": "dive_catch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.17391,
+    "takeoff": 0.26087,
+    "contact": 0.5,
+    "end": 0.91304
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_med",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    71,
+    73,
+    66,
+    null
+   ],
+   "ball_at_contact": [
+    0.067,
+    -2.843,
+    1.675
+   ],
+   "grid_cell": [
+    0,
+    3
+   ],
+   "save_time": 0.25,
+   "save_time_from_takeoff": 0.1833
+  },
+  {
+   "clip": "gk_dive_catch_far_right_low",
+   "mirrored": true,
+   "id": 73,
+   "label": "DiveCtch LLoFar",
+   "type": "dive_catch",
+   "duration": 0.6333,
+   "milestones": {
+    "crouch": 0.23684,
+    "takeoff": 0.34211,
+    "contact": 0.57895,
+    "end": 0.88421
+   },
+   "fail": {
+    "clip": "gk_dvng_defl_parry_far_right_low",
+    "mirrored": true
+   },
+   "recover": {
+    "clip": "gk_recover_with_ball_side",
+    "mirrored": true
+   },
+   "connected": [
+    72,
+    null,
+    67,
+    null
+   ],
+   "ball_at_contact": [
+    -0.162,
+    -2.732,
+    0.384
+   ],
+   "grid_cell": [
+    0,
+    0
+   ],
+   "save_time": 0.2167,
+   "save_time_from_takeoff": 0.15
+  },
+  {
+   "clip": "gk_stand_defl_center_parry_super_high_jump",
+   "mirrored": false,
+   "id": 88,
+   "label": "Deflect XHi Jmp",
+   "type": "deflect",
+   "duration": 1.0667,
+   "milestones": {
+    "crouch": 0.1,
+    "takeoff": 0.19062,
+    "contact": 0.32812,
+    "end": 0.625
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    89,
+    93,
+    98
+   ],
+   "ball_at_contact": [
+    0.274,
+    0.034,
+    3.01
+   ],
+   "grid_cell": [
+    3,
+    4
+   ],
+   "save_time": 0.2433,
+   "save_time_from_takeoff": 0.1467
+  },
+  {
+   "clip": "gk_stand_defl_center_parry_high_jump",
+   "mirrored": false,
+   "id": 89,
+   "label": "Deflect Hi Jmp",
+   "type": "deflect",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13333,
+    "takeoff": 0.20667,
+    "contact": 0.3,
+    "end": 0.6
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    88,
+    90,
+    94,
+    99
+   ],
+   "ball_at_contact": [
+    0.481,
+    0.034,
+    2.564
+   ],
+   "grid_cell": [
+    3,
+    4
+   ],
+   "save_time": 0.1667,
+   "save_time_from_takeoff": 0.0933
+  },
+  {
+   "clip": "gk_stand_defl_center_parry_high",
+   "mirrored": false,
+   "id": 90,
+   "label": "Deflect Hi",
+   "type": "deflect",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.11111,
+    "takeoff": 0.18519,
+    "contact": 0.2037,
+    "end": 0.59259
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    89,
+    91,
+    95,
+    100
+   ],
+   "ball_at_contact": [
+    0.907,
+    0.034,
+    1.494
+   ],
+   "grid_cell": [
+    3,
+    2
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.0167
+  },
+  {
+   "clip": "gk_stand_defl_center_parry_med",
+   "mirrored": false,
+   "id": 91,
+   "label": "Deflect Med",
+   "type": "deflect",
+   "duration": 0.8333,
+   "milestones": {
+    "crouch": 0.04,
+    "takeoff": 0.08,
+    "contact": 0.12,
+    "end": 0.44
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    90,
+    92,
+    96,
+    101
+   ],
+   "ball_at_contact": [
+    1.229,
+    -0.015,
+    0.772
+   ],
+   "grid_cell": [
+    3,
+    1
+   ],
+   "save_time": 0.0667,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_stand_defl_center_parry_low",
+   "mirrored": false,
+   "id": 92,
+   "label": "Deflect Lo",
+   "type": "deflect",
+   "duration": 0.7,
+   "milestones": {
+    "crouch": 0.11905,
+    "takeoff": 0.16667,
+    "contact": 0.2381,
+    "end": 0.47619
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    91,
+    null,
+    97,
+    102
+   ],
+   "ball_at_contact": [
+    1.258,
+    -0.0,
+    0.253
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.0833,
+   "save_time_from_takeoff": 0.05
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_super_high_jump",
+   "mirrored": false,
+   "id": 93,
+   "label": "Defl R XHi Jmp",
+   "type": "deflect",
+   "duration": 1.0333,
+   "milestones": {
+    "crouch": 0.12903,
+    "takeoff": 0.1871,
+    "contact": 0.32258,
+    "end": 0.66129
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    94,
+    null,
+    88
+   ],
+   "ball_at_contact": [
+    0.26,
+    0.584,
+    2.999
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.2,
+   "save_time_from_takeoff": 0.14
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_high_jump",
+   "mirrored": false,
+   "id": 94,
+   "label": "Defl R Hi Jmp",
+   "type": "deflect",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13,
+    "takeoff": 0.21,
+    "contact": 0.28333,
+    "end": 0.65
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    93,
+    95,
+    null,
+    89
+   ],
+   "ball_at_contact": [
+    0.641,
+    0.519,
+    2.387
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.1533,
+   "save_time_from_takeoff": 0.0733
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_high",
+   "mirrored": false,
+   "id": 95,
+   "label": "Deflect R Hi",
+   "type": "deflect",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.1037,
+    "takeoff": 0.2037,
+    "contact": 0.22963,
+    "end": 0.56667
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    94,
+    96,
+    null,
+    90
+   ],
+   "ball_at_contact": [
+    0.616,
+    0.519,
+    1.475
+   ],
+   "grid_cell": [
+    4,
+    2
+   ],
+   "save_time": 0.1133,
+   "save_time_from_takeoff": 0.0233
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_med",
+   "mirrored": false,
+   "id": 96,
+   "label": "Deflect R Med",
+   "type": "deflect",
+   "duration": 0.8333,
+   "milestones": {
+    "crouch": 0.068,
+    "takeoff": 0.1,
+    "contact": 0.124,
+    "end": 0.44
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    95,
+    97,
+    null,
+    91
+   ],
+   "ball_at_contact": [
+    1.199,
+    0.457,
+    0.768
+   ],
+   "grid_cell": [
+    4,
+    1
+   ],
+   "save_time": 0.0467,
+   "save_time_from_takeoff": 0.02
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_low",
+   "mirrored": false,
+   "id": 97,
+   "label": "Deflect R Lo",
+   "type": "deflect",
+   "duration": 0.8333,
+   "milestones": {
+    "crouch": 0.108,
+    "takeoff": 0.148,
+    "contact": 0.192,
+    "end": 0.48
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    96,
+    null,
+    null,
+    92
+   ],
+   "ball_at_contact": [
+    0.44,
+    0.788,
+    0.048
+   ],
+   "grid_cell": [
+    4,
+    0
+   ],
+   "save_time": 0.07,
+   "save_time_from_takeoff": 0.0367
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_super_high_jump",
+   "mirrored": true,
+   "id": 98,
+   "label": "Defl L XHi Jmp",
+   "type": "deflect",
+   "duration": 1.0333,
+   "milestones": {
+    "crouch": 0.12903,
+    "takeoff": 0.1871,
+    "contact": 0.32258,
+    "end": 0.66129
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    99,
+    88,
+    null
+   ],
+   "ball_at_contact": [
+    0.26,
+    -0.584,
+    2.999
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.2,
+   "save_time_from_takeoff": 0.14
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_high_jump",
+   "mirrored": true,
+   "id": 99,
+   "label": "Defl L Hi Jmp",
+   "type": "deflect",
+   "duration": 1.0,
+   "milestones": {
+    "crouch": 0.13,
+    "takeoff": 0.21,
+    "contact": 0.28333,
+    "end": 0.65
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    98,
+    100,
+    89,
+    null
+   ],
+   "ball_at_contact": [
+    0.641,
+    -0.519,
+    2.387
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.1533,
+   "save_time_from_takeoff": 0.0733
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_high",
+   "mirrored": true,
+   "id": 100,
+   "label": "Deflect L Hi",
+   "type": "deflect",
+   "duration": 0.9,
+   "milestones": {
+    "crouch": 0.1037,
+    "takeoff": 0.2037,
+    "contact": 0.22963,
+    "end": 0.56667
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    99,
+    101,
+    90,
+    null
+   ],
+   "ball_at_contact": [
+    0.616,
+    -0.519,
+    1.475
+   ],
+   "grid_cell": [
+    2,
+    2
+   ],
+   "save_time": 0.1133,
+   "save_time_from_takeoff": 0.0233
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_med",
+   "mirrored": true,
+   "id": 101,
+   "label": "Deflect L Med",
+   "type": "deflect",
+   "duration": 0.8333,
+   "milestones": {
+    "crouch": 0.068,
+    "takeoff": 0.1,
+    "contact": 0.124,
+    "end": 0.44
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    100,
+    102,
+    91,
+    null
+   ],
+   "ball_at_contact": [
+    1.199,
+    -0.457,
+    0.768
+   ],
+   "grid_cell": [
+    2,
+    1
+   ],
+   "save_time": 0.0467,
+   "save_time_from_takeoff": 0.02
+  },
+  {
+   "clip": "gk_stand_defl_right_parry_low",
+   "mirrored": true,
+   "id": 102,
+   "label": "Deflect L Lo",
+   "type": "deflect",
+   "duration": 0.8333,
+   "milestones": {
+    "crouch": 0.108,
+    "takeoff": 0.148,
+    "contact": 0.192,
+    "end": 0.48
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    101,
+    null,
+    92,
+    null
+   ],
+   "ball_at_contact": [
+    0.44,
+    -0.788,
+    0.048
+   ],
+   "grid_cell": [
+    2,
+    0
+   ],
+   "save_time": 0.07,
+   "save_time_from_takeoff": 0.0367
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_high",
+   "mirrored": false,
+   "id": 76,
+   "label": "Dive Dfl R Hi",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.26087,
+    "contact": 0.36522,
+    "end": 0.91304
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    75,
+    79,
+    null
+   ],
+   "ball_at_contact": [
+    0.368,
+    0.568,
+    2.444
+   ],
+   "grid_cell": [
+    4,
+    4
+   ],
+   "save_time": 0.18,
+   "save_time_from_takeoff": 0.08
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_med",
+   "mirrored": false,
+   "id": 75,
+   "label": "Dive Dfl R Med",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.23913,
+    "contact": 0.28261,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    76,
+    74,
+    78,
+    null
+   ],
+   "ball_at_contact": [
+    0.606,
+    0.777,
+    1.221
+   ],
+   "grid_cell": [
+    4,
+    2
+   ],
+   "save_time": 0.1167,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_low",
+   "mirrored": false,
+   "id": 74,
+   "label": "Dive Dfl R Lo",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.23913,
+    "contact": 0.28261,
+    "end": 0.6087
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    75,
+    null,
+    77,
+    null
+   ],
+   "ball_at_contact": [
+    0.392,
+    0.786,
+    0.17
+   ],
+   "grid_cell": [
+    4,
+    0
+   ],
+   "save_time": 0.1167,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_high",
+   "mirrored": false,
+   "id": 79,
+   "label": "DiveDfl R HiFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.24783,
+    "contact": 0.43478,
+    "end": 0.91304
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    78,
+    null,
+    76
+   ],
+   "ball_at_contact": [
+    0.368,
+    2.713,
+    2.346
+   ],
+   "grid_cell": [
+    6,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1433
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_med",
+   "mirrored": false,
+   "id": 78,
+   "label": "DiveDfl R MdFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.24783,
+    "contact": 0.43478,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    79,
+    77,
+    null,
+    75
+   ],
+   "ball_at_contact": [
+    0.314,
+    2.831,
+    1.373
+   ],
+   "grid_cell": [
+    6,
+    2
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1433
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_low",
+   "mirrored": false,
+   "id": 77,
+   "label": "DiveDfl R LoFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.26087,
+    "contact": 0.43478,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    78,
+    null,
+    null,
+    74
+   ],
+   "ball_at_contact": [
+    0.368,
+    2.796,
+    0.283
+   ],
+   "grid_cell": [
+    6,
+    0
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_high",
+   "mirrored": true,
+   "id": 82,
+   "label": "Dive Dfl L Hi",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.26087,
+    "contact": 0.36522,
+    "end": 0.91304
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    81,
+    null,
+    85
+   ],
+   "ball_at_contact": [
+    0.368,
+    -0.568,
+    2.444
+   ],
+   "grid_cell": [
+    2,
+    4
+   ],
+   "save_time": 0.18,
+   "save_time_from_takeoff": 0.08
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_med",
+   "mirrored": true,
+   "id": 81,
+   "label": "Dive Dfl L Med",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.23913,
+    "contact": 0.28261,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    82,
+    80,
+    null,
+    84
+   ],
+   "ball_at_contact": [
+    0.606,
+    -0.777,
+    1.221
+   ],
+   "grid_cell": [
+    2,
+    2
+   ],
+   "save_time": 0.1167,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dvng_defl_parry_near_right_low",
+   "mirrored": true,
+   "id": 80,
+   "label": "Dive Dfl L Lo",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.23913,
+    "contact": 0.28261,
+    "end": 0.6087
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    81,
+    null,
+    null,
+    83
+   ],
+   "ball_at_contact": [
+    0.392,
+    -0.786,
+    0.17
+   ],
+   "grid_cell": [
+    2,
+    0
+   ],
+   "save_time": 0.1167,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_high",
+   "mirrored": true,
+   "id": 85,
+   "label": "DiveDfl L HiFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.24783,
+    "contact": 0.43478,
+    "end": 0.91304
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    84,
+    82,
+    null
+   ],
+   "ball_at_contact": [
+    0.368,
+    -2.713,
+    2.346
+   ],
+   "grid_cell": [
+    0,
+    4
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1433
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_med",
+   "mirrored": true,
+   "id": 84,
+   "label": "DiveDfl L MdFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.24783,
+    "contact": 0.43478,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    85,
+    83,
+    81,
+    null
+   ],
+   "ball_at_contact": [
+    0.314,
+    -2.831,
+    1.373
+   ],
+   "grid_cell": [
+    0,
+    2
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1433
+  },
+  {
+   "clip": "gk_dvng_defl_parry_far_right_low",
+   "mirrored": true,
+   "id": 83,
+   "label": "DiveDfl L LoFar",
+   "type": "dive_deflect",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13043,
+    "takeoff": 0.26087,
+    "contact": 0.43478,
+    "end": 0.82609
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    84,
+    null,
+    80,
+    null
+   ],
+   "ball_at_contact": [
+    0.368,
+    -2.796,
+    0.283
+   ],
+   "grid_cell": [
+    0,
+    0
+   ],
+   "save_time": 0.2333,
+   "save_time_from_takeoff": 0.1333
+  },
+  {
+   "clip": "gk_right_leg_low",
+   "mirrored": false,
+   "id": 86,
+   "label": "Leg R Lo",
+   "type": "leg",
+   "duration": 0.9333,
+   "milestones": {
+    "contact": 0.19643
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.335,
+    0.757,
+    0.189
+   ],
+   "grid_cell": [
+    4,
+    0
+   ],
+   "save_time": 0.11
+  },
+  {
+   "clip": "gk_right_leg_low",
+   "mirrored": true,
+   "id": 87,
+   "label": "Leg L Lo",
+   "type": "leg",
+   "duration": 0.9333,
+   "milestones": {
+    "contact": 0.19643
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.335,
+    -0.757,
+    0.189
+   ],
+   "grid_cell": [
+    2,
+    0
+   ],
+   "save_time": 0.11
+  },
+  {
+   "clip": "gk_stand_defl_center_punch_high",
+   "mirrored": false,
+   "id": 103,
+   "label": "Punch Hi",
+   "type": "punch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.12609,
+    "takeoff": 0.21739,
+    "contact": 0.26087,
+    "end": 0.78261
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    104,
+    105
+   ],
+   "ball_at_contact": [
+    0.755,
+    -0.018,
+    2.084
+   ],
+   "grid_cell": [
+    3,
+    4
+   ],
+   "save_time": 0.1033,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_stand_defl_right_punch_high",
+   "mirrored": true,
+   "id": 104,
+   "label": "Punch R Hi",
+   "type": "punch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13913,
+    "takeoff": 0.21739,
+    "contact": 0.26087,
+    "end": 0.74783
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    103
+   ],
+   "ball_at_contact": [
+    0.609,
+    0.461,
+    2.035
+   ],
+   "grid_cell": [
+    4,
+    3
+   ],
+   "save_time": 0.0933,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_stand_defl_right_punch_high",
+   "mirrored": false,
+   "id": 105,
+   "label": "Punch L Hi",
+   "type": "punch",
+   "duration": 0.7667,
+   "milestones": {
+    "crouch": 0.13913,
+    "takeoff": 0.21739,
+    "contact": 0.26087,
+    "end": 0.74783
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    103,
+    null
+   ],
+   "ball_at_contact": [
+    0.609,
+    -0.461,
+    2.035
+   ],
+   "grid_cell": [
+    2,
+    3
+   ],
+   "save_time": 0.0933,
+   "save_time_from_takeoff": 0.0333
+  },
+  {
+   "clip": "gk_s2s_blast_into_net",
+   "mirrored": false,
+   "id": 108,
+   "label": "S2S Blast Net",
+   "type": "sts_blast_net",
+   "duration": 2.2667,
+   "milestones": {
+    "contact": 0.05882
+   },
+   "fail": null,
+   "recover": null,
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    1.238,
+    0.012,
+    0.826
+   ],
+   "grid_cell": [
+    3,
+    1
+   ],
+   "save_time": 0.08
+  },
+  {
+   "clip": "gk_s2s_spin",
+   "mirrored": false,
+   "id": 114,
+   "label": "S2S Spin L",
+   "type": "sts_spin",
+   "duration": 2.4333,
+   "milestones": {
+    "contact": 0.00685
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_s2s_prone_getup",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.348,
+    -0.363,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.01
+  },
+  {
+   "clip": "gk_s2s_spin",
+   "mirrored": true,
+   "id": 115,
+   "label": "S2S Spin R",
+   "type": "sts_spin",
+   "duration": 2.4333,
+   "milestones": {
+    "contact": 0.00685
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_s2s_prone_getup",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.348,
+    0.363,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.01
+  },
+  {
+   "clip": "gk_s2s_knocked_out_start",
+   "mirrored": false,
+   "id": 110,
+   "label": "S2S Save Stun",
+   "type": "sts_save_stun",
+   "duration": 1.1667,
+   "milestones": {
+    "contact": 0.32
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_s2s_defl_knocked_out_loop",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    1.165,
+    0.02,
+    1.172
+   ],
+   "grid_cell": [
+    3,
+    2
+   ],
+   "save_time": 0.224
+  },
+  {
+   "clip": "gk_catch_miss_chip",
+   "mirrored": false,
+   "id": 128,
+   "label": "Miss Chip R",
+   "type": "miss_chip",
+   "duration": 1.5,
+   "milestones": {
+    "contact": 0.77778
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.635,
+    0.03,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.7
+  },
+  {
+   "clip": "gk_catch_miss_chip",
+   "mirrored": true,
+   "id": 129,
+   "label": "Miss Chip L",
+   "type": "miss_chip",
+   "duration": 1.5,
+   "milestones": {
+    "contact": 0.77778
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.635,
+    -0.03,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.7
+  },
+  {
+   "clip": "gk_catch_miss_chip_short",
+   "mirrored": false,
+   "id": 130,
+   "label": "MissChipShort R",
+   "type": "miss_chip",
+   "duration": 0.7667,
+   "milestones": {
+    "contact": 0.65217
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": false
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.635,
+    0.03,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.3
+  },
+  {
+   "clip": "gk_catch_miss_chip_short",
+   "mirrored": true,
+   "id": 131,
+   "label": "MissChipShort L",
+   "type": "miss_chip",
+   "duration": 0.7667,
+   "milestones": {
+    "contact": 0.65217
+   },
+   "fail": null,
+   "recover": {
+    "clip": "gk_recover_without_ball",
+    "mirrored": true
+   },
+   "connected": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "ball_at_contact": [
+    0.635,
+    -0.03,
+    0.166
+   ],
+   "grid_cell": [
+    3,
+    0
+   ],
+   "save_time": 0.3
+  }
+ ]
+}

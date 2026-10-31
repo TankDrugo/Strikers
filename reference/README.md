@@ -11,9 +11,10 @@ Fatto:
 - Confronto col codice ricostruito di parate, tiri, Super Strike, passaggi, contrasti, IA e animazioni (`VERIFICA.md`, 31 ottobre)
 - Letti dal disco tutti i valori di `GameTweaks.ini`, dei 7 `Difficulty*.ini`, dei 13 personaggi e di `goalie.ini` (`STRIKERS_REFERENCE.md` §9 bis) e i trigger delle animazioni (`animation/data/strikers_triggers.json`)
 - Corretto: la parata tira a sorte al momento del tiro con la curva del livello scelto, uguale per le due squadre (1–55% secondo la barra), poi serve un'animazione che arrivi in tempo; carica del Super Strike 0,91 s
+- Criteri completi del portiere (posizione, uscite, scelta tra 69 parate) e sequenza delle animazioni del Super Strike (`VERIFICA.md` §9 e §10)
 
 Prossimo:
-- Correggere il gioco secondo `VERIFICA.md` (righe 1–7 per prime), poi le animazioni delle ulti
+- Correggere il gioco secondo `VERIFICA.md` (righe 1–7 per prime, poi portiere e Super Strike)
 - Da misurare: telecamera originale e altezza delle mesh; tiri dei gregari
 
 | File | Contenuto |

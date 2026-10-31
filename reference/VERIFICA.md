@@ -32,6 +32,7 @@ Abbreviazioni: *FA* = `src/Game/AI/FielderActions.cpp`, *F* = `src/Game/AI/Field
 | 14 | **Portiere: presa o respinta** | Presa possibile solo se il tiro è un pallonetto, oppure se il portiere è riposato (energia ≥ 90, `Fatigue Catch Threshold`) e il tiro è debole (carica < 0,3, `Catch Save Max Speed`) | 65% a caso sui tiri deboli | media |
 | 15 | **Portiere con la palla in mano** | `Goalie Ball Time` 2 s | Rilancia dopo 1,2 s | bassa |
 | 16 | **Portiere contro il Super Strike** | Durante la carica può uscire sul capitano (`Goalie.cpp`, clip `gk_attack_s2s_high`): sempre entro 1 m in più della distanza di presa, con l'1% a fotogramma entro 2 m (`STS Attack Close/Max Distance`), solo prima del trigger `0x85181b83` della clip del capitano (fotogramma 24) | Assente | media |
+| 17 | **Posizione e uscite del portiere** | Distanza dalla porta secondo quella del pallone (2,5–8 m), uscite sul portatore entro `Attack Carrier Range`, sulla palla libera entro `Loose Ball Range`, intercetti solo da Professional; può farsi saltare (`Goalie Deke Chance`). Dettagli in §9.1 | Regole nostre | media |
 
 Le righe 1–7 cambiano come si vince una partita. Con i numeri del disco ora si possono correggere tutte.
 
@@ -141,6 +142,73 @@ Le righe 1–7 cambiano come si vince una partita. Con i numeri del disco ora si
 | Palla in mano | `Goalie Ball Time` | 2 s (riferimento) | Rilancia a 1,2 s | – | 2 s (o prima, se c'è un compagno libero: da verificare in `GoalieActions.cpp`) |
 | Rinvio | `Goalie::DoPassRelease` | `Minimum/Maximum Kick Velocity`, angoli (riferimento) | Formula nostra con ×0,9 e ×0,6 | Da verificare | Formula originale |
 | Pallone oltre 50 m/s | `PhysicsBall` taglia prima e dopo ogni passo | – | Fino a 69 m/s in una partita (problema noto) | – | Da correggere insieme al tiro |
+
+## 9. Criteri del portiere (analisi completa, 31 ottobre)
+
+Fonti: `Goalie.cpp`, `AI/GoalieActions.cpp`, `AI/GoalieSave.cpp`, `AI/Fielder.cpp` (`CalcRegularShot`, `CalcShootToScoreShot`), `Ball.cpp`. Il portiere è sempre guidato dal computer, anche nella squadra di chi gioca: usa la tabella della difficoltà della sua squadra, tranne `Attack Carrier Range`, `Loose Ball Range` e `Goalie Intercept Pass`, che vengono dal livello scelto (§7).
+
+**Tabella delle parate:** [`animation/data/strikers_saves.json`](../animation/data/strikers_saves.json), rifatta da `animation/saves.py` senza il disco: le 69 voci di `gSaveInfo` con clip (e se è specchiata), tipo, clip di errore e di recupero, parate collegate, milestone dei trigger, tempo di parata e posizione dell'osso `ball` al contatto (metri originali; x avanti, y laterale con + = lato delle voci "R", z in alto) e cella della griglia 7 × 5.
+
+### 9.1 Ogni fotogramma senza tiro (`ActionMove`), in quest'ordine
+
+| Passo | Condizione (funzione) | Cosa fa |
+|---|---|---|
+| Posizione | `FindDesiredGoaliePosition`: bersaglio = pallone + 0,18 s × velocità (del portatore o del pallone), tenuto nel cono della porta (`ClampToGoalCone`, 3 m) | Sta sulla retta tra un punto 0,5 m dietro il centro della linea di porta e il bersaglio, a una distanza che dipende da quella del bersaglio d: d > 23 m → 8 m; 19–23 m → da 2,5 a 8 m; 12–19 m → 2,5 m; 7–12 m → da 2,5 a 4 m; sotto 7 m → d − 3. Mai oltre d − 3, mai sotto 0,5 m. In fuga solitaria (`IsSoloBreakaway` > 0,8, ridotto dai compagni dell'attaccante vicini alla porta) esce da 2,5 a 8 m. Il punto finale è 0,8 × punto voluto + 0,2 × posizione attuale; se è dietro la linea resta entro la porta (larghezza/2 − 1 m) |
+| Passaggio pericoloso | `IsPassThreat`: passaggio avversario con intercetto nell'area allargata di 1 m, nella sua metà | Se `CanInterceptPass` (solo con `Goalie Intercept Pass` ≥ 0,5: Rookie no, da Professional sì; tolleranza `Intercept Save Tolerance` 0,5 m) esce a intercettare; altrimenti si mette contro il punto d'intercetto e, se il ricevitore tira al volo, si accovaccia (`gk_anticipate`) quando mancano meno di 0,4 s (durata della clip) |
+| Uscita sul Super Strike | `CheckForSTSAttack`: riga 16 del riepilogo | `gk_attack_s2s_high` sul capitano |
+| Palla libera | `IsLooseBallClose(Loose Ball Range)`: entro l'area più quella distanza (Rookie −1 = mai fuori dall'area, Professional 1 m, Superstar e Legend 2 m) | La insegue e la raccoglie (`LooseBallAnims`: presa, tuffo, calcio di prima) |
+| Portatore vicino | `IsOpponentBallCarrierInRange`: portatore avversario dentro l'area e entro `Attack Carrier Range` (Rookie 2,5 m, Professional 3, Superstar e Legend 4); mai durante un Super Strike | Se entro la distanza di presa + `Pounce Range` 1 m: si tuffa sul pallone (`gk_trap_attack`). Se l'attaccante sta caricando il tiro: si accovaccia se è già in posizione (entro 1,2 m), altrimenti corre. Altrimenti lo attacca correndo a 1,5×; con probabilità `Goalie Deke Chance` "si fa saltare" e corre a `Goalie Deke Speed` (Rookie 1, Professional 1,1, Superstar 1,2, Legend 1,3). Per la squadra di chi gioca valgono 0,5 e 0,5 (mancano in `DifficultyHuman.ini`) |
+| Compagno col pallone | `IsTeammateHoardingBall` | Va a prendersi il pallone (`InitActionGrabBall`) |
+
+### 9.2 Il tiro e la parata
+
+| Passo | Funzione | Regola |
+|---|---|---|
+| 1. Tipi di parata permessi | `CalcRegularShot` | Tutti (prese comprese, `0xFFFF`) se pallonetto o portiere con energia ≥ 90 e carica < 0,3; altrimenti senza prese (`0xFFFC`). Con l'opzione "portieri storditi" le prese sono sempre escluse (`FindBestSave`) |
+| 2. Tiro a sorte | `CalcRegularShot` | `mbShouldMiss` con la curva del livello (§1) |
+| 3. Quando reagisce | `Ball.cpp` (tiro rilasciato) → `InitActionSaveSetup` | Subito al tiro. Se il tiro finisce fuori dalla porta di oltre 1 m (`Save Ignore Margin`) o non attraversa il suo piano non si tuffa |
+| 4. Punto e tempo di contatto | `CalcTimeToPlane` | Il pallone viene simulato (`FakeBallWorld`) fino a un piano 0,2 m davanti al portiere, girato verso il pallone: dà tempo t e punto nel sistema del portiere |
+| 5. Pallonetto che deve entrare | `InitActionSaveSetup` | Se deve sbagliare un pallonetto e il bersaglio è a più di 2,5 m da lui: con probabilità 0,3 (`Lob Shot Stumble Chance`) inciampa (`gk_catch_miss_chip`) |
+| 6. Scelta della parata | `CalcSaveParameters` → `GoalieSave::FindBestSave` / `FindBestInList` | Cerca nella cella 7 × 5 del punto di contatto (larghezza 5,69 m, altezza 2,56 m) le parate con tempo ≤ t. Ogni parata si **miscela** con quelle collegate (fino a 4: sopra/sotto, destra/sinistra; `GetClosestBlendedPos`), quindi copre un'area e non un punto. Sceglie quella col punto più vicino (solo laterale e altezza); una presa vale solo se il punto è entro **0,5 m** (`mfCatchAllowDistSq` 0,25, mai cambiato), deviazioni e tuffi a qualsiasi distanza. Se il portiere è già accovacciato o in corsa veloce conta il tempo dallo stacco invece che dall'accovacciata |
+| 7. Nessuna parata in tempo | `CalcSaveParameters` | Se non c'è e non deve sbagliare: riprova dallo stacco; se ancora niente, prende la deviazione più vicina senza limite di tempo e la gioca come **parata mancata** (`mbPlayMiss`). Se deve sbagliare: aggiunge `Miss Save Delay` 0,1 s e fa lo stesso |
+| 8. Partenza | `InitActionSaveSetup` | Fa partire la clip in modo che il contatto cada all'arrivo del pallone: aspetta `contatto − t` (in `gk_ready_idle`, girandosi a 100000) e, se il tempo è poco, salta l'inizio della clip fino allo stacco. Se c'è tempo e conviene, prima si riposiziona (`ShouldReposition`) |
+| 9. Contatto | `ActionSave`, `CheckForLimbEndZoneCollision` | Presa se il pallone passa entro 0,6 m (`Catch Save Tolerance`) da una mano; altrimenti deviazione (`CheckForDelflectAwayFromNet`). Fatica: §6 di `STRIKERS_REFERENCE.md` |
+| 10. Dopo | `InitActionDiveRecover`, `InitActionMoveWB` | Clip di recupero della parata; con la palla in mano rilancia entro 2 s (`Goalie Ball Time`). Dopo un gol subito gioca una delle 5 `gk_dejected_*`; la fatica torna a zero a ogni gol |
+
+Tempi di parata (accovacciata → contatto) dalla tabella: prese da fermo 0,07–0,08 s, prese in salto 0,2–0,23 s; tuffi vicini 0,15–0,23 s, tuffi lontani 0,22–0,32 s (portata laterale 2,7–2,8 m originali); deviazioni da fermo 0,05–0,11 s, in salto 0,15–0,24 s; pugni 0,09–0,1 s; gamba 0,11 s. Le voci "XHi" hanno l'osso `ball` fino a 3,7 m: l'osso al contatto non coincide sempre con le mani, quindi vanno controllate a occhio prima di usarle.
+
+### 9.3 Super Strike (`CalcShootToScoreShot`, `Goalie::InitActionSTS*`)
+
+| Risultato | Portiere |
+|---|---|
+| Respinta (fuori dal verde, o giallo che diventa respinta con probabilità `valore / 0,95`) | Se il capitano è a più di 7 m: schiaffo (`gk_ball_swat`) con probabilità 66% × valore. Altrimenti parata normale col 75% di prese permesse, 0,1 s in più di tempo; se il punto della parata dista più di 1 m il pallone va appena fuori dal palo. Tiro 1,2 volte più lento |
+| Giallo | Parata con stordimento (`gk_s2s_knocked_out_start`, poi `gk_s2s_defl_knocked_out_loop` per 1–2 s, `…_recovery`); il gol vale come parata (`m_uGoalType` 4) |
+| Gol | Deve sbagliare: gioca una parata mancata con almeno 0,2 s |
+| Super (imparabile) | `FindSTSMissData`: `gk_s2s_blast_into_net` (il portiere finisce 1,5 m dietro la linea di porta, senza collisioni con rete e pareti) oppure `gk_s2s_spin` (specchiata per lato) e `gk_s2s_prone_getup` |
+
+Fatica: parata di un Super Strike 15, stordimento 25.
+
+## 10. Animazioni del Super Strike (ulti)
+
+Fonti: `FielderActions.cpp` `InitActionShootToScore`, `ActionShootToScore`; `common.ini` `[captain_sts]`; trigger in `strikers_triggers.json`. La clip è `captain_shoot_to_score` (127 fotogrammi, 4,23 s a 1×), specchiata quando il capitano è nella metà con x < 0. I fotogrammi sono quelli della clip, che durante il Super Strike gira sempre a velocità 1 (sotto il rallentatore fino al fotogramma 27).
+
+| Fotogramma | t | Cosa succede |
+|---|---|---|
+| 0 | 0 | Parte da `windup` (miscela 0,1 s), si gira verso la porta (`CalcAnimTurnAdjust`), root motion della clip. Rallentatore 0,68–0,78 secondo la distanza. Vicino alla linea di porta (entro 2 m e davanti alla porta) o a fine partita diventa un tiro normale |
+| ~10 | 0,08 | Sceglie la versione specchiata o no secondo la metà campo, tenendo il tempo |
+| 3 → 14,5 → 26 | 0,024 → 0,114 → 0,205 | Lancetta: sale, poi scende (§3). Oltre il 26 senza seconda pressione: tempo a 0,1 |
+| 27 | 0,213 | Risultato (`DoCalcShootToScoreResult`). Tempo di nuovo a 1 (se super, al fotogramma 63). Barra nascosta, capitano invulnerabile, tutti gli altri restano a giocare. Telecamera animata della squadra (`<squadra>_ShootToScoreCamera`, altrimenti `ShootToScoreCamera`) e scurimento del mondo (`fade_to_dark_amount` 1). Se **super**: effetto `EmitShootToScoreHyperStrike`, tutti gli altri congelati, power-up azzerati, vibrazione crescente fino al fotogramma 63, si vede solo il capitano |
+| 63 | 0,496 | Solo super: telecamera della squadra dal tempo 0,4, lampo |
+| 67 | 0,528 | Effetto della squadra `<squadra>_captain_sts_effect`, luce speciale sul capitano |
+| 94 | 0,740 | Luce speciale spenta |
+| 103,9 | 0,818 | Primo calcio: il mondo torna chiaro (`fade_from_dark_speed`), parte la scia del pallone, punto di non ritorno. Solo super: telecamera che gira attorno al pallone (4,25 s, 0,61 giri, campo visivo 50°) con tempo a 0,005 |
+| 106 | 0,835 | Il pallone parte davvero (`DoRegularShooting` → `CalcShootToScoreShot`), tempo a 1, telecamera tolta, tutti scongelati |
+| 116 | 0,913 | Atterraggio (trigger `0x77935c1c`) |
+| 127 | 1 | Fine, poi corsa |
+
+Per un Super Strike non del capitano (`isCaptainSts` falso) la lancetta finisce a `S2S Kick Frame` 27 e il pallone parte lì, senza telecamera né scurimento. Chi viene colpito dal pallone di un Super Strike gioca `sts_hit_react` (83 fotogrammi, miscela 0,067 s).
+
+Nel nostro gioco: `SUPER.hangClip` (clip ferma a mano tra 0,9 e 2,0 s) e `kickRate` 1,35 sono inventati. Con le regole qui sopra la clip gira a velocità normale: 0,9 s di carica (`windup`), circa 1 s di lancetta sotto il rallentatore, 2,6 s di scena a tempo normale, pallone al fotogramma 106.
 
 ---
 
