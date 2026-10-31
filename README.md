@@ -21,7 +21,7 @@ Prossimo:
 <!-- aree:inizio (scritta da docs/make_map.py dalle sezioni Stato dei README: non modificare a mano) -->
 | Area | Cartella | Stato |
 |---|---|---|
-| **Riferimento** (Misure e dinamiche del gioco originale, con le fonti. La base di tutte le costanti) | [`reference/`](reference/README.md) | completo |
+| **Riferimento** (Misure e dinamiche del gioco originale, con le fonti. In corso il confronto di tutta la partita col codice ricostruito (`VERIFICA.md`)) | [`reference/`](reference/README.md) | in verifica |
 | **Animazioni** (Clip originali decodificate, retarget sugli scheletri Mixamo, controlli automatici) | [`animation/`](animation/README.md) | funziona |
 | **Personaggi** (Modelli dei giocatori, roster e formazioni delle due squadre) | [`characters/`](characters/README.md) | completo |
 | **Gioco** (Partita 5 contro 5: campo, stadio, pallone, giocatori, IA, comandi) | [`game/`](game/README.md) | funziona |

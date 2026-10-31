@@ -180,7 +180,11 @@ Da `goalie.ini`:
 | Stordimento dopo un Super Strike | 1–2 s |
 | Fatica | sale con ogni parata: presa 5, presa in tuffo 10, deviazione 7/15, Super Strike 15/25; recupero 2/s |
 
-Come decide la parata (da smstrikers-decomp, `Goalie::CalcSaveParameters` e `GoalieSave::FindBestSave`): **non tira a sorte**. Divide la porta in una griglia 7 × 5 e cerca un'animazione di parata che arrivi sul punto del pallone entro il tempo di arrivo del tiro; se non c'è, il tiro entra. Il tiro perfetto non cambia la scelta della parata: è più difficile perché è più veloce e curva. La fatica rallenta solo il rialzarsi e lo spostamento laterale, non fa sbagliare. La difficoltà della CPU (`Difficulty0…3.ini`) non tocca il portiere. I tempi delle animazioni di parata stanno nei file del disco, non nel codice: nel gioco li stimiamo (`GOALIE.saveReact`, `GOALIE.diveSpeed` in `game/src/config.js`).
+Come decide la parata (da smstrikers-decomp; correzione del 31 ottobre, dettagli in [`VERIFICA.md`](VERIFICA.md) §1), in due passi:
+1. **Tiro a sorte, al momento del tiro** (`cFielder::CalcRegularShot`, `Fielder.cpp`): il valore della barra del tiratore (attributo `Shooting` del personaggio e carica, `ShotMeter.cpp` `CalcScoreValue`) passa per la curva `Shot Value 1–3` / `Shot Chance 0–4` della difficoltà della squadra **che tira** (`DifficultyHuman.ini` per chi gioca, `Difficulty0…3.ini` per la CPU). Se esce, il portiere deve sbagliare (`mbShouldMiss`): aspetta `Miss Save Delay` in più e gioca un'animazione di parata mancata.
+2. **Parata possibile** (`Goalie::CalcSaveParameters`, `GoalieSave::FindBestSave`): altrimenti divide la porta in una griglia 7 × 5 e cerca, tra le 69 animazioni di parata (`gSaveInfo`), una che arrivi sul punto del pallone entro il tempo di arrivo del tiro; se non c'è, il tiro entra. Il tempo di ogni parata viene dai trigger della clip (file `.trg`), il punto dall'osso `ball` della clip a quel trigger.
+
+La presa è permessa solo per i pallonetti o con portiere riposato (`Fatigue Catch Threshold`) e tiro debole (`Catch Save Max Speed`); altrimenti solo deviazioni. Il tiro perfetto non cambia la scelta della parata: è più difficile perché è più veloce, curva e alza il valore della barra. La difficoltà non cambia i riflessi del portiere: entra solo dalla curva del tiratore. Nel gioco oggi i tempi sono stimati (`GOALIE.saveReact`, `GOALIE.diveSpeed` in `game/src/config.js`) e il tiro a sorte manca: da correggere coi valori del disco.
 
 ---
 
