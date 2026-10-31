@@ -10,6 +10,8 @@ Tutto quello che porta le animazioni del gioco originale sui personaggi del nost
 | `audit.py` | Controllo automatico di ogni clip, fotogramma per fotogramma: piedi nel terreno, personaggio sospeso, scatti delle articolazioni, direzione delle ossa, ginocchia |
 | `strikers_anim.py` | Decodifica dei formati originali (`.sanim`, `.shier`, `.bin`) e convertitore per Blender (sotto) |
 | `tests/` | Prove del convertitore su file sintetici |
+| `nis.py` | Decodifica delle scene d'intermezzo originali (`.nis`): clip dei personaggi e telecamere. Prepara le 3 clip del walkout dei pacchetti (Ultimate Team) e `game/assets/walkout.json` |
+| `data/strikers_nis.npz` | Le scene `.nis` già decodificate (clip in coordinate del mondo, telecamere). Sostituisce i file del disco |
 
 ## Retarget su un personaggio
 
@@ -114,3 +116,29 @@ python3 tests/test_converter.py
 ```
 
 Senza Blender verifica la decodifica e i BVH. Con un Python che ha il modulo `bpy` (`pip install bpy`) importa anche in Blender e confronta ogni osso, a ogni fotogramma, con la posa calcolata come in `cPoseAccumulator::BuildNodeMatrices`. Poi reimporta i BVH con l'importer di Blender e confronta di nuovo.
+
+## Scene d'intermezzo (`.nis`) e walkout
+
+Un file `.nis` contiene una clip per ogni personaggio in scena (stesso formato delle `.sanim`, con il root motion in coordinate dello stadio) e le telecamere (posizione, punto guardato e campo visivo orizzontale per fotogramma, 30 al secondo). Non contiene lo scheletro: `nis.py` lo ricostruisce dalla disposizione Biped (38 nodi come Mario, 39 senza l'osso extra della testa e con due ossa di coda). Lo `Spine` è figlio di `Bip01`, non del bacino: verificato sulle clip di Mario (distanza tra ossa costante in ogni fotogramma).
+
+Scene disponibili (dall'utente): `camera_establish` (stadio), `camera_establish_home` (squadra che esce dal tunnel), `birdo_goal_winner_high/low` (esultanze con due telecamere), `birdo_goal_bg_winner_high` (compagni sullo sfondo, non usata).
+
+Il retarget (`retarget.py`, chiamato da `add_characters.py`) aggiunge a ogni personaggio 3 clip, con la calibrazione dei giocatori di movimento:
+
+| Clip | Da |
+|---|---|
+| `nis_walkout` | `camera_establish_home`, il capitano che corre fuori dal tunnel |
+| `nis_win_low` | `birdo_goal_winner_low` |
+| `nis_win_high` | `birdo_goal_winner_high` |
+
+Le clip restano sul posto; lo spostamento sul terreno e le telecamere stanno in `game/assets/walkout.json`. Rifare il pacchetto e il JSON dai file `.nis` (che non vanno nel repository):
+
+```bash
+python3 animation/nis.py CARTELLA_CON_I_NIS animation/data/strikers_nis.npz
+```
+```bash
+python3 animation/add_characters.py --all
+```
+```bash
+python3 -c "import sys,json; sys.path.insert(0,'animation'); import nis; json.dump(nis.walkout_json(), open('game/assets/walkout.json','w'), separators=(',',':'))"
+```

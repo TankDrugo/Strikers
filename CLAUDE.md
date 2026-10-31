@@ -12,7 +12,7 @@ Quando l'utente nomina un'area, leggi prima il README di quella cartella: dice c
 | "animazioni", "retarget", "clip", "pose" | `animation/` | `animation/README.md` |
 | "personaggi", "nuovo personaggio", "squadre", "roster" | `characters/` e `game/assets/roster.json` | `characters/README.md` |
 | "misure", "proporzioni", "com'era nell'originale", "Strikers" | `reference/` | `reference/STRIKERS_REFERENCE.md` |
-| "Ultimate Team", "carte", "collezione", "pacchetti" | `ultimate-team/` | `ultimate-team/README.md` |
+| "Ultimate Team", "carte", "collezione", "pacchetti", "walkout" | `ultimate-team/` | `ultimate-team/README.md`, poi `ultimate-team/DESIGN.md` |
 | "interfaccia", "menu", "HUD", "schermate", "UI" | `interfaccia-gioco/` | `interfaccia-gioco/README.md` |
 | "grafo", "mappa", "graphify" | `graphify-out/`, `docs/` | `docs/grafo.md` |
 
@@ -30,7 +30,7 @@ graphify path "add_characters.py" "Player" --undirected
 
 - **Repository privato, uso personale.** Le animazioni derivano dal disco dell'utente. Mai rendere pubblico il repository. Il gioco compilato si pubblica **solo** sull'Artifact privato del gioco, https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH, mai su un link nuovo o pubblico.
 - **Dopo ogni modifica al gioco, aggiorna il link online:** `node game/tools/build.mjs --web`, poi pubblica `game/dist/web/index.html` con tutti i file di `game/dist/web/assets/` sull'Artifact qui sopra (parametro `url`). Dettagli in `game/README.md`, sezione Link online.
-- **Mai aggiungere file del disco** (`.sanim`, `.shier`, `.bin`, `.trg`, `main.dol`, `.iso`, `.zip` del disco). Sono in `.gitignore`. Le animazioni decodificate stanno già in `animation/data/strikers_source.npz`.
+- **Mai aggiungere file del disco** (`.sanim`, `.shier`, `.bin`, `.trg`, `.nis`, `main.dol`, `.iso`, `.zip` del disco). Sono in `.gitignore`. Le animazioni decodificate stanno già in `animation/data/strikers_source.npz` e `animation/data/strikers_nis.npz`.
 - **Nessun nome o marchio Nintendo** nel gioco (testi, stadio, interfaccia). I nomi originali compaiono solo in `reference/` e `animation/`, come fonte.
 - Le misure vengono da `reference/STRIKERS_REFERENCE.md`. Se cambi un valore rispetto all'originale, scrivilo nel commento accanto (esempio: `SIZE` e `BALL.radius` in `game/src/config.js`).
 - Dopo ogni modifica al gioco: `node game/tools/build.mjs` e una partita CPU contro CPU senza errori (vedi `game/README.md`, sezione Prove).
@@ -39,10 +39,11 @@ graphify path "add_characters.py" "Player" --undirected
 ## Stato al passaggio di consegne
 
 - Gioco: partita completa 5v5 giocabile con controller Xbox (stile EA FC) o tastiera. Stadio originale. Giocatori 1,3 volte più grandi dell'originale (`SIZE`), pallone più piccolo (raggio 0,13 m): scelta dell'utente.
-- Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`.
-- Personaggi: completi. Due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante): **Celestini** (maglia celeste) e **Rivali** (maglia verde), tutti con le 183 animazioni. Nomi e colori delle squadre (anelli, punteggio, tabellone, tifosi) vengono da `teamInfo` in `game/assets/roster.json`.
-- Il gioco compilato pesa circa 89 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
-- Ultimate Team e Interfaccia gioco: cartelle pronte, lavoro non iniziato.
+- Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`. Più 3 clip di walkout dalle scene `.nis` (`animation/nis.py`).
+- Personaggi: completi. Due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante): **Celestini** (maglia celeste) e **Rivali** (maglia verde), tutti con le 183 animazioni + 3 di walkout. Nomi e colori delle squadre (anelli, punteggio, tabellone, tifosi) vengono da `teamInfo` in `game/assets/roster.json`.
+- Il gioco compilato pesa circa 91 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
+- Ultimate Team: prima versione giocabile (50 carte con statistiche che cambiano il gioco, crediti, 4 pacchetti, walkout con le telecamere originali, salvataggio online privato sull'Artifact). Regole in `ultimate-team/DESIGN.md`.
+- Interfaccia gioco: cartella pronta, lavoro non iniziato.
 
 ## graphify
 

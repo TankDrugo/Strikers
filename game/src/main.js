@@ -5,6 +5,9 @@ import { Hud } from './hud.js';
 import { Input, PadMenus } from './input.js';
 import { MATCH, FIELDER, GOALIE, RIG_HEIGHT, TEAM_DEFAULTS } from './config.js';
 import { Player } from './player.js';
+import { buildField } from './field.js';
+import { Stadium } from './stadium.js';
+import { UltimateTeam } from '../../ultimate-team/src/index.js';
 
 // assets/roster.json lists the characters (one retargeted .glb + clip facts each) and the 5 per team
 // (slots 0-3 fielders, slot 4 goalie). The built game embeds them; the dev page fetches them.
@@ -38,13 +41,34 @@ async function loadAssets() {
     for (const a of gltf.animations) clips[a.name] = a;
     let material = null;
     gltf.scene.traverse((o) => { if (o.isMesh && !material) material = o.material; });
-    byId[ch.id] = { id: ch.id, name: ch.name, scene: gltf.scene, clips, meta: meta.clips, height: meta.model_height,
+    byId[ch.id] = { id: ch.id, name: ch.name, scene: gltf.scene, clips, meta: meta.clips, height: meta.model_height, nisScale: meta.nis_scale,
       teamMaterials: ch.recolor ? teamMaterials(material) : null };
   }
   const first = byId[roster.characters[0].id];
   // the default template doubles as the shared one (clip facts are the same for every character)
   const teams = TEAM_DEFAULTS.map((d, i) => ({ ...d, ...(roster.teamInfo || [])[i] }));
-  return { ...first, roster, byId, teams, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
+  const embeddedWalkout = document.getElementById('asset-walkout');
+  let walkoutData = null;
+  try { walkoutData = embeddedWalkout ? JSON.parse(embeddedWalkout.textContent) : await (await fetch(ASSETS + 'walkout.json')).json(); } catch { walkoutData = null; }
+  return { ...first, roster, byId, teams, walkoutData, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
+}
+
+// An empty stadium (pack walkouts): pitch, stands, crowd and the match lights.
+function makeStage(teams) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1d2738);
+  scene.fog = new THREE.Fog(0x1d2738, 60, 120);
+  scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x2a3a2a, 1.35));
+  const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+  sun.position.set(-10, 34, 14);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  const c = sun.shadow.camera; c.left = -26; c.right = 26; c.top = 24; c.bottom = -24; c.near = 1; c.far = 80;
+  sun.shadow.bias = -0.0005;
+  scene.add(sun);
+  buildField(scene, { stadium: true });
+  const stadium = new Stadium(scene, teams);
+  return { scene, update: (dt) => stadium.update(dt, null), dispose: () => {} };
 }
 
 // Team 0 keeps the model's yellow shirt; team 1 gets it recoloured red (only strongly yellow pixels change).
@@ -142,18 +166,21 @@ async function boot() {
   const hud = new Hud();
   hud.onSfx = makeAudio();
   hud.show(false);
-  let game = null, input = null, paused = false, mode = 'menu', viewer = null;
+  let game = null, input = null, paused = false, mode = 'menu', viewer = null, view = null, matchOpts = null;
 
   const resize = () => {
     renderer.setSize(innerWidth, innerHeight);
-    const cam = game ? game.camera : viewer?.camera;
+    const cam = view ? view.camera : game ? game.camera : viewer?.camera;
     if (cam) { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); }
   };
   addEventListener('resize', resize);
 
-  function startMatch({ aiOnly = false, seconds = MATCH.seconds } = {}) {
+  // opts.lineups / opts.teams: Ultimate Team squads (see Game); opts.onEnd(score): replaces the end
+  // screen; opts.onQuit: called when the player leaves the match from the pause menu.
+  function startMatch({ aiOnly = false, seconds = MATCH.seconds, ...opts } = {}) {
     if (viewer) { viewer.dispose(); viewer = null; }
-    game = new Game(renderer, template, hud);
+    matchOpts = opts;
+    game = new Game(renderer, template, hud, opts);
     game.aiOnly = aiOnly;
     if (aiOnly) game.setHuman(null);
     game.clock = seconds;
@@ -165,6 +192,7 @@ async function boot() {
     hud.show(true);
     hud.el.querySelector('#help').style.display = aiOnly ? 'none' : '';
     hud.onEnd = (score, humanTeam, stats) => {
+      if (opts.onEnd) { setTimeout(() => { mode = 'menu'; hud.show(false); opts.onEnd(score, stats); }, 2500); return; }
       setTimeout(() => {
         const res = aiOnly ? 'Fine partita' : score[humanTeam] > score[1 - humanTeam] ? 'Vittoria!' : score[humanTeam] < score[1 - humanTeam] ? 'Sconfitta' : 'Pareggio';
         const s = screen(`<h1>${res} ${score[0]} – ${score[1]}</h1>
@@ -191,14 +219,17 @@ async function boot() {
       pauseScreen = screen(`<h1>Pausa</h1>${controlsHtml()}<div class="row"><button id="resume">Riprendi</button><button class="alt" id="restart">Ricomincia</button><button class="alt" id="quit">Esci al menu</button></div>`);
       pauseScreen.querySelector('#restart').onclick = restartFromPause;
       pauseScreen.querySelector('#resume').onclick = togglePause;
-      pauseScreen.querySelector('#quit').onclick = () => { paused = false; pauseScreen.remove(); pauseScreen = null; showMenu(); };
+      pauseScreen.querySelector('#quit').onclick = () => {
+        paused = false; pauseScreen.remove(); pauseScreen = null;
+        if (matchOpts && matchOpts.onQuit) { const q = matchOpts.onQuit; mode = 'menu'; hud.show(false); game.aiOnly = true; game.setHuman(null); q(); } else showMenu();
+      };
     } else if (pauseScreen) { pauseScreen.remove(); pauseScreen = null; game.input.actions.clear(); if (input) input.resumeGuard = true; }
   }
 
   function restartFromPause() {
     if (!pauseScreen) return;
     paused = false; pauseScreen.remove(); pauseScreen = null;
-    startMatch({ aiOnly: game.aiOnly, seconds: MATCH.seconds });
+    startMatch({ aiOnly: game.aiOnly, seconds: MATCH.seconds, ...matchOpts });
   }
 
   function showMenu() {
@@ -209,7 +240,8 @@ async function boot() {
     const s = screen(`<h1>Calcio arcade · prototipo</h1>
       <p>5 contro 5 su un campo di 41 × 24 m chiuso da barriere, con le misure e la fisica del documento di riferimento. Tutti i giocatori usano il tuo personaggio con le animazioni adattate.</p>
       <div id="ctl">${controlsHtml()}</div>
-      <div class="row"><button id="play">Gioca (3 minuti)</button><button class="alt" id="cpu">Guarda CPU contro CPU</button><button class="alt" id="anim">Visualizzatore animazioni</button></div>`);
+      <div class="row"><button id="play">Gioca (3 minuti)</button><button id="ut">Ultimate Team</button><button class="alt" id="cpu">Guarda CPU contro CPU</button><button class="alt" id="anim">Visualizzatore animazioni</button></div>`);
+    s.querySelector('#ut').onclick = () => { s.remove(); ut.open(); };
     s.querySelector('#play').onclick = () => { s.remove(); startMatch(); };
     s.querySelector('#cpu').onclick = () => { s.remove(); startMatch({ aiOnly: true }); };
     s.querySelector('#anim').onclick = () => { s.remove(); openViewer(); };
@@ -227,7 +259,13 @@ async function boot() {
     resize();
   }
 
-  window.__proto = { get game() { return game; }, startMatch, openViewer, template };
+  const ut = new UltimateTeam({
+    THREE, renderer, template, Player, walkoutData: template.walkoutData, screen, startMatch, showMenu,
+    makeStage: () => makeStage(template.teams),
+    setView: (v) => { view = v; mode = v ? 'view' : 'menu'; if (v) { hud.show(false); resize(); } },
+  });
+
+  window.__proto = { get game() { return game; }, startMatch, openViewer, template, ut };
 
   const padMenus = new PadMenus();
   const helpEl = hud.el.querySelector('#help');
@@ -242,6 +280,7 @@ async function boot() {
       onViewer: mode === 'viewer' && viewer ? (c) => viewer.pad(c) : null,
     });
     if (mode === 'viewer' && viewer) { viewer.update(dt); renderer.render(viewer.scene, viewer.camera); return; }
+    if (mode === 'view' && view) { const v = view; v.update(dt); if (view === v) { v.render(renderer); return; } }
     if (!game) return;
     if (input && mode === 'game') {
       input.suspended = paused || !!document.querySelector('.screen');

@@ -1,37 +1,43 @@
 # Ultimate Team
 
-**Stato: da iniziare.** Questa cartella è pronta per il lavoro: quando l'utente dice "lavoriamo su Ultimate Team", si parte da qui.
+**Stato: prima versione giocabile.** Dal menu del gioco: **Ultimate Team**. Regole in [`DESIGN.md`](DESIGN.md).
 
-## Idea
+Collezioni carte dei personaggi, componi una squadra di 5 e la usi in partita contro squadre CPU; le partite danno crediti, i crediti comprano pacchetti. Le carte hanno statistiche che cambiano il gioco. I progressi si salvano online sul link privato del gioco (nel browser se il gioco è aperto dal file).
 
-Una modalità in cui il giocatore colleziona personaggi (carte), compone la propria squadra di 5 e la usa in partita, come Ultimate Team di EA FC.
+## File
+
+| File | Cosa fa |
+|---|---|
+| `DESIGN.md` | Regole decise con l'utente: carte, statistiche, economia, pacchetti, walkout |
+| `data/cards.js` | Le 50 carte (generato, non modificare a mano) |
+| `tools/make_cards.mjs` | Genera `data/cards.js` da `game/assets/roster.json`: profili dei ruoli, rarità, carattere delle squadre |
+| `src/core.js` | Regole pure: collezione, crediti, pacchetti, squadra, premi, avversari |
+| `src/storage.js` | Salvataggio: database dell'Artifact (`data/users/<id>/ut`) o `localStorage` |
+| `src/index.js` | Le schermate (hub, squadra, collezione, dettaglio carta, negozio, pacchetti, pre-partita, premi) e i ritratti delle carte |
+| `src/walkout.js` | Il walkout dei pacchetti con le telecamere originali (`game/assets/walkout.json`) |
+| `src/ui.css.js` | Stili delle schermate e delle carte |
 
 ## Con cosa si collega
 
-| Parte esistente | Collegamento |
+| Parte | Collegamento |
 |---|---|
-| `game/assets/roster.json` | Oggi decide chi gioca. La squadra scelta in Ultimate Team dovrà riempire i 5 posti di una squadra (`teams[0]`): posti 0–3 giocatori di movimento, posto 4 portiere |
-| `characters/` e `animation/add_characters.py` | I personaggi disponibili per le carte sono quelli del roster |
-| `game/src/config.js` (`FIELDER`, `GOALIE`) | Oggi tutti i giocatori hanno le stesse statistiche. Se le carte devono avere statistiche (velocità, tiro, passaggio…), andranno lette per giocatore invece che da queste costanti |
-| `interfaccia-gioco/` | Le schermate (collezione, pacchetti, formazione) sono lavoro dell'interfaccia: decidere insieme chi fa cosa |
-| `game/src/main.js` | Menu principale: qui va il punto d'ingresso della modalità |
+| `game/src/main.js` | Crea `UltimateTeam` e gli passa il contesto (three.js, renderer, personaggi, `startMatch`, ecc.): questa cartella non importa file del gioco |
+| `game/src/game.js` | `new Game(..., { lineups, teams })`: le carte riempiono i 5 posti di ogni squadra |
+| `game/src/stats.js` | Da statistiche della carta a valori di gioco (a 75 = originale) |
+| `game/assets/roster.json` | I personaggi: ognuno ha 5 carte. Un personaggio nuovo diventa carte rigenerando `data/cards.js` |
+| `animation/nis.py` | Clip e telecamere del walkout |
+| `interfaccia-gioco/` | Le schermate sono qui, con lo stile dei menu esistenti; se l'interfaccia cambia stile, `ui.css.js` va allineato |
 
-## Da decidere prima di scrivere codice
+## Prova
 
-Domande da fare all'utente nella prima chat su questo tema:
-
-1. Le carte hanno statistiche che cambiano il gioco, o sono solo collezione?
-2. Come si ottengono le carte: pacchetti, premi delle partite, crediti?
-3. Dove si salvano i progressi: nel browser (`localStorage`) o su un server?
-4. Rarità e versioni speciali dello stesso personaggio?
-5. Intesa (chemistry) tra i giocatori della squadra?
-
-## Struttura proposta (da confermare)
-
+```bash
+cd game && node tools/build.mjs && node tools/uttest.cjs
 ```
-ultimate-team/
-  README.md        questo file
-  DESIGN.md        regole decise con l'utente
-  src/             logica (collezione, pacchetti, formazione), importata da game/src
-  data/            definizione delle carte
-```
+
+Pacchetto di benvenuto, squadra, pacchetto Oro con walkout, partita CPU con le carte, crediti e salvataggio. Con un secondo argomento salva le schermate: `node tools/uttest.cjs dist/gioco.html /tmp/ut`.
+
+## Prossimi passi possibili
+
+- Mercato tra carte (scambio crediti/carte), obiettivi e sfide settimanali.
+- Più personaggi = più carte: basta aggiungerli al roster e rigenerare.
+- Squadre avversarie con livelli di difficoltà (oggi la IA è uguale, cambiano solo le carte).

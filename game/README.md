@@ -27,7 +27,7 @@ Per aggiornarlo (lo fa Claude dopo ogni modifica al gioco):
 node tools/build.mjs --web
 ```
 
-Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 48 MB, sotto il limite di 64 MB per pubblicazione.
+Poi si ripubblica `dist/web/index.html` con i file di `dist/web/assets/` sullo **stesso** Artifact, passando il suo link come `url`. La pagina dichiara le capacità `db` e `user`: servono al salvataggio online di Ultimate Team (spazio privato di chi gioca). I modelli vanno come testo (gzip + base64, `*.glb.gz.txt`) perché gli Artifact non servono file `.glb`; il gioco li decomprime nel browser. In totale circa 48 MB, sotto il limite di 64 MB per pubblicazione.
 
 ## Comandi
 
@@ -62,14 +62,15 @@ Il controller va collegato prima di aprire il gioco, oppure basta premere un suo
 | + / - o rotella | zoom della telecamera | |
 | P / Esc | pausa | |
 
-Dal menu puoi anche guardare una partita CPU contro CPU, o aprire il **visualizzatore** con tutte le 183 animazioni: 84 da giocatore e 99 da portiere, anche specchiate.
+Dal menu c'è anche **Ultimate Team** (carte, pacchetti, squadra: vedi [`ultimate-team/README.md`](../ultimate-team/README.md)). Puoi anche guardare una partita CPU contro CPU, o aprire il **visualizzatore** con tutte le 183 animazioni: 84 da giocatore e 99 da portiere, anche specchiate.
 
 ## Codice
 
 | File | Cosa fa |
 |---|---|
 | `src/config.js` | Tutte le costanti: campo, pallone, giocatori, portiere, tiro, contrasti, partita. `SIZE` ingrandisce i corpi rispetto all'originale |
-| `src/main.js` | Caricamento di roster e personaggi, menu, pausa, visualizzatore delle animazioni |
+| `src/stats.js` | Valori per giocatore dalle statistiche delle carte di Ultimate Team: a 75 coincidono con `config.js`, senza carta pure |
+| `src/main.js` | Caricamento di roster e personaggi, menu, pausa, visualizzatore delle animazioni, ingresso di Ultimate Team (`../ultimate-team/`) |
 | `src/game.js` | La partita: passo fisso a 50 Hz, azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
 | `src/player.js` | Il giocatore: movimento, scelta e velocità delle animazioni, root motion, disegno interpolato tra due passi di fisica |
 | `src/ball.js` | Fisica del pallone, effetto Magnus, urti con pali e barriere, gol |
@@ -78,9 +79,11 @@ Dal menu puoi anche guardare una partita CPU contro CPU, o aprire il **visualizz
 | `src/hud.js` | Punteggio, tempo, barra del tiro, scritte |
 | `src/field.js`, `src/stadium.js` | Campo, porte e stadio (disegno originale) |
 | `assets/roster.json` | Personaggi disponibili e formazione delle due squadre (posti 0–3 giocatori, posto 4 portiere) |
-| `assets/characters/` | Personaggi pronti per il gioco, scritti da `animation/add_characters.py` |
+| `assets/characters/` | Personaggi pronti per il gioco, scritti da `animation/add_characters.py` (183 animazioni di gioco + 3 del walkout) |
+| `assets/walkout.json` | Telecamere e percorsi del walkout dei pacchetti, da `animation/nis.py` |
 | `tools/build.mjs` | Crea `dist/gioco.html` con tutto dentro |
 | `tools/playtest.cjs` | Prova automatica: 150 s di partita CPU contro CPU |
+| `tools/uttest.cjs` | Prova automatica di Ultimate Team: pacchetti, walkout, partita con le carte, crediti, salvataggio |
 | `dev/` | Pagine di sviluppo: `index.html` (gioco senza build); `sheet.html?char=<id>&clips=a,b,c` (fotogrammi del personaggio accanto allo scheletro originale, da `sticks.json`); `posecheck.html` (controllo di una posa) |
 
 Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma disegna corpi e pallone a metà strada tra gli ultimi due passi (`Player.render`, `Ball.updateMesh`): senza questo, su schermi a 60 o 120 Hz il movimento scattava e sembrava sfocato.
@@ -102,7 +105,7 @@ Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo 
 
 ## Sviluppo e prove
 
-Per sviluppare senza ricompilare, servi questa cartella con un server statico e apri `dev/index.html`:
+Per sviluppare senza ricompilare, servi la **cartella principale del progetto** (serve anche `ultimate-team/`) con un server statico e apri `http://localhost:8000/game/dev/index.html`:
 
 ```bash
 python3 -m http.server 8000
@@ -114,6 +117,12 @@ Prova automatica dopo ogni modifica (richiede Playwright):
 node tools/build.mjs && node tools/playtest.cjs
 ```
 
+Se la modifica tocca Ultimate Team o le statistiche:
+
+```bash
+node tools/uttest.cjs
+```
+
 Esce con errore se la pagina dà errori o se una posizione diventa NaN.
 
 Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md).
@@ -121,4 +130,4 @@ Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md)
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Il file `gioco.html` pesa circa 89 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
+- Il file `gioco.html` pesa circa 91 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
