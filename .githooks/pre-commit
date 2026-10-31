@@ -1,0 +1,17 @@
+#!/bin/sh
+# Keeps the project graph, the map and the README area table in step with every commit (docs/grafo.md).
+# Code changes update the graph (AST, no LLM); the map reads the "## Stato" sections of the READMEs.
+# Turned on by the SessionStart hook in .claude/settings.json (git config core.hooksPath .githooks).
+# Skip it once with: git commit --no-verify
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+changed=$(git diff --cached --name-only | grep -v -e '^docs/mappa\.html$' -e '^graphify-out/')
+[ -z "$changed" ] && exit 0
+if command -v graphify >/dev/null 2>&1; then
+  graphify update . >/dev/null 2>&1 || echo "pre-commit: graphify update non riuscito, grafo non aggiornato"
+fi
+readme_before=$(git hash-object README.md)
+python3 docs/make_map.py >/dev/null 2>&1 || { echo "pre-commit: docs/make_map.py non riuscito, mappa non aggiornata"; exit 0; }
+git add docs/mappa.html graphify-out/graph.json graphify-out/graph.html graphify-out/GRAPH_REPORT.md 2>/dev/null
+[ "$(git hash-object README.md)" != "$readme_before" ] && git add README.md
+exit 0
