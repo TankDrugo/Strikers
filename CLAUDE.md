@@ -49,6 +49,17 @@ graphify path "add_characters.py" "Player" --undirected
 - Super Strike: fatta (31 ottobre), come nell'originale: solo il capitano, nella metà campo avversaria, carica 1,6 s, due lancette sul verde scuro (0,84 e 0,16), rallentatore 0,72, vale 2 gol. Numeri e stime in `SUPER` di `game/src/config.js`, prova `game/tools/supertest.cjs`. Indicatore G1–G4 stile FIFA sopra il giocatore controllato. Carte con ritratto a mezzo busto stile FUT.
 - Il gioco legge `ultimate-team/data/*.json`: la pagina di sviluppo si serve dalla cartella principale (`game/dev/index.html`).
 
+## Ordine dei lavori tra le chat (deciso con l'utente il 31 ottobre, pomeriggio)
+
+I rami si stavano incrociando: si lavora **in quest'ordine**, una chat alla volta sul `main`. Prima di iniziare controlla a che punto sei qui sotto e parti dall'ultimo `main`.
+
+1. **Chat dei 20 nuovi personaggi `.glb`**: finisce il lavoro, poi tutto sul `main` (merge del suo ramo). Nessun altro tocca `characters/`, `game/assets/` o `roster.json` finché non ha finito.
+2. **Chat delle animazioni**: **in pausa**. Riparte solo dopo il punto 3, per mettere le animazioni delle ulti (Super Strike / mosse speciali) secondo le regole fissate lì.
+3. **Chat delle regole del gioco** (ramo `claude/magical-ride-ltcq1k`: `reference/VERIFICA.md`, tabelle del disco, trigger delle animazioni in `animation/data/strikers_triggers.json`): finisce l'analisi delle regole, dei criteri del portiere e delle animazioni delle ulti, poi merge sul `main` **dopo** il punto 1 (ribasando sul `main` aggiornato). Poi si fa il punto 2.
+4. **Verifica finale**: gioco completo e funzionante (build, partita CPU contro CPU, Super Strike, Coppe, Ultimate Team), pulizia di grafo e mappa (`graphify update .`, `/graphify . --update`, `python3 docs/make_map.py`), pubblicazione della versione definitiva sull'Artifact privato e su itch.io. Solo dopo: server privato (punto 3 della lista sotto).
+
+Regola: un solo ramo aperto alla volta verso il `main`; chi finisce fa merge e lo segna qui.
+
 ## Prossimi lavori (decisi con l'utente il 31 ottobre)
 
 Il ramo aggiornato è `main`: contiene menu, Coppe e Ultimate Team. Prima di lavorare controlla che il tuo ramo parta dall'ultimo `main` (`git log origin/main -1`).
