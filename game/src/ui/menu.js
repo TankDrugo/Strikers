@@ -8,6 +8,7 @@ import { save, PROFILE_COLORS } from './save.js';
 import { readPads } from '../input.js';
 import { installCups } from './cupsMenu.js';
 import { installUt } from './utMenu.js';
+import { installSquads, presets, presetLineup, sidesColors, lineupLabel } from './squads.js';
 import { CARD, RANK } from '../ut/cards.js';
 import { clubOf, squadRating, divName } from '../ut/club.js';
 import { cupById, roundKey } from '../cups/cups.js';
@@ -50,12 +51,18 @@ export class Menu {
     this.sfx = makeBlips();
     this.nav.onSound = (n) => this.sfx(n);
     this.state = { mode: 'main', tab: 0, sub: 0 };
-    this.setup = { kind: 'cpu', team: 0, seconds: 180, cpuLevel: 1 };
+    this.setup = { kind: 'cpu', seconds: 180, cpuLevel: 1, sides: null };
     this.newsIdx = 0;
     setInterval(() => this.rotateNews(), 7000);
   }
 
   get active() { return this.nav.active; }
+
+  // the two line-ups of quick play (side 0 is player 1's team): presets until changed in the set-up
+  sides() {
+    if (!this.setup.sides) this.setup.sides = this.roster ? [presetLineup(this.roster, 0), presetLineup(this.roster, 1)] : [{ name: 'Celestini' }, { name: 'Rivali' }];
+    return this.setup.sides;
+  }
   poll(dt) { this.nav.poll(dt); }
 
   layer(cls, html, opts = {}) {
@@ -222,7 +229,7 @@ export class Menu {
   }
 
   view(id) {
-    const p = save.active(), r = p.record, teams = this.teams || [{ name: 'Celestini' }, { name: 'Rivali' }];
+    const p = save.active(), r = p.record, teams = this.sides();
     const tile = (act, h, text = '', extra = '', style = '', cls = '') => `<button class="tile ${cls}" data-nav data-act="${act}" style="${style}"><h3>${h}</h3>${text ? `<p>${text}</p>` : ''}${extra}</button>`;
     const soon = (h, text) => `<div class="tile soon locked" data-nav tabindex="-1"><span class="soon-tag">${t('ut.soon')}</span><h3>${h}</h3><p>${text}</p></div>`;
     switch (id) {
@@ -248,7 +255,7 @@ export class Menu {
           ${tile('q-coop', t('quick.coop'), t('quick.coopText'), `<span class="big" style="margin-top:auto">${t('quick.big3')}</span>`)}
           ${tile('q-watch', t('quick.watch'), t('quick.watchText'), `<span class="big" style="margin-top:auto">${t('quick.big4')}</span>`)}
           <div class="tile" style="grid-column:span 4;cursor:default;justify-content:center"><div class="keys" style="grid-template-columns:auto 1fr auto 1fr">
-            <b>${t('setup.team')}</b><span>${esc(teams[0].name)} · ${esc(teams[1].name)}</span><b>${t('setup.time')}</b><span>2 · 3 · 5 min</span>
+            <b>${t('setup.team')}</b><span>${this.roster ? presets(this.roster).map((x) => esc(x.name)).join(' · ') : ''} · ${t('lineup.custom')}</span><b>${t('setup.time')}</b><span>2 · 3 · 5 min</span>
             <b>${t('setup.cpu')}</b><span>${t('setup.easy')} · ${t('setup.normal')} · ${t('setup.hard')}</span><b>${t('setup.stadium')}</b><span>${t('setup.stadiumMain')}</span></div></div>
         </div>`;
       case 'cups':
@@ -377,39 +384,50 @@ export class Menu {
   // ------------------------------------------------------------- quick play set-up
 
   showSetup() {
-    const s = this.setup, teams = this.teams || [{ name: 'Celestini' }, { name: 'Rivali' }];
+    const s = this.setup, sides = this.sides();
     const rows = () => {
       const vsCpu = s.kind !== 'friend';
+      const lbl = { cpu: ['setup.yourTeam', 'setup.opponent'], coop: ['setup.yourTeam', 'setup.opponent'], friend: ['setup.teamP1', 'setup.teamP2'], watch: ['setup.side1', 'setup.side2'] }[s.kind];
       return [
-        ['team', s.kind === 'friend' ? t('setup.teamP1') : t('setup.team'), s.kind === 'watch' ? `${esc(teams[0].name)} – ${esc(teams[1].name)}` : esc(teams[s.team].name), s.kind !== 'watch'],
-        ['formation', t('setup.formation'), t('setup.formationClassic'), false],
+        ['team0', t(lbl[0]), lineupLabel(sides[0]), true],
+        ['edit0', t('setup.lineup'), t('setup.lineupEdit'), true, true],
+        ['team1', t(lbl[1]), lineupLabel(sides[1]), true],
+        ['edit1', t('setup.lineup'), t('setup.lineupEdit'), true, true],
         ['stadium', t('setup.stadium'), t('setup.stadiumMain'), false],
         ['time', t('setup.time'), t('setup.minutes', { n: s.seconds / 60 }), true],
         ...(vsCpu ? [['cpu', t('setup.cpu'), [t('setup.easy'), t('setup.normal'), t('setup.hard')][s.cpuLevel], s.kind !== 'watch']] : []),
-        ['rules', t('setup.rules'), t('setup.rulesNone'), false],
-      ].map(([k, lbl, val, can]) => `<button class="opt-row${can ? '' : ' fixed'}" data-nav data-opt="${k}"><span class="lbl">${lbl}</span><span class="val"><span class="arrow">◀</span>${val}<span class="arrow">▶</span></span></button>`).join('');
+      ].map(([k, lbl, val, can, btn]) => btn
+        ? `<button class="opt-row" data-nav data-opt="${k}"><span class="lbl">${lbl}</span><span class="val">${val} <span class="btnA" style="margin-left:.4em">A</span></span></button>`
+        : `<button class="opt-row${can ? '' : ' fixed'}" data-nav data-opt="${k}"><span class="lbl">${lbl}</span><span class="val"><span class="arrow">◀</span>${val}<span class="arrow">▶</span></span></button>`).join('');
     };
     const title = { cpu: t('quick.vsCpu'), friend: t('quick.vsFriend'), coop: t('quick.coop'), watch: t('quick.watch') }[s.kind];
     const l = this.layer('dim', `<div class="center"><div class="panel">
-      <h1 class="title">${title}</h1><p class="sub">${t('setup.title')}</p><div class="grid" id="rows">${rows()}</div>
-      <p class="sub" style="opacity:.7">${t('setup.more')}</p>
+      <h1 class="title">${title}</h1><p class="sub">${t('setup.title')}</p><div class="grid" id="rows" style="gap:.4em">${rows()}</div>
       <div class="row-btns"><button class="btn primary" data-nav data-act="go">${t('setup.go')}</button><button class="btn" data-nav data-act="back">${t('foot.back')}</button></div>
       <div class="footer" style="color:var(--ink);-webkit-text-stroke:0"><span><span class="btnLR">◀</span><span class="btnLR">▶</span>${t('foot.change')}</span><span><span class="btnB">B</span>${t('foot.back')}</span></div></div></div>`, {
       onMove: (dx, dy, cur) => {
-        if (!dx || !cur || !cur.dataset.opt) return false;
+        if (!dx || !cur || !cur.dataset.opt || cur.dataset.opt.startsWith('edit')) return false;
         change(cur.dataset.opt, dx); return true;
       },
       act: (a) => { if (a === 'go') this.afterSetup(l); if (a === 'back') this.nav.pop(l); },
       onBack: () => this.nav.pop(l),
     });
+    const repaint = (k) => {
+      l.el.querySelector('#rows').innerHTML = rows();
+      this.nav.focus(l.el.querySelector(`[data-opt="${k}"]`), false);
+    };
     const change = (k, d) => {
-      if (k === 'team' && s.kind !== 'watch') s.team = 1 - s.team;
+      if (k.startsWith('edit')) {
+        const i = +k.slice(4);
+        this.showLineup(sides[i], (lu) => { sides[i] = lu; repaint(k); });
+        return;
+      }
+      if (k.startsWith('team')) { const i = +k.slice(4); sides[i] = this.cyclePreset(sides[i], d); }
       else if (k === 'time') { const o = [120, 180, 300]; s.seconds = o[(o.indexOf(s.seconds) + d + 3) % 3]; }
       else if (k === 'cpu' && s.kind !== 'watch') s.cpuLevel = (s.cpuLevel + d + 3) % 3;
       else return;
       this.sfx('tab');
-      l.el.querySelector('#rows').innerHTML = rows();
-      this.nav.focus(l.el.querySelector(`[data-opt="${k}"]`), false);
+      repaint(k);
     };
     l.el.querySelector('#rows').addEventListener('click', (e) => { const r = e.target.closest('[data-opt]'); if (r) change(r.dataset.opt, 1); });
     this.nav.push(l);
@@ -468,9 +486,10 @@ export class Menu {
   }
 
   launch(opts) {
-    const humans = opts.kind === 'watch' ? [] : opts.kind === 'friend' ? [opts.team, 1 - opts.team] : opts.kind === 'coop' ? [opts.team, opts.team] : [opts.team];
+    const humans = opts.kind === 'watch' ? [] : opts.kind === 'friend' ? [0, 1] : opts.kind === 'coop' ? [0, 0] : [0];
     const bindings = opts.bindings || (humans.length ? [{ device: 'any', ctrl: 0 }] : []);
-    this.lastLaunch = { ...opts, humans, bindings };
+    const lineups = sidesColors(...this.sides()).map((x) => ({ name: x.name, color: x.color, slots: [...x.slots], captain: x.captain }));
+    this.lastLaunch = { ...opts, humans, bindings, lineups };
     this.nav.clear(); this.hub = null;
     this.onStart(this.lastLaunch);
   }
@@ -508,3 +527,4 @@ export class Menu {
 
 installCups(Menu);
 installUt(Menu);
+installSquads(Menu);

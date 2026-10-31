@@ -1,5 +1,5 @@
 {
-  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one. teamInfo: name and colour of each team (colour = rings, score, crowd; shirt = sampled from the models' textures).",
+  "_doc": "Characters in the game and who plays where. Team slots: 0 defender, 1 midfielder (both deep), 2 winger, 3 striker (both forward), 4 goalkeeper. See characters/README.md to add one. teamInfo: name and colour of each team (colour = rings, score, crowd; shirt = sampled from the models' textures). squads: extra preset teams for quick play and cups (same slots; captain = slot 0-3 of the Super Strike player).",
   "characters": [
     {
       "id": "celestini_portiere",
@@ -133,6 +133,32 @@
       "name": "Rivali",
       "color": "#2bd17e",
       "shirt": "#1b5a3c"
+    }
+  ],
+  "squads": [
+    {
+      "name": "Leggende",
+      "color": "#ffd21f",
+      "slots": [
+        "bigsmoke_belgio",
+        "crilin_giappone",
+        "dastardly_croazia",
+        "goku_ssj_germania",
+        "rivali_portiere"
+      ],
+      "captain": 3
+    },
+    {
+      "name": "Nazionali",
+      "color": "#ff7b1c",
+      "slots": [
+        "bigsmoke_belgio",
+        "goku_spagna",
+        "dastardly_croazia",
+        "goku_ssj_germania",
+        "celestini_portiere"
+      ],
+      "captain": 1
     }
   ]
 }

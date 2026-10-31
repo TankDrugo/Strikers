@@ -140,7 +140,7 @@ const CSS = `
 /* HUD and the old screens get the same look */
 .hud .score{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;background:#1b1036e0;border:3px solid #fff}
 .hud .flash{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;-webkit-text-stroke:3px #1b1036;paint-order:stroke fill}
-.hud .ptag{position:absolute;font-family:"Bungee","Arial Black",sans-serif;font-size:13px;color:#fff;background:#1b1036;border:2px solid #fff;border-radius:8px;padding:0 6px;transform:translate(-50%,-100%);white-space:nowrap}
+.hud .ptag{position:absolute;font-family:"Bungee","Arial Black",sans-serif;font-size:14px;line-height:1.25;color:#fff;background:var(--pc,#2b8cff);border:2px solid #fff;border-radius:7px;padding:0 7px;transform:translate(-50%,calc(-100% - 11px));white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.45);text-shadow:0 1px 0 rgba(0,0,0,.5)}.hud .ptag::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:8px solid transparent;border-top:10px solid #fff;margin-top:1px}.hud .ptag::before{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top:8px solid var(--pc,#2b8cff);z-index:1}
 `;
 
 export function installTheme() {

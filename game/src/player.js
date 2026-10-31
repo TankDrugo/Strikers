@@ -40,6 +40,7 @@ export class Player {
     this.role = role; // 'fielder' | 'goalie'
     this.index = index;
     this.isGoalie = role === 'goalie';
+    this.charId = template.id;
     this.stats = stats;
     this.cfg = this.isGoalie ? goalieConfig(stats || {}) : fielderConfig(stats || {});
     this.model = SkeletonUtils.clone(template.scene);

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { SHOT } from './config.js';
 import { t } from './ui/i18n.js';
 
+const PAD_COLORS = ['#2b8cff', '#ff3b3b', '#ffc21f', '#2fbf4a']; // P1 blue, P2 red, P3 yellow, P4 green, like FC
+
 const css = `
 .hud{position:fixed;inset:0;pointer-events:none;font-family:"Trebuchet MS",system-ui,sans-serif;color:#fff;user-select:none}
 .hud .score{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;background:rgba(10,16,28,.72);padding:6px 18px;border-radius:999px;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
@@ -81,27 +83,27 @@ export class Hud {
     const c = Math.ceil(game.clock);
     this.el.querySelector('#clock').textContent = `${Math.floor(c / 60)}:${String(c % 60).padStart(2, '0')}`;
     if (this.flashT > 0) { this.flashT -= 1 / 60; if (this.flashT <= 0) this.flashEl.style.opacity = 0; }
-    // with two humans, a "P1 / P2" tag over each one's player
-    const tags = game.controllers.length > 1 ? game.controllers : [];
+    // FIFA-style marker over every human-controlled player: "P1" in the controller's colour, arrow down to the head
+    const tags = game.controllers;
     this.tags = this.tags || [];
     while (this.tags.length < tags.length) { const e = document.createElement('div'); e.className = 'ptag'; this.el.appendChild(e); this.tags.push(e); }
     this.tags.forEach((e, i) => {
       const c = tags[i];
       if (!c || !c.player) { e.style.display = 'none'; return; }
-      this.v.set(c.player.rpos.x, c.player.cfg.height + 0.25, c.player.rpos.z).project(game.camera);
+      this.v.set(c.player.rpos.x, c.player.cfg.height * 1.08 + 0.1, c.player.rpos.z).project(game.camera);
       e.style.display = 'block';
       e.textContent = t('hud.p', { n: i + 1 });
-      e.style.background = game.teams[c.team].color;
+      e.style.setProperty('--pc', PAD_COLORS[i % PAD_COLORS.length]);
       e.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth}px`;
       e.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight}px`;
     });
     const h = game.controllers.map((c) => c.player).find((p) => p && p.state === 'windup');
     if (h) {
       const f = Math.min(1, h.stateTime / SHOT.windupSeconds);
-      this.v.set(h.pos.x, h.cfg.height + 0.45, h.pos.z).project(game.camera);
+      this.v.set(h.rpos.x, h.cfg.height * 1.08 + 0.1, h.rpos.z).project(game.camera); // just above the P1 marker
       this.meter.style.display = 'block';
       this.meter.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth - 43}px`;
-      this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 14}px`;
+      this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 48}px`;
       this.meter.firstChild.style.width = `${f * 100}%`;
       this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow * (h.cfg.perfectWindow ?? 1) ? '#7dffa8' : '';
     } else this.meter.style.display = 'none';

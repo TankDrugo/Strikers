@@ -162,7 +162,8 @@ async function boot() {
 
   // cups: the same characters under other team names, colours and line-ups
   // Ultimate Team: line-ups also carry the card stats of every slot (game/src/stats.js)
-  const withLineups = (lineups) => ({ ...template, teams: lineups.map((l) => ({ name: l.name, color: l.color })),
+  // captain: slot 0-3 of the only player who can do the Super Strike (default the striker)
+  const withLineups = (lineups) => ({ ...template, teams: lineups.map((l) => ({ name: l.name, color: l.color, captain: l.captain ?? 3 })),
     forSlot: (team, slot) => template.byId[lineups[team].slots[slot]] || template.forSlot(team, slot),
     statsFor: (team, slot) => lineups[team].stats?.[slot] || null });
   menu.portrait = makePortraits(renderer, template);
