@@ -67,10 +67,13 @@ export class Ball {
     this.shotTimer = 0; // > 0 while a shot is in flight (goalie reacts)
     this.shotPower = 0;
     this.shotPerfect = false;
+    this.shotValue = 0;
+    this.shouldMiss = false;
     this.passTarget = null;
     this.inGoal = 0; // side of the goal it went in, once
     this.events = [];
     this.q = new THREE.Quaternion();
+    this.kickId = 0; // grows with every kick: the keeper knows whether the ball he planned for was touched since
   }
 
   reset(x = 0, z = 0) {
@@ -81,6 +84,7 @@ export class Ball {
   kick(vel, spin = null, opts = {}) {
     if (this.owner) this.lastTouch = this.owner;
     this.owner = null;
+    this.kickId++;
     this.vel.copy(vel);
     this.spin.copy(spin || new THREE.Vector3());
     this.magnus = !!opts.magnus;
@@ -88,6 +92,8 @@ export class Ball {
     this.shotTimer = opts.shot ? 1.5 : 0;
     this.shotPower = opts.power || 0;
     this.shotPerfect = !!opts.perfect;
+    this.shotValue = opts.value ?? 0; // bar value of the shot (ShotMeter.cpp CalcScoreValue)
+    this.shouldMiss = !!opts.shouldMiss; // the dice roll said the keeper must miss (Fielder.cpp mbShouldMiss)
     this.passTarget = opts.passTarget || null;
   }
 

@@ -115,6 +115,7 @@ export class Player {
   play(name, { loop = false, fade = 0.12, rate = 1, mirror = false, restart = true, start = 0 } = {}) {
     const a = this.action(name);
     if (!a) return;
+    if (this.blendAction && this.blendAction !== a) { this.blendAction.fadeOut(fade); this.blendAction = null; }
     if (this.currentName === name && !restart && this.mirrored === mirror) { a.timeScale = rate; return; }
     a.reset();
     a.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
@@ -132,14 +133,34 @@ export class Player {
     this.lastRoot = null;
   }
 
+  // Two clips at once with weights 1 − w and w (the keeper's blended saves, GoalieSave GetClosestBlendedPos):
+  // each starts at its own time and rate so that both contacts fall together.
+  playBlend(nameA, nameB, w, { mirror = false, startA = 0, startB = 0, rateA = 1, rateB = 1, fade = 0.05 } = {}) {
+    const a = this.action(nameA);
+    if (!a) return;
+    const b = nameB && w > 0.001 ? this.action(nameB) : null;
+    for (const act of Object.values(this.actions)) if (act !== a && act !== b && act.isRunning()) act.fadeOut(fade);
+    const go = (x, t0, r, wt) => {
+      x.reset(); x.setLoop(THREE.LoopOnce, 1); x.clampWhenFinished = true; x.timeScale = r; x.time = t0; x.enabled = true;
+      x.setEffectiveWeight(wt); x.fadeIn(fade); x.play();
+    };
+    go(a, startA, rateA, b ? 1 - w : 1);
+    if (b) go(b, startB, rateB, w);
+    this.current = a; this.currentName = nameA; this.blendAction = b;
+    this.mirrored = mirror;
+    this.model.scale.x = mirror ? -this.scale : this.scale;
+    this.lastRoot = null;
+  }
+
   clipTime() { return this.current ? this.current.time : 0; }
   clipDone() { return !this.current || (this.current.time >= this.current.getClip().duration - 1e-3 && !this.current.isRunning()) || this.current.time >= this.current.getClip().duration - 1e-3; }
 
   // Root motion of the current clip, moved into world space (for slides, hits, reactions, dekes).
-  applyRootMotion() {
+  // time: clip time to sample (default: the mixer's); logic that must not depend on drawing passes its own clock
+  applyRootMotion(time = null) {
     const m = this.meta[this.currentName];
     if (!m || !this.current) return;
-    const t = Math.min(this.current.time, m.duration);
+    const t = Math.min(time ?? this.current.time, m.duration);
     const k = Math.min(m.root.length - 1, Math.max(0, t * 30));
     const i = Math.floor(k), f = k - i, a = m.root[i], b = m.root[Math.min(i + 1, m.root.length - 1)];
     const fwd = a[0] + (b[0] - a[0]) * f, left = (a[1] + (b[1] - a[1]) * f) * (this.mirrored ? -1 : 1);
@@ -189,7 +210,11 @@ export class Player {
     else name = 'run_with_ball'; // ANIM_RUN and ANIM_RUN_WB both use this clip
     const m = this.meta[name];
     let rate = 1;
-    if (this.speed >= 0.3 && m && m.linear_speed > 0.1) {
+    // Character.cpp MatchAnimSpeedToCharacterSpeed only for the clips with the flag (jog, run, strafe, backwards):
+    // the turbo run plays at 1×, the turbo with the ball at 2× (RUNNING_WB_TURBO)
+    if (name === 'turbo_run') rate = 1;
+    else if (name.startsWith('turbo_with_ball')) rate = 2;
+    else if (this.speed >= 0.3 && m && m.linear_speed > 0.1) {
       rate = Math.min(ANIM_RATE_MAX, Math.max(ANIM_RATE_MIN, this.speed / (m.linear_speed * (this.cfg.height / this.rigHeight))));
     }
     this.play(name, { loop: true, rate, restart: false, fade: 0.133 });

@@ -9,15 +9,16 @@ Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIK
 Fatto:
 - Partita 5 contro 5 completa, CPU contro CPU o con controller Xbox
 - Stadio, fisica del pallone, IA
-- Portiere che para come l'originale: conta il tempo del tuffo, non il caso
+- Regole della partita dell'originale (31 ottobre, notte, `reference/VERIFICA.md` righe 1–17, colonna «Nostro gioco»): tiro con valore della barra e tiro a sorte con la curva del livello, portiere con la tabella delle 69 parate, Super Strike sui fotogrammi della clip, CPU con le tabelle della difficoltà, scivolata, spallata e passaggi dell'originale
 - Partita a due giocatori (uno contro uno o insieme contro la CPU), difficoltà della CPU
 - Link online privato, aggiornato a ogni modifica
 - Statistiche per giocatore dalle carte di Ultimate Team (`src/stats.js`)
-- Super Strike del capitano come nell'originale (`SUPER` in `src/config.js`), indicatore G1–G4 stile FIFA sopra il giocatore controllato
+- Super Strike del capitano come nell'originale (`SUPER` in `src/config.js`): carica 0,91 s, una lancetta sul tempo della clip, scena dal fotogramma 27; indicatore G1–G4 stile FIFA sopra il giocatore controllato
 - Build di prova con 10 milioni di crediti (`--prova`) e build per itch.io (`--itch`), caricata sulla pagina ristretta https://goleador0702.itch.io/strikers
 
 Prossimo:
-- Pallone oltre il limite di 50 m/s in alcuni tiri
+- Pallone attaccato all'osso `ball` delle clip (riga 12 di `VERIFICA.md`: va esportato l'osso), stati di corsa (riga 11), condizioni degli script della CPU
+- Pallonetto in porta, tiro al volo, disturbo della lancetta del Super Strike
 - Power-up
 - Opzioni della pagina itch.io dal sito (gioco nel browser, 1280×720, schermo intero, accesso agli amici)
 
@@ -76,7 +77,7 @@ Prima build caricata il 31 ottobre (canale `html5`). Le opzioni della pagina (gi
 | Levetta sinistra / croce | muovi | muovi |
 | RT | turbo | turbo |
 | A | passaggio verso la direzione indicata | – |
-| B | tieni premuto per caricare, rilascia per tirare. Barra piena e verde: tiro perfetto con effetto | scivolata |
+| B | tieni premuto per caricare, rilascia per tirare (a barra piena parte da solo). Barra piena e verde: tiro perfetto con effetto | scivolata (dura finché tieni premuto, al massimo 0,35 s) |
 | Y | pallonetto | – |
 | X | finta | spallata |
 | LB | – | cambia giocatore |
@@ -85,7 +86,7 @@ Prima build caricata il 31 ottobre (canale `html5`). Le opzioni della pagina (gi
 
 Nei menu (stile EA FC): **LB / RB** cambiano scheda, croce o levetta si spostano, **A** conferma, **B** torna indietro. Funzionano tutti i controller collegati. Nel visualizzatore: croce su/giù per cambiare animazione, X per specchiarla, B per uscire.
 
-**Super Strike** (vale 2 gol): solo il capitano (© sopra la testa e nell'editor della formazione; in Ultimate Team si sceglie nella Rosa, mai il portiere). Nella metà campo avversaria tieni premuto B (tastiera: K) oltre la barra piena: il capitano brilla d'oro e dopo 1,6 s salta. Al rallentatore passano due lancette: premi B quando la prima è sul verde scuro a destra e quando la seconda è sul verde scuro a sinistra. Tutte e due sul verde scuro: imparabile. Una appena fuori: gol lo stesso. Altrimenti il portiere respinge e resta a terra 1–2 s. Se ti placcano mentre carichi, la perdi.
+**Super Strike** (vale 2 gol): solo il capitano (© sopra la testa e nell'editor della formazione; in Ultimate Team si sceglie nella Rosa, mai il portiere). Nella metà campo avversaria tieni premuto B (tastiera: K) oltre la barra piena: il capitano brilla d'oro e dopo 0,91 s salta. Al rallentatore una lancetta sale e poi scende: premi B quando sale sul verde a destra (0,84) e di nuovo quando scende sul verde a sinistra (0,16). Conta soprattutto la seconda pressione: sul verde è gol; se anche la prima era perfetta il tiro è imparabile e il portiere finisce in rete; sul giallo il portiere para e resta stordito 1–2 s; fuori, respinge. Una prima pressione vicina allo 0,84 allarga il verde della seconda. Se ti placcano mentre carichi, la perdi; se sei a meno di 2 m dal portiere, può uscirti addosso. Vicino alla linea di porta o negli ultimi 5 s diventa un tiro normale.
 
 Il controller va collegato prima di aprire il gioco, oppure basta premere un suo tasto con la pagina aperta: il browser lo rende visibile solo dopo la prima pressione. Funziona in Chrome, Edge e Firefox.
 
@@ -120,7 +121,8 @@ Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; d
 | `src/ut/` | Ultimate Team: `cards.js` catalogo delle carte, `club.js` regole del club (pacchetti, rosa, mercato, Divisioni, album), `walkout3d.js` palco 3D del walkout. Regole in `ultimate-team/DESIGN.md` |
 | `src/cups/` | Coppe: `cups.js` (4 coppe, squadre CPU rimescolate, tabellone, simulazione, voto D–Z), `objectives.js` (obiettivi delle stelle e `Tracker` che li segue dagli eventi della partita) |
 | `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `cupsMenu.js` schermate delle Coppe, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser; `utMenu.js`, `utCards.js`, `i18n_ut.js` schermate, carte e testi di Ultimate Team |
-| `src/game.js` | La partita: passo fisso a 50 Hz, uno o più umani (`controllers`, `setHumans`), difficoltà della CPU (`cpuLevel`), azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
+| `src/game.js` | La partita: passo fisso a 50 Hz, uno o più umani (`controllers`, `setHumans`), difficoltà (`cpuLevel`, `skill()` legge le tabelle `SKILL`), azioni (passaggio, tiro col tiro a sorte, pallonetto, finta, scivolata, spallata), Super Strike, gol, telecamera |
+| `src/goalie.js` | Il portiere: posizione e uscite (§9.1 di `VERIFICA.md`), parate dalla tabella `animation/data/strikers_saves.json` (griglia 7×5, miscela con la parata collegata, presa o deviazione, fatica) |
 | `src/player.js` | Il giocatore: movimento, scelta e velocità delle animazioni, root motion, disegno interpolato tra due passi di fisica |
 | `src/ball.js` | Fisica del pallone, effetto Magnus, urti con pali e barriere, gol |
 | `src/ai.js` | IA dei giocatori di movimento |
@@ -141,12 +143,13 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 
 - **Campo:** 41,2 × 24,2 m chiuso da barriere con angoli arrotondati; porte 5,69 × 2,56 m; aree di rigore.
 - **Pallone:** fisica a 50 Hz con gravità −14 m/s², resistenza dell'aria e al rotolamento, rimbalzi diversi per terreno, barriere e pali. Velocità massima 50 m/s.
-- **Tiro perfetto:** effetto Magnus con correzione della mira, come in `cBall::Shoot`.
+- **Tiro:** carica 0,25 + 0,75 × tempo / 0,66, rilascio automatico a barra piena; velocità tra 29 e 34 m/s secondo distanza e carica; bersaglio vicino a un palo, errore di mira che cresce col tempo di volo e un valore della barra basso; contatto al fotogramma 1,825 della clip.
+- **Tiro perfetto:** carica ≥ 0,99 (barra tenuta fino in fondo); effetto Magnus con correzione della mira, come in `cBall::Shoot`.
 - **Giocatori:** velocità, accelerazioni e virate dei file `.ini` e di `g_pTweaks`.
 - **Animazioni:** velocità adattata a quella reale del giocatore (0,6–1,4×). Le clip "a sinistra" sono quelle "a destra" specchiate, come nell'originale.
-- **Azioni:** passaggi a terra e pallonetti col compagno anticipato, tiro caricato in 0,66 s, scivolate e spallate con reazioni direzionali, finte.
-- **Portieri:** si posizionano tra palla e porta, prevedono il tiro e si tuffano. Come nell'originale la parata non è un tiro di dado: para se il tuffo (reazione più spostamento) arriva in tempo. In partite CPU contro CPU entra circa un tiro su cinque, un tiro perfetto su due. Poi rinviano con la mano o col piede.
-- **IA:** per ogni squadra un giocatore pressa, uno marca e gli altri tengono la posizione rispetto al pallone.
+- **Azioni:** passaggi a terra (spinta verticale 0,5–2 m/s) e pallonetti verso il punto d'intercetto del compagno, velocità secondo distanza e compagno che viene incontro, clip scelta dalla direzione; scivolata a 7,5 m/s verso l'intercetto, chi tocca il pallone col piede lo prende; spallata col movimento della clip a 1,5×, chi la subisce perde il pallone e resta giù per tutta la clip; finte.
+- **Portieri:** come nell'originale (`src/goalie.js`). Al tiro si tira a sorte: il valore della barra (Shooting × 0,06 + carica × 0,29 + porta aperta × 0,40 + vicinanza × 0,25) passa per la curva del livello scelto (da 1% a 55%) e dice se il portiere deve sbagliare. Altrimenti para se una delle 69 parate della tabella (tempi dai trigger, punto dall'osso `ball`, ×`SIZE`) arriva in tempo nella cella 7×5 del pallone, miscelata con la parata collegata. Presa solo con tiro debole (carica < 0,3) e portiere riposato. Si piazza secondo la distanza del pallone, esce sul portatore e sulla palla libera secondo il livello, rilancia entro 2 s.
+- **IA:** per ogni squadra un giocatore pressa, uno marca (stretto secondo `Marking Effectiveness`) e gli altri tengono la posizione. Ogni scelta (tiro, passaggio, finta, turbo, scivolata, spallata, Super Strike) è una probabilità della tabella della difficoltà (`SKILL` in `src/config.js`); la squadra con giocatori umani usa la tabella "umana" (i compagni del computer non contrastano). Velocità uguali a ogni livello.
 
 ## Non ancora presente
 
@@ -172,11 +175,25 @@ Esce con errore se la pagina dà errori o se una posizione diventa NaN. Se la mo
 node tools/uttest.cjs
 ```
 
-Altre prove: `node tools/squadtest.cjs` (scelta della squadra e formazione), `node tools/supertest.cjs` (Super Strike: perfetta +2, respinta, metà campo sbagliata, non capitano, CPU), `node tools/packtest.cjs` (build di prova: crediti, 1.000 pacchetti, tutte le carte del catalogo col ritratto).
+Altre prove: `node tools/squadtest.cjs` (scelta della squadra e formazione), `node tools/supertest.cjs` (Super Strike: carica 0,91 s, imparabile +2, solo seconda pressione +2, respinta, metà campo sbagliata, non capitano, uscita del portiere, CPU), `node tools/savetest.cjs` (60 tiri da punti diversi col tiro a sorte forzato: "para" deve parare quasi tutti quelli in porta, "deve sbagliare" deve subirli; con un prefisso salva le foto dei tuffi al contatto), `node tools/goalrate.cjs [secondi]` (gol per tiro a ogni livello, CPU contro CPU), `node tools/packtest.cjs` (build di prova: crediti, 1.000 pacchetti, tutte le carte del catalogo col ritratto).
+
+### Gol per tiro (31 ottobre, notte)
+
+`node tools/goalrate.cjs 1800`: 30 minuti di partita CPU contro CPU per livello (le due squadre leggono la tabella del livello). Tiri normali; i Super Strike a parte.
+
+| Livello | Tiri | Gol | Gol per tiro | "Deve sbagliare" | Tiri perfetti (gol) | Super Strike (gol) | Passaggi | Contrasti |
+|---|---|---|---|---|---|---|---|---|
+| Rookie | 195 | 63 | **32%** | 32% | 89 (27) | 0 (0) | 107 | 12 |
+| Professional | 191 | 37 | **19%** | 20% | 89 (17) | 3 (2) | 371 | 59 |
+| Superstar | 164 | 27 | **16%** | 20% | 77 (18) | 8 (5) | 462 | 419 |
+| Legend | 77 | 9 | **12%** | 14% | 25 (2) | 4 (4) | 379 | 1031 |
+
+Quasi ogni gol viene da un tiro in cui il tiro a sorte ha detto "deve sbagliare": se no il portiere trova quasi sempre una parata in tempo (`savetest.cjs`: 53–54 tiri su 59 in porta). Più alto il livello, più la CPU contrasta (tabella: `Slide Attack Chance` 0,02 / 0,15 / 0,5 / 1) e meno si tira. Prima della correzione entrava circa un tiro su cinque a ogni livello.
 
 Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md).
 
 ## Problemi noti
 
-- Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
+- Le mani del nostro portiere arrivano a circa l'80% della portata dell'osso `ball` della tabella delle parate: nei tuffi lunghi il pallone respinto può passare fino a 0,9 m oltre le dita (`reference/VERIFICA.md` §9.2, controllo a occhio).
+- A Legend la CPU scivola quasi a ogni occasione (`Slide Attack Chance` 1): circa 35 contrasti al minuto in CPU contro CPU. Quando una scelta viene offerta (raggi, frequenza) è ancora una stima nostra in `TACKLE` di `src/config.js`.
 - Il file `gioco.html` pesa circa 215 MB con 25 personaggi (circa 8-9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.

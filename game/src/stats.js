@@ -25,8 +25,7 @@ export function fielderConfig(st = {}) {
     shot: scale(FIELDER.shot, sho),
     passGround: scale(FIELDER.passGround, pas), passVolley: scale(FIELDER.passVolley, pas), chip: scale(FIELDER.chip, pas),
     // extras read by game.js and hud.js
-    shotSpread: Math.max(0.4, f(st.tir, -0.02)), // aim error: 99 = 0.52×, 55 = 1.4×
-    perfectWindow: f(st.tir, 0.01), // green zone of the shot meter: ±1 % per point
+    shooting: (st.tir ?? STAT_BASE) / STAT_BASE, // the "Shooting" attribute of the bar value (mario.ini 1 at 75; weight 0.06)
     passError: Math.max(0, (80 - (st.pas ?? 80)) * 0.003), // radians of random error below 80
     tackleReach: f(st.con, 0.005), slideSpeed: f(st.con, 0.004), // shoulder charge reach, slide speed
     stunTime: Math.max(0.6, f(st.con, -0.008)), // knocked down for shorter
@@ -39,9 +38,9 @@ export function goalieConfig(st = {}) {
   return {
     ...GOALIE,
     jog: GOALIE.jog * vel, run: GOALIE.run * vel,
-    diveSpeed: GOALIE.diveSpeed * f(st.par, 0.005), diveReach: GOALIE.diveReach * f(st.par, 0.004),
-    saveReact: GOALIE.saveReact * f(st.rif, -0.01), // reaction time: −1 % per point
+    saveReach: f(st.par, 0.004), // reach of every save of the table: ±0.4 % per point
+    saveRate: f(st.rif, 0.004), // save clips play faster: ±0.4 % per point (the save times of the table shrink)
+    catchTolerance: GOALIE.catchTolerance * f(st.usc, 0.004), // Catch Save Tolerance: ±0.4 % per point
     kick: scale(GOALIE.kick, f(st.usc, 0.004)), pass: scale(GOALIE.pass, f(st.usc, 0.003)),
-    catchChance: Math.min(0.95, 0.65 * f(st.usc, 0.012)), // 0.65 is the original chance to hold a soft shot
   };
 }
