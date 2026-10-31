@@ -73,6 +73,7 @@ export class Ball {
     this.inGoal = 0; // side of the goal it went in, once
     this.events = [];
     this.q = new THREE.Quaternion();
+    this.kickId = 0; // grows with every kick: the keeper knows whether the ball he planned for was touched since
   }
 
   reset(x = 0, z = 0) {
@@ -83,6 +84,7 @@ export class Ball {
   kick(vel, spin = null, opts = {}) {
     if (this.owner) this.lastTouch = this.owner;
     this.owner = null;
+    this.kickId++;
     this.vel.copy(vel);
     this.spin.copy(spin || new THREE.Vector3());
     this.magnus = !!opts.magnus;

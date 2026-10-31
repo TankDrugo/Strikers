@@ -5,6 +5,7 @@ import { buildField, buildBallMesh } from './field.js';
 import { Stadium } from './stadium.js';
 import { Player, angleDiff, seekDirection } from './player.js';
 import { fielderAI, bestPassTarget } from './ai.js';
+import { Keeper } from './goalie.js';
 import { t } from './ui/i18n.js';
 
 const R = BALL.radius;
@@ -34,6 +35,7 @@ export class Game {
     buildField(this.scene, { stadium: true });
     this.stadium = new Stadium(this.scene, this.teams);
     this.ball = new Ball(buildBallMesh());
+    this.keeper = new Keeper(this);
     this.scene.add(this.ball.mesh);
     this.ballShadow = new THREE.Mesh(new THREE.CircleGeometry(R * 1.1, 16), new THREE.MeshBasicMaterial({ color: 0, transparent: true, opacity: 0.35, depthWrite: false }));
     this.ballShadow.rotation.x = -Math.PI / 2;
@@ -50,6 +52,7 @@ export class Game {
       const g = new Player(this, template.forSlot(team, 4), team, 'goalie', 4, template.statsFor ? template.statsFor(team, 4) : null);
       g.home.set((team === 0 ? -1 : 1) * (FIELD.halfLength - 1.2), 0, 0);
       g.tackleCooldown = 0;
+      g.energy = 100; // goalie fatigue (goalie.ini Shot Fatigue ...): catches need 90
       this.players.push(g);
     }
     this.score = [0, 0];
@@ -367,6 +370,7 @@ export class Game {
     this.emit('shot', { team: p.team, perfect });
     this.hud.flash(perfect ? t('flash.perfect') : null);
     p.stateData.released = true;
+    if (gk) this.keeper.onShot(gk);
   }
 
   startSlide(p) {
@@ -682,8 +686,8 @@ export class Game {
       case 'celebrate':
       case 'dejected':
         break;
-      case 'dive':
-      case 'catch':
+      case 'dive': this.keeper.dive(p, dt); break;
+      case 'trap': this.keeper.trap(p, dt); break;
       case 'hold':
       case 'throw':
         this.goalieAction(p, dt);
@@ -696,41 +700,17 @@ export class Game {
   // ------------------------------------------------------------- goalies
 
   goalieAI(g, dt) {
-    const b = this.ball;
-    const gx = -g.attackDir * FIELD.halfLength; // own goal line
-    const out = g.attackDir; // direction to the pitch
-    const inBox = (pt) => Math.abs(pt.x - gx) < FIELD.halfLength - FIELD.penaltyX && Math.abs(pt.z) < FIELD.penaltyHalfWidth;
-    if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.1 }); return; }
     if (this.superStrike && this.superStrike.keeper === g) { g.desiredSpeed = 0; g.locomotion(dt); return; } // reacts in superFlight
-
-    // incoming shot?
-    if (!b.owner && (b.vel.x * -out) > 6) {
-      const path = predict(b.pos, b.vel, b.spin, b.magnus, 1.4);
-      const cross = path.find((s) => (s.p.x - gx) * out < 0.6);
-      if (cross && Math.abs(cross.p.z) < FIELD.goalHalfWidth + GOALIE.saveIgnoreMargin && cross.p.y < FIELD.goalHeight + 0.6) {
-        this.planSave(g, cross, path);
-        return;
-      }
-    }
-    // loose ball in the box: go and collect it
-    if (!b.owner && inBox(b.pos) && b.vel.length() < 9 && b.pos.y < 1.5) {
-      const meet = this.ballMeetPoint(g);
-      this.goalieMove(g, meet.x, meet.z, g.cfg.run);
-      return;
-    }
-    // positioning: on the line between ball and goal centre
-    const bx = b.pos.x - gx, bz = b.pos.z, d = Math.hypot(bx, bz);
-    const off = Math.min(2.6, 0.8 + d * 0.06);
-    const tx = gx + (bx / (d || 1)) * off, tz = Math.max(-FIELD.goalHalfWidth + 0.35, Math.min(FIELD.goalHalfWidth - 0.35, (bz / (d || 1)) * off * 1.4));
-    this.goalieMove(g, tx, tz, d < 18 ? g.cfg.run : g.cfg.jog);
+    this.keeper.think(g, dt);
   }
 
-  goalieMove(g, x, z, speed) {
+  // rush: running at the ball carrier (no strafing)
+  goalieMove(g, x, z, speed, rush = false) {
     const dx = x - g.pos.x, dz = z - g.pos.z, dd = Math.hypot(dx, dz);
     const faceBall = Math.atan2(this.ball.pos.z - g.pos.z, this.ball.pos.x - g.pos.x);
     if (dd < 0.15) { g.desiredSpeed = 0; g.facing += angleDiff(g.facing, faceBall) * 0.15; g.speed = 0; g.locomotionAnim(); return; }
     // short moves sideways keep facing the ball (strafe), long ones run
-    if (dd < 2.5) {
+    if (dd < 2.5 && !rush) {
       const step = Math.min(dd, g.cfg.run * 0.75 * (1 / 50));
       g.pos.x += (dx / dd) * step * 1; g.pos.z += (dz / dd) * step * 1;
       g.facing += angleDiff(g.facing, faceBall) * 0.2;
@@ -744,66 +724,16 @@ export class Game {
     g.locomotion(1 / 50);
   }
 
-  planSave(g, cross, path) {
-    const b = this.ball;
-    const out = g.attackDir;
-    const right = new THREE.Vector3(-Math.sin(g.facing), 0, Math.cos(g.facing));
-    const rel = tmp.copy(cross.p).sub(g.pos);
-    const lateral = rel.dot(right);
-    const reach = Math.abs(lateral);
-    const power = b.shotPower || Math.min(1, b.vel.length() / 34);
-    const time = Math.max(0.05, cross.t);
-    // like the original: saved if the dive gets there in time (reaction + travel), and the ball is within reach.
-    // High balls far from the body take a little longer. CPU level only changes the keeper's reaction.
-    const high = cross.p.y > 1.35 * SIZE && reach > GOALIE.standReach;
-    const needed = 0.14 + Math.max(0, reach - GOALIE.standReach) / 9 + (high ? 0.08 : 0); // interim (step 1): replaced by the save table
-    const success = !b.shouldMiss && time >= needed && reach <= g.cfg.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
-    const height = cross.p.y < 0.55 * SIZE ? 'low' : cross.p.y < 1.35 * SIZE ? 'med' : 'high';
-    let clip;
-    const catchIt = power < GOALIE.catchMaxShotPower && !b.shotPerfect;
-    if (reach < 0.6 * SIZE) clip = catchIt ? 'gk_catch_' + height : 'gk_stand_defl_center_parry_' + height;
-    else if (reach < 1.4 * SIZE) clip = catchIt ? 'gk_dive_catch_near_right_' + height : 'gk_dvng_defl_parry_near_right_' + height;
-    else clip = catchIt ? 'gk_dive_catch_far_right_' + height : 'gk_dvng_defl_parry_far_right_' + height;
-    if (!this.template.clips[clip]) clip = 'gk_dive_catch_far_right_med';
-    g.setState('dive', { success, catchIt, target: cross.p.clone(), t0: time, from: g.pos.clone(), clip });
-    g.play(clip, { fade: 0.04, mirror: lateral < 0 && reach >= 0.6, rate: Math.max(1, 0.45 / time) });
-    g.facing = out > 0 ? 0 : Math.PI;
-  }
-
   goalieAction(g, dt) {
     const b = this.ball;
-    const d = g.stateData;
-    if (g.state === 'dive') {
-      const k = Math.min(1, g.stateTime / Math.max(0.12, d.t0));
-      const tx = d.target.x - g.attackDir * 0.15, tz = Math.max(-FIELD.goalHalfWidth - 0.6, Math.min(FIELD.goalHalfWidth + 0.6, d.target.z));
-      if (d.success) { g.pos.x = d.from.x + (tx - d.from.x) * k; g.pos.z = d.from.z + (tz - d.from.z) * k; }
-      else { g.pos.x = d.from.x + (tx - d.from.x) * k * 0.5; g.pos.z = d.from.z + (tz - d.from.z) * k * 0.55; }
-      if (d.success && !b.owner && !d.done) {
-        const handY = Math.min(1.9, Math.max(0.3, d.target.y));
-        if (Math.hypot(b.pos.x - g.pos.x, b.pos.z - g.pos.z) < 0.95 && Math.abs(b.pos.y - handY) < 1.0) {
-          d.done = true;
-          this.stats.saves[g.team]++;
-          this.emit('save', { team: g.team });
-          if (d.catchIt) { b.owner = g; b.vel.set(0, 0, 0); b.magnus = false; b.shotTimer = 0; this.hud.flash(t('flash.save')); }
-          else {
-            const s = b.vel.length() * 0.35;
-            const ang = (g.attackDir > 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 1.6;
-            b.kick(new THREE.Vector3(Math.cos(ang) * s, 3 + Math.random() * 3, Math.sin(ang) * s), null, { noPickup: 0.3 });
-            b.lastTouch = g;
-            this.hud.flash(t('flash.parry'));
-          }
-        }
-      }
-      if (g.stateTime > Math.max(0.9, d.t0 + 0.6)) {
-        if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.15 }); }
-        else { g.setState('free'); g.play('gk_recover_without_ball', { fade: 0.1, rate: 1.5 }); }
-      }
-    } else if (g.state === 'hold') {
+    if (g.state === 'hold') {
       g.speed = 0;
       g.facing += angleDiff(g.facing, g.attackDir > 0 ? 0 : Math.PI) * 0.1;
-      if (g.stateTime > GOALIE.holdTime * 0.6) {
+      // Goalie Ball Time: out within 2 s, earlier if a teammate is free
+      if (g.stateTime > GOALIE.holdLookTime) {
         const t = bestPassTarget(this, g);
-        if (t) {
+        const free = t && this.players.every((o) => o.team === t.team || o.isGoalie || Math.hypot(o.pos.x - t.pos.x, o.pos.z - t.pos.z) > 4);
+        if (t && (free || g.stateTime >= GOALIE.holdTime)) {
           const dist = Math.hypot(t.pos.x - g.pos.x, t.pos.z - g.pos.z);
           if (dist > GOALIE.kickMinDist) {
             g.setState('throw', { kick: true, target: t });
@@ -839,6 +769,7 @@ export class Game {
       else if (o.state === 'super') this.superBallPoint(o, tmp);
       else o.dribblePoint(tmp);
       b.vel.subVectors(tmp, b.pos).divideScalar(dt);
+      if (b.vel.length() > BALL.maxSpeed) b.vel.setLength(BALL.maxSpeed); // a carried ball snapping to the hands is not a flight
       b.pos.copy(tmp);
       b.lastTouch = o;
       return;
@@ -852,15 +783,18 @@ export class Game {
       const reachH = p.isGoalie ? Math.min(1.9 * SIZE, 2.5) : BALL.pickupHeight;
       const radius = p.isGoalie ? 0.75 * SIZE : BALL.pickupRadius;
       if (d < radius && b.pos.y < reachH && b.noPickup <= 0) {
-        // a hard shot flying past a fielder deflects instead of sticking
         const sp = b.vel.length();
+        // a hard shot flying past a fielder deflects instead of sticking
         if (!p.isGoalie && sp > 22 && b.shotTimer > 0) {
           if (b.lastTouch && b.lastTouch.team !== p.team) { b.vel.multiplyScalar(-0.3); b.vel.y = Math.abs(b.vel.y) + 2; b.magnus = false; b.noPickup = 0.2; b.lastTouch = p; }
           continue;
         }
         if (p.isGoalie) {
-          const inBox = Math.abs(p.pos.x) > FIELD.penaltyX - 0.5 && Math.abs(p.pos.z) < FIELD.penaltyHalfWidth + 0.5;
-          if (!inBox) continue;
+          // within the box (plus Loose Ball Range); an opponent's shot in flight is only stopped by a save (goalie.js)
+          const extra = Math.max(0.5, this.skill('looseBallRange', p.team));
+          const inBox = Math.abs(p.pos.x) > FIELD.penaltyX - extra && Math.abs(p.pos.z) < FIELD.penaltyHalfWidth + extra;
+          if (!inBox || p.state === 'dive' || p.state === 'trap') continue;
+          if (b.shotTimer > 0 && b.lastTouch && b.lastTouch.team !== p.team && sp > 5) continue;
         }
         if (d < bestD) { bestD = d; taker = p; }
       }
@@ -958,6 +892,7 @@ export class Game {
     this.stadium.msgColor = this.teams[team].color; // scoreboard 'GOL!' in the scorer's colour
     for (const p of this.players) {
       p.desiredSpeed = 0;
+      if (p.isGoalie) p.energy = 100; // the fatigue goes back to zero at every goal
       if (p.isGoalie) {
         if (p.team !== team) { p.setState('dejected'); p.play('gk_dejected_0' + (1 + Math.floor(Math.random() * 3)), { fade: 0.2 }); }
       } else if (p.team === team) { p.setState('celebrate'); p.play('wave', { fade: 0.2 }); }

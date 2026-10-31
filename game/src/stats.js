@@ -38,9 +38,9 @@ export function goalieConfig(st = {}) {
   return {
     ...GOALIE,
     jog: GOALIE.jog * vel, run: GOALIE.run * vel,
-    diveSpeed: GOALIE.diveSpeed * f(st.par, 0.005), diveReach: GOALIE.diveReach * f(st.par, 0.004),
-    saveReact: GOALIE.saveReact * f(st.rif, -0.01), // reaction time: −1 % per point
+    saveReach: f(st.par, 0.004), // reach of every save of the table: ±0.4 % per point
+    saveRate: f(st.rif, 0.004), // save clips play faster: ±0.4 % per point (the save times of the table shrink)
+    catchTolerance: GOALIE.catchTolerance * f(st.usc, 0.004), // Catch Save Tolerance: ±0.4 % per point
     kick: scale(GOALIE.kick, f(st.usc, 0.004)), pass: scale(GOALIE.pass, f(st.usc, 0.003)),
-    catchChance: Math.min(0.95, 0.65 * f(st.usc, 0.012)), // 0.65 is the original chance to hold a soft shot
   };
 }

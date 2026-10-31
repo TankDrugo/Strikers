@@ -69,18 +69,32 @@ export const GOALIE = {
   capsuleRadius: (0.65 / 2) * SIZE,
   kick: [15.0, 19.0], kickAngle: [50, 60], kickMinDist: 13.0,
   throwMinDist: 7.0,
-  holdTime: 2.0, // Goalie Ball Time
-  catchTolerance: 0.6,
-  interceptTolerance: 0.5,
-  catchMaxShotPower: 0.3, // harder shots are parried
-  saveIgnoreMargin: 1.0,
-  diveReach: 1.9 * SIZE, // horizontal reach of a full dive at this size (estimated from gk_dive clips)
-  reachHeight: Math.min(2.0 * SIZE, 2.559),
-  // Saves are not a dice roll in the original (Goalie::CalcSaveParameters, GoalieSave::FindBestSave): the keeper
-  // saves when one of his save animations reaches the ball in time. We model that with a reaction time plus a dive
-  // speed (both estimated: the shipped save-timing grid is not in the decompilation).
-  standReach: 0.6 * SIZE, // shots this close to the body need no dive
   pass: [9.0, 19.0],
+  // goalie.ini (GoalieTweaks::Init, CharacterTweaks.cpp), STRIKERS_REFERENCE.md §6 and §9 bis
+  holdTime: 2.0, // Goalie Ball Time: throws within 2 s
+  holdLookTime: 0.6, // estimate: before that, he throws as soon as a teammate is free (VERIFICA §8: "da verificare")
+  catchTolerance: 0.6 * SIZE, // Catch Save Tolerance: a real catch if the ball passes this close to the hands (×SIZE)
+  limbTolerance: 0.8 * SIZE, // estimate: CheckForLimbEndZoneCollision, farther than this the ball misses the body
+  interceptTolerance: 0.5 * SIZE, // Intercept Save Tolerance
+  catchAllowDist: 0.5, // GoalieSave mfCatchAllowDistSq 0.25: a catch save only if its point is within 0.5 m (original metres)
+  catchMaxShotPower: 0.3, // Catch Save Max Speed: catches only for a charge below 0.3...
+  fatigueCatch: 90, // Fatigue Catch Threshold (riserva del codice 60): ...and an energy of at least 90
+  missSaveDelay: 0.1, // Miss Save Delay: added when the dice roll says the keeper must miss
+  lobStumbleChance: 0.3, // Lob Shot Stumble Chance (chip shots, not in our game yet)
+  saveIgnoreMargin: 1.0, // Save Ignore Margin: no dive for a shot that misses the goal by more than 1 m
+  savePlane: 0.2 * SIZE, // Goalie::CalcTimeToPlane: the plane 0.2 m in front of the keeper, turned towards the ball
+  saveTurn: 100000, saveTurnFalloff: 4000, // Save Turn Speed/Falloff: turning while he waits for the dive
+  saveGrid: [7, 5], // GoalieSave::FindBestSave: the net (5.692 × 2.559 m) split in 7 × 5 cells
+  // fatigue per save type, recovery per second (Shot Fatigue ..., Fatigue Recover Rate)
+  fatigue: { catch: 5, dive_catch: 10, deflect: 7, dive_deflect: 15, punch: 7, leg: 6, stsSave: 15, stsStun: 25, recover: 2 },
+  pounceRange: 1.0 * SIZE, // Pounce Range: dives on the ball at the carrier's feet within catch distance + 1 m
+  attackRunScale: 1.5, // Goalie.cpp: runs at the ball carrier at 1.5×
+  readyDistance: 1.2, // Goalie.cpp: against a carrier winding up he crouches if within 1.2 m of his spot
+  passThreatMargin: 1.0, // IsPassThreat: pass intercept inside the penalty box widened by 1 m
+  // FindDesiredGoaliePosition: aim at ball + 0.18 s of its velocity, stand on the line from 0.5 m behind the goal
+  // centre, at a distance from that point that depends on the target's distance d (m): see goalie.js
+  lead: 0.18, behindLine: 0.5, keepNow: 0.2, // final point = 0.8 × wanted + 0.2 × current position
+  lineMargin: 1.0, // behind the goal line he stays within half the goal width − 1 m
 };
 
 export const SHOT = {

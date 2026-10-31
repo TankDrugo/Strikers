@@ -115,6 +115,7 @@ export class Player {
   play(name, { loop = false, fade = 0.12, rate = 1, mirror = false, restart = true, start = 0 } = {}) {
     const a = this.action(name);
     if (!a) return;
+    if (this.blendAction && this.blendAction !== a) { this.blendAction.fadeOut(fade); this.blendAction = null; }
     if (this.currentName === name && !restart && this.mirrored === mirror) { a.timeScale = rate; return; }
     a.reset();
     a.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
@@ -129,6 +130,25 @@ export class Player {
     this.currentName = name;
     this.mirrored = mirror;
     this.model.scale.x = mirror ? -this.scale : this.scale; // mirrored clips: like m_bMirror in the original
+    this.lastRoot = null;
+  }
+
+  // Two clips at once with weights 1 − w and w (the keeper's blended saves, GoalieSave GetClosestBlendedPos):
+  // each starts at its own time and rate so that both contacts fall together.
+  playBlend(nameA, nameB, w, { mirror = false, startA = 0, startB = 0, rateA = 1, rateB = 1, fade = 0.05 } = {}) {
+    const a = this.action(nameA);
+    if (!a) return;
+    const b = nameB && w > 0.001 ? this.action(nameB) : null;
+    for (const act of Object.values(this.actions)) if (act !== a && act !== b && act.isRunning()) act.fadeOut(fade);
+    const go = (x, t0, r, wt) => {
+      x.reset(); x.setLoop(THREE.LoopOnce, 1); x.clampWhenFinished = true; x.timeScale = r; x.time = t0; x.enabled = true;
+      x.setEffectiveWeight(wt); x.fadeIn(fade); x.play();
+    };
+    go(a, startA, rateA, b ? 1 - w : 1);
+    if (b) go(b, startB, rateB, w);
+    this.current = a; this.currentName = nameA; this.blendAction = b;
+    this.mirrored = mirror;
+    this.model.scale.x = mirror ? -this.scale : this.scale;
     this.lastRoot = null;
   }
 
