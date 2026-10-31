@@ -37,6 +37,7 @@ if (web) {
   // the host serves no .glb, so each model goes as gzip + base64 text (smaller than the raw .glb)
   const webRoster = { ...roster, characters: chars.map((c) => ({ ...c, glb: c.glb + '.gz.txt' })) };
   fs.writeFileSync(path.join(out, 'assets', 'roster.json'), JSON.stringify(webRoster));
+  fs.copyFileSync(path.join(assets, 'walkout.json'), path.join(out, 'assets', 'walkout.json'));
   for (const c of chars) {
     fs.writeFileSync(path.join(out, 'assets', c.glb + '.gz.txt'), zlib.gzipSync(fs.readFileSync(path.join(assets, c.glb)), { level: 9 }).toString('base64'));
     fs.copyFileSync(path.join(assets, c.clips), path.join(out, 'assets', c.clips));
@@ -55,6 +56,7 @@ const html = `<!doctype html>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:#1d2738}</style>
 </head><body>
 <script type="application/json" id="asset-roster">${JSON.stringify(roster)}</script>
+<script type="application/json" id="asset-walkout">${fs.readFileSync(path.join(assets, 'walkout.json'), 'utf8')}</script>
 ${embeds}
 <script>${js}</script>
 </body></html>

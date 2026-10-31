@@ -12,6 +12,7 @@ Fatto:
 - Portiere che para come l'originale: conta il tempo del tuffo, non il caso
 - Partita a due giocatori (uno contro uno o insieme contro la CPU), difficoltà della CPU
 - Link online privato, aggiornato a ogni modifica
+- Statistiche per giocatore dalle carte di Ultimate Team (`src/stats.js`)
 
 Prossimo:
 - Pallone oltre il limite di 50 m/s in alcuni tiri
@@ -91,8 +92,10 @@ Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; d
 |---|---|
 | `src/config.js` | Tutte le costanti: campo, pallone, giocatori, portiere, tiro, contrasti, partita. `SIZE` ingrandisce i corpi rispetto all'originale |
 | `src/main.js` | Caricamento di roster e personaggi (in parallelo, con barra e messaggio d'errore), avvio delle partite, visualizzatore delle animazioni |
+| `src/stats.js` | Valori di gioco per giocatore dalle statistiche delle carte di Ultimate Team: a 75 coincidono con `config.js`; senza carta (Gioco rapido, Coppe) valgono gli originali |
+| `src/ut/` | Ultimate Team: `cards.js` catalogo delle carte, `club.js` regole del club (pacchetti, rosa, mercato, Divisioni, album), `walkout3d.js` palco 3D del walkout. Regole in `ultimate-team/DESIGN.md` |
 | `src/cups/` | Coppe: `cups.js` (4 coppe, squadre CPU rimescolate, tabellone, simulazione, voto D–Z), `objectives.js` (obiettivi delle stelle e `Tracker` che li segue dagli eventi della partita) |
-| `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `cupsMenu.js` schermate delle Coppe, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser |
+| `src/ui/` | Interfaccia (decisa in `interfaccia-gioco/DESIGN.md`): `menu.js` schermate, `cupsMenu.js` schermate delle Coppe, `nav.js` navigazione LB/RB per tastiera e controller, `theme.js` stile M1, `i18n.js` testi italiano e inglese, `save.js` profili nel browser; `utMenu.js`, `utCards.js`, `i18n_ut.js` schermate, carte e testi di Ultimate Team |
 | `src/game.js` | La partita: passo fisso a 50 Hz, uno o più umani (`controllers`, `setHumans`), difficoltà della CPU (`cpuLevel`), azioni (passaggio, tiro, pallonetto, finta, scivolata, spallata), portiere, gol, telecamera |
 | `src/player.js` | Il giocatore: movimento, scelta e velocità delle animazioni, root motion, disegno interpolato tra due passi di fisica |
 | `src/ball.js` | Fisica del pallone, effetto Magnus, urti con pali e barriere, gol |
@@ -101,9 +104,11 @@ Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; d
 | `src/hud.js` | Punteggio, tempo, barra del tiro, scritte |
 | `src/field.js`, `src/stadium.js` | Campo, porte e stadio (disegno originale) |
 | `assets/roster.json` | Personaggi disponibili e formazione delle due squadre (posti 0–3 giocatori, posto 4 portiere) |
-| `assets/characters/` | Personaggi pronti per il gioco, scritti da `animation/add_characters.py` |
+| `assets/characters/` | Personaggi pronti per il gioco, scritti da `animation/add_characters.py` (183 animazioni di gioco + 3 del walkout) |
+| `assets/walkout.json` | Percorsi e direzioni delle clip del walkout, da `animation/nis.py` |
 | `tools/build.mjs` | Crea `dist/gioco.html` con tutto dentro |
 | `tools/playtest.cjs` | Prova automatica: 150 s di partita CPU contro CPU |
+| `tools/uttest.cjs` | Prova automatica di Ultimate Team nel menu: club, pacchetti e walkout, teca, mercato, partita di Divisioni con le carte, album |
 | `dev/` | Pagine di sviluppo: `index.html` (gioco senza build); `sheet.html?char=<id>&clips=a,b,c` (fotogrammi del personaggio accanto allo scheletro originale, da `sticks.json`); `posecheck.html` (controllo di una posa) |
 
 Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma disegna corpi e pallone a metà strada tra gli ultimi due passi (`Player.render`, `Ball.updateMesh`): senza questo, su schermi a 60 o 120 Hz il movimento scattava e sembrava sfocato.
@@ -121,11 +126,11 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 
 ## Non ancora presente
 
-Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici), Ultimate Team (nel menu c'è già, segnato "in costruzione").
+Power-up, Super Strike, falli e rigori, scelta dei personaggi, suoni veri (solo segnali sintetici).
 
 ## Sviluppo e prove
 
-Per sviluppare senza ricompilare, servi questa cartella con un server statico e apri `dev/index.html`:
+Per sviluppare senza ricompilare, servi la **cartella principale del progetto** (il gioco legge anche `ultimate-team/data/`) con un server statico e apri `http://localhost:8000/game/dev/index.html`:
 
 ```bash
 python3 -m http.server 8000
@@ -137,11 +142,15 @@ Prova automatica dopo ogni modifica (richiede Playwright):
 node tools/build.mjs && node tools/playtest.cjs
 ```
 
-Esce con errore se la pagina dà errori o se una posizione diventa NaN.
+Esce con errore se la pagina dà errori o se una posizione diventa NaN. Se la modifica tocca Ultimate Team, il menu o le statistiche:
+
+```bash
+node tools/uttest.cjs
+```
 
 Per aggiungere personaggi vedi [`characters/README.md`](../characters/README.md).
 
 ## Problemi noti
 
 - Il pallone può superare i 50 m/s del limite originale (fino a circa 69 m/s in una partita CPU): il taglio della velocità non copre tutti i casi.
-- Il file `gioco.html` pesa circa 89 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.
+- Il file `gioco.html` pesa circa 91 MB con 10 personaggi (circa 9 MB l'uno). Si apre in qualche secondo; se diventa un problema si possono comprimere mesh e animazioni.

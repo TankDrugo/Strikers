@@ -37,13 +37,13 @@ export class Game {
     this.players = [];
     for (let team = 0; team < 2; team++) {
       for (let i = 0; i < 4; i++) {
-        const p = new Player(this, template.forSlot(team, i), team, 'fielder', i);
+        const p = new Player(this, template.forSlot(team, i), team, 'fielder', i, template.statsFor ? template.statsFor(team, i) : null);
         const [hx, hz] = HOMES[i];
         p.home.set(team === 0 ? hx : -hx, 0, team === 0 ? hz : -hz);
         p.tackleCooldown = 0;
         this.players.push(p);
       }
-      const g = new Player(this, template.forSlot(team, 4), team, 'goalie', 4);
+      const g = new Player(this, template.forSlot(team, 4), team, 'goalie', 4, template.statsFor ? template.statsFor(team, 4) : null);
       g.home.set((team === 0 ? -1 : 1) * (FIELD.halfLength - 1.2), 0, 0);
       g.tackleCooldown = 0;
       this.players.push(g);
@@ -204,7 +204,7 @@ export class Game {
     const b = this.ball;
     const dx = target.pos.x - p.pos.x, dz = target.pos.z - p.pos.z, d = Math.hypot(dx, dz);
     const f = Math.max(0, Math.min(1, (d - PASS.minDist) / (PASS.maxDist - PASS.minDist)));
-    const range = p.isGoalie ? GOALIE.pass : lob ? FIELDER.passVolley : FIELDER.passGround;
+    const range = p.isGoalie ? p.cfg.pass : lob ? p.cfg.passVolley : p.cfg.passGround;
     const speed = range[0] + (range[1] - range[0]) * f;
     let t = lob ? Math.max(0.6, d / speed * 1.6) : Math.max(0.15, d / speed);
     // lead the receiver
@@ -214,6 +214,7 @@ export class Game {
     const from = b.pos.clone();
     const to = new THREE.Vector3(tx, lob ? 0.9 : R, tz);
     let vel = shootAtFast(from, to, t);
+    if (p.cfg.passError) vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() * 2 - 1) * p.cfg.passError); // card passing stat
     if (!lob) { vel.y = Math.min(vel.y, 1.2); }
     p.facing = Math.atan2(tz - p.pos.z, tx - p.pos.x);
     p.setState('pass', { vel, lob, target });
@@ -239,7 +240,7 @@ export class Game {
 
   releaseShot(p) {
     const charge = Math.min(1, p.stateTime / SHOT.windupSeconds);
-    const perfect = charge >= 1 - SHOT.perfectWindow && p.stateTime <= SHOT.windupSeconds + 0.12;
+    const perfect = charge >= 1 - SHOT.perfectWindow * (p.cfg.perfectWindow ?? 1) && p.stateTime <= SHOT.windupSeconds + 0.12;
     p.setState('kick', { charge, perfect });
     const clip = perfect ? 'windup_powershot' : 'windup_kick';
     p.play(clip, { fade: 0.04, rate: perfect ? 1.35 : 1.25 });
@@ -258,16 +259,16 @@ export class Game {
     if (p.stateData.aimZ !== null && p.stateData.aimZ !== undefined && Math.abs(p.stateData.aimZ) > 0.2) side = Math.sign(p.stateData.aimZ);
     else side = gk.pos.z > 0 ? -1 : 1;
     const dist = Math.hypot(goalX - b.pos.x, b.pos.z);
-    const target = new THREE.Vector3(goalX, 0, side * w + (Math.random() * 2 - 1) * SHOT.widthVariance * 2 * w);
+    const target = new THREE.Vector3(goalX, 0, side * w + (Math.random() * 2 - 1) * SHOT.widthVariance * (p.cfg.shotSpread ?? 1) * 2 * w);
     target.y = dist > SHOT.highShotDistance ? FIELD.goalHeight - 0.4 : 0.35 + Math.random() * 1.3;
     target.y += (Math.random() * 2 - 1) * SHOT.heightVariance * FIELD.goalHeight;
     const power = perfect ? 1 : 0.15 + 0.85 * charge;
-    const speed = FIELDER.shot[0] + (FIELDER.shot[1] - FIELDER.shot[0]) * power;
+    const speed = p.cfg.shot[0] + (p.cfg.shot[1] - p.cfg.shot[0]) * power;
     const from = b.pos.clone();
     const flight = Math.max(0.25, from.distanceTo(target) / speed);
     let vel = shootAtFast(from, target, flight);
     // weak shots are less accurate
-    const err = (1 - power) * 0.12;
+    const err = (1 - power) * 0.12 * (p.cfg.shotSpread ?? 1);
     vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() * 2 - 1) * err);
     let spin = new THREE.Vector3();
     if (perfect) {
@@ -294,7 +295,7 @@ export class Game {
   startSlide(p) {
     p.setState('slide', { hit: false });
     p.play('slide_tackle_1200', { fade: 0.05 });
-    p.speed = Math.max(p.speed, TACKLE.slideSpeed);
+    p.speed = Math.max(p.speed, TACKLE.slideSpeed * (p.cfg.slideSpeed ?? 1));
     p.tackleCooldown = 1.2;
     this.stats.tackles[p.team]++;
   }
@@ -314,6 +315,11 @@ export class Game {
   knockDown(victim, attacker, kind) {
     if (victim.state === 'react' || victim.isGoalie) return;
     const b = this.ball;
+    if (kind === 'hit' && b.owner === victim) {
+      // card tackling stat: a stronger ball carrier can shrug off a weaker player's shoulder charge
+      const edge = ((victim.cfg.strength ?? 75) - (attacker.cfg.strength ?? 75)) / 60;
+      if (edge > 0 && Math.random() < Math.min(0.5, edge)) { this.hud.sfx('hit'); return; }
+    }
     if (b.owner === victim && attacker.team !== victim.team) this.emit('steal', { team: attacker.team });
     if (b.owner === victim) {
       const dir = Math.atan2(victim.pos.z - attacker.pos.z, victim.pos.x - attacker.pos.x) + (Math.random() - 0.5);
@@ -329,7 +335,7 @@ export class Game {
     const base = kind === 'slide' ? 'slide_tackle_react_' : 'hit_react_';
     const name = kind === 'slide' ? base + dirName : base + dirName;
     victim.setState('react', {});
-    victim.stun = kind === 'slide' ? TACKLE.stunSlide : TACKLE.stunHit;
+    victim.stun = (kind === 'slide' ? TACKLE.stunSlide : TACKLE.stunHit) * (victim.cfg.stunTime ?? 1);
     victim.speed = 0;
     victim.play(this.template.clips[name] ? name : base + '1200', { fade: 0.05, mirror });
     this.hud.sfx('hit');
@@ -341,12 +347,12 @@ export class Game {
     const p = c.player, inp = c.input;
     const mag = Math.hypot(inp.x, inp.z);
     if (p.state === 'free') {
-      if (mag > 0.15) { p.desiredDir = Math.atan2(inp.z, inp.x); p.desiredSpeed = p.hasBall() ? FIELDER.runWithBall : FIELDER.run; }
+      if (mag > 0.15) { p.desiredDir = Math.atan2(inp.z, inp.x); p.desiredSpeed = p.hasBall() ? p.cfg.runWithBall : p.cfg.run; }
       else p.desiredSpeed = 0;
       p.turbo = inp.turbo && mag > 0.15;
       if (p.turbo && !c.turboOn) this.emit('turbo', { team: c.team });
       c.turboOn = p.turbo;
-      if (p.turbo) p.desiredSpeed = p.hasBall() ? FIELDER.turboWithBall[0] : FIELDER.turbo;
+      if (p.turbo) p.desiredSpeed = p.hasBall() ? p.cfg.turboWithBall[0] : p.cfg.turbo;
       // keyboard keys change meaning with the ball; controller buttons follow the chosen layout
       const a = inp.actions;
       const aim = mag > 0.15 ? p.desiredDir : p.facing;
@@ -453,7 +459,7 @@ export class Game {
           p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
           if (!p.stateData.done) for (const o of this.players) {
             if (o.team === p.team || o.isGoalie || o.state === 'react') continue;
-            if (Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < TACKLE.hitRange * 0.75) { this.knockDown(o, p, 'hit'); p.stateData.done = true; }
+            if (Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < TACKLE.hitRange * 0.75 * (p.cfg.tackleReach ?? 1)) { this.knockDown(o, p, 'hit'); p.stateData.done = true; }
           }
         } else p.speed = Math.max(0, p.speed - 25 * dt);
         if (p.stateTime > 0.75) p.setState('free');
@@ -461,7 +467,7 @@ export class Game {
       }
       case 'deke':
         p.applyRootMotion();
-        if (p.stateTime > 0.55) { p.setState('free'); p.speed = FIELDER.runWithBall * 0.7; }
+        if (p.stateTime > 0.55) { p.setState('free'); p.speed = p.cfg.runWithBall * 0.7; }
         break;
       case 'react':
         p.applyRootMotion();
@@ -502,14 +508,14 @@ export class Game {
     // loose ball in the box: go and collect it
     if (!b.owner && inBox(b.pos) && b.vel.length() < 9 && b.pos.y < 1.5) {
       const meet = this.ballMeetPoint(g);
-      this.goalieMove(g, meet.x, meet.z, GOALIE.run);
+      this.goalieMove(g, meet.x, meet.z, g.cfg.run);
       return;
     }
     // positioning: on the line between ball and goal centre
     const bx = b.pos.x - gx, bz = b.pos.z, d = Math.hypot(bx, bz);
     const off = Math.min(2.6, 0.8 + d * 0.06);
     const tx = gx + (bx / (d || 1)) * off, tz = Math.max(-FIELD.goalHalfWidth + 0.35, Math.min(FIELD.goalHalfWidth - 0.35, (bz / (d || 1)) * off * 1.4));
-    this.goalieMove(g, tx, tz, d < 18 ? GOALIE.run : GOALIE.jog);
+    this.goalieMove(g, tx, tz, d < 18 ? g.cfg.run : g.cfg.jog);
   }
 
   goalieMove(g, x, z, speed) {
@@ -518,7 +524,7 @@ export class Game {
     if (dd < 0.15) { g.desiredSpeed = 0; g.facing += angleDiff(g.facing, faceBall) * 0.15; g.speed = 0; g.locomotionAnim(); return; }
     // short moves sideways keep facing the ball (strafe), long ones run
     if (dd < 2.5) {
-      const step = Math.min(dd, GOALIE.run * 0.75 * (1 / 50));
+      const step = Math.min(dd, g.cfg.run * 0.75 * (1 / 50));
       g.pos.x += (dx / dd) * step * 1; g.pos.z += (dz / dd) * step * 1;
       g.facing += angleDiff(g.facing, faceBall) * 0.2;
       g.speed = 0;
@@ -542,14 +548,14 @@ export class Game {
     const time = Math.max(0.05, cross.t);
     // like the original: saved if the dive gets there in time (reaction + travel), and the ball is within reach.
     // High balls far from the body take a little longer. CPU level only changes the keeper's reaction.
-    const react = GOALIE.saveReact * (this.isCpuTeam(g.team) ? this.cpuTune([1.4, 1, 0.85, 0.75]) : 1);
+    const react = g.cfg.saveReact * (this.isCpuTeam(g.team) ? this.cpuTune([1.4, 1, 0.85, 0.75]) : 1);
     const high = cross.p.y > 1.35 * SIZE && reach > GOALIE.standReach;
     // a perfect shot curves: the keeper reads it late (our choice, so the perfect shot stays the best weapon)
-    const needed = react + (b.shotPerfect ? GOALIE.perfectReadDelay : 0) + Math.max(0, reach - GOALIE.standReach) / GOALIE.diveSpeed + (high ? 0.08 : 0);
-    const success = time >= needed && reach <= GOALIE.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
+    const needed = react + (b.shotPerfect ? GOALIE.perfectReadDelay : 0) + Math.max(0, reach - GOALIE.standReach) / g.cfg.diveSpeed + (high ? 0.08 : 0);
+    const success = time >= needed && reach <= g.cfg.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
     const height = cross.p.y < 0.55 * SIZE ? 'low' : cross.p.y < 1.35 * SIZE ? 'med' : 'high';
     let clip;
-    const catchIt = power < GOALIE.catchMaxShotPower + 0.25 && !b.shotPerfect && Math.random() < 0.65;
+    const catchIt = power < GOALIE.catchMaxShotPower + 0.25 && !b.shotPerfect && Math.random() < (g.cfg.catchChance ?? 0.65);
     if (reach < 0.6 * SIZE) clip = catchIt ? 'gk_catch_' + height : 'gk_stand_defl_center_parry_' + height;
     else if (reach < 1.4 * SIZE) clip = catchIt ? 'gk_dive_catch_near_right_' + height : 'gk_dvng_defl_parry_near_right_' + height;
     else clip = catchIt ? 'gk_dive_catch_far_right_' + height : 'gk_dvng_defl_parry_far_right_' + height;
@@ -607,7 +613,7 @@ export class Game {
         const t = g.stateData.target;
         const ang = (GOALIE.kickAngle[0] + Math.random() * (GOALIE.kickAngle[1] - GOALIE.kickAngle[0])) * Math.PI / 180;
         const dist = Math.hypot(t.pos.x - g.pos.x, t.pos.z - g.pos.z);
-        const sp = Math.min(GOALIE.kick[1], Math.max(GOALIE.kick[0], Math.sqrt(dist * 14 / Math.sin(2 * ang)) * 0.9));
+        const sp = Math.min(g.cfg.kick[1], Math.max(g.cfg.kick[0], Math.sqrt(dist * 14 / Math.sin(2 * ang)) * 0.9));
         const dir = Math.atan2(t.pos.z - g.pos.z, t.pos.x - g.pos.x);
         b.kick(new THREE.Vector3(Math.cos(dir) * Math.cos(ang) * sp, Math.sin(ang) * sp * 0.6, Math.sin(dir) * Math.cos(ang) * sp), null, { passTarget: t, noPickup: 0.4 });
         b.pos.y = 0.6;

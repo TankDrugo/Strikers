@@ -164,5 +164,39 @@
     },
     "ovrPriceFactorPerPoint": 0.08,
     "cpuBuyerShare": 0.35
-  }
+  },
+  "start": {
+    "_doc": "A new club: credits and the five base cards of the starter squad (same level as tools/economy_sim.py: about 66).",
+    "credits": 2000,
+    "squad": [
+      "rivali_difensore",
+      "rivali_centrocampista",
+      "rivali_ala",
+      "celestini_difensore",
+      "rivali_portiere"
+    ],
+    "benchSize": 3
+  },
+  "album": {
+    "_doc": "Credits for completing a character page (every non-numbered version found) and the whole album.",
+    "page": 2000,
+    "all": 25000
+  },
+  "dailyList": [
+    {
+      "id": "play2",
+      "what": "played",
+      "n": 2
+    },
+    {
+      "id": "win1",
+      "what": "won",
+      "n": 1
+    },
+    {
+      "id": "goals4",
+      "what": "goals",
+      "n": 4
+    }
+  ]
 }

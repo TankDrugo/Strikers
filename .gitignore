@@ -15,11 +15,11 @@ disc/
 *.shier
 *.trg
 *.cph
+*.nis
 main.dol
 strikers_dati.zip
 nis/
 nis_dict.txt
-*.nis
 
 # local test output
 *.blend

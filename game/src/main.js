@@ -9,6 +9,9 @@ import { save } from './ui/save.js';
 import { Tracker } from './cups/objectives.js';
 import { MATCH, FIELDER, GOALIE, RIG_HEIGHT, TEAM_DEFAULTS } from './config.js';
 import { Player } from './player.js';
+import { WalkoutStage } from './ut/walkout3d.js';
+import * as UTC from './ut/club.js';
+import * as UTCARDS from './ut/cards.js';
 
 // assets/roster.json lists the characters (one retargeted .glb + clip facts each) and the 5 per team
 // (slots 0-3 fielders, slot 4 goalie). The built game embeds them; the dev page fetches them.
@@ -51,14 +54,52 @@ async function loadAssets(onProgress = () => {}) {
     for (const a of gltf.animations) clips[a.name] = a;
     let material = null;
     gltf.scene.traverse((o) => { if (o.isMesh && !material) material = o.material; });
-    byId[ch.id] = { id: ch.id, name: ch.name, scene: gltf.scene, clips, meta: meta.clips, height: meta.model_height,
+    byId[ch.id] = { id: ch.id, name: ch.name, scene: gltf.scene, clips, meta: meta.clips, height: meta.model_height, nisScale: meta.nis_scale,
       teamMaterials: ch.recolor ? teamMaterials(material) : null };
     onProgress(++done, roster.characters.length);
   }));
   const first = byId[roster.characters[0].id];
   // the default template doubles as the shared one (clip facts are the same for every character)
   const teams = TEAM_DEFAULTS.map((d, i) => ({ ...d, ...(roster.teamInfo || [])[i] }));
-  return { ...first, roster, byId, teams, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
+  // Ultimate Team pack walkout clips (animation/nis.py)
+  const wTag = document.getElementById('asset-walkout');
+  let walkout = null;
+  try { walkout = wTag ? JSON.parse(wTag.textContent) : await (await fetchOk(ASSETS + 'walkout.json')).json(); } catch { walkout = null; }
+  return { ...first, roster, byId, teams, walkout, forSlot: (team, slot) => byId[roster.teams[team][slot]] || first };
+}
+
+// Card art for Ultimate Team: each character rendered once in its idle pose, transparent background.
+function makePortraits(renderer, template) {
+  const cache = {};
+  return (charId, gk) => {
+    const key = charId + (gk ? ':gk' : '');
+    if (cache[key] !== undefined) return cache[key];
+    const tpl = template.byId[charId];
+    if (!tpl) return (cache[key] = null);
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 2.4));
+    const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(1, 2, 3); scene.add(d);
+    const p = new Player({ scene, teams: [{ color: '#fff' }] }, tpl, 0, gk ? 'goalie' : 'fielder', 0);
+    p.ring.visible = false; p.shadow.visible = false;
+    p.play(gk ? 'gk_ready_idle' : 'idle', { loop: true, fade: 0 });
+    p.mixer.update(0.3);
+    p.root.rotation.y = 0.35;
+    const h = p.cfg.height;
+    const cam = new THREE.PerspectiveCamera(26, 168 / 160, 0.05, 20);
+    cam.position.set(0, h * 0.78, h * 1.7); cam.lookAt(0, h * 0.6, 0);
+    const W = 168, H = 160;
+    const rt = new THREE.WebGLRenderTarget(W, H, { colorSpace: THREE.SRGBColorSpace });
+    const prev = renderer.getRenderTarget(), prevColor = renderer.getClearColor(new THREE.Color()), prevAlpha = renderer.getClearAlpha();
+    renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, cam);
+    const px = new Uint8Array(W * H * 4);
+    renderer.readRenderTargetPixels(rt, 0, 0, W, H, px);
+    renderer.setRenderTarget(prev); renderer.setClearColor(prevColor, prevAlpha); rt.dispose();
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d'), img = g.createImageData(W, H);
+    for (let y = 0; y < H; y++) img.data.set(px.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4);
+    g.putImageData(img, 0, 0);
+    return (cache[key] = c.toDataURL());
+  };
 }
 
 // Team 0 keeps the model's yellow shirt; team 1 gets it recoloured red (only strongly yellow pixels change).
@@ -120,8 +161,12 @@ async function boot() {
   menu.roster = template.roster;
 
   // cups: the same characters under other team names, colours and line-ups
+  // Ultimate Team: line-ups also carry the card stats of every slot (game/src/stats.js)
   const withLineups = (lineups) => ({ ...template, teams: lineups.map((l) => ({ name: l.name, color: l.color })),
-    forSlot: (team, slot) => template.byId[lineups[team].slots[slot]] || template.forSlot(team, slot) });
+    forSlot: (team, slot) => template.byId[lineups[team].slots[slot]] || template.forSlot(team, slot),
+    statsFor: (team, slot) => lineups[team].stats?.[slot] || null });
+  menu.portrait = makePortraits(renderer, template);
+  menu.walkout = template.walkout ? new WalkoutStage(renderer, template, template.walkout) : null;
 
   const hud = new Hud();
   hud.onSfx = makeAudio();
@@ -131,6 +176,7 @@ async function boot() {
   const resize = () => {
     renderer.setSize(innerWidth, innerHeight);
     const cam = game ? game.camera : viewer?.camera;
+    if (menu.walkout) menu.walkout.resize();
     if (cam) { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); }
   };
   addEventListener('resize', resize);
@@ -216,7 +262,7 @@ async function boot() {
 
   menu.onStart = startMatch;
   menu.onViewer = openViewer;
-  window.__proto = { get game() { return game; }, startMatch, openViewer, showMenu, template, menu };
+  window.__proto = { get game() { return game; }, startMatch, openViewer, showMenu, template, menu, ut: { club: UTC, cards: UTCARDS } };
 
   const padMenus = new PadMenus();
   const helpEl = hud.el.querySelector('#help');
@@ -230,7 +276,10 @@ async function boot() {
       if (!menu.active) padMenus.poll(dt, { onViewer: (c) => viewer.pad(c) });
       viewer.update(dt); renderer.render(viewer.scene, viewer.camera); return;
     }
-    if (!game) { renderer.clear(); return; }
+    if (!game) {
+      if (menu.walkout && menu.walkout.active) { menu.walkout.update(dt); menu.walkout.render(); } else renderer.clear();
+      return;
+    }
     if (input && mode === 'game') {
       input.suspended = paused || menu.active;
       input.poll();

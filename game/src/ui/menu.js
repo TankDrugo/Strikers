@@ -7,6 +7,9 @@ import { t, setLang, getLang } from './i18n.js';
 import { save, PROFILE_COLORS } from './save.js';
 import { readPads } from '../input.js';
 import { installCups } from './cupsMenu.js';
+import { installUt } from './utMenu.js';
+import { CARD, RANK } from '../ut/cards.js';
+import { clubOf, squadRating, divName } from '../ut/club.js';
 import { cupById, roundKey } from '../cups/cups.js';
 
 const MAIN = ['home', 'quick', 'cups', 'ut', 'opts'];
@@ -263,10 +266,13 @@ export class Menu {
       case 'ut':
         return `<div class="view" style="grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr">
           ${tile('enter-ut', t('tab.ut'), t('ut.intro'), `<span class="hint"><span class="btnA">A</span>${t('foot.enter')}</span>`, 'grid-row:span 2;background:linear-gradient(135deg,#2a1260,#6a2fd8);color:#fff', '')}
-          <div class="tile locked"><h3>${t('sub.divisions')}</h3><p>${t('ut.divisions')}</p></div>
-          <div class="tile locked"><h3>${t('sub.album')}</h3><p>${t('ut.album')}</p></div></div>`;
+          ${(() => { const c = clubOf(p); if (!c.started) return `<div class="tile locked"><h3>${t('sub.divisions')}</h3><p>${t('ut.divisions')}</p></div><div class="tile locked"><h3>${t('sub.album')}</h3><p>${t('ut.album')}</p></div>`;
+            const best = c.cards.map((i) => ({ i, c: CARD[i.id] })).sort((a, b) => RANK[b.c.rarity] - RANK[a.c.rarity] || b.c.ovr - a.c.ovr)[0];
+            return `<div class="tile locked"><h3>${t('ut.div.name', { n: divName(c.division.div) })}</h3><p>${t('ut.squad.rating')} <b>${squadRating(c)}</b> · ${t('ut.div.points', { n: c.division.pts })}</p></div>
+              <div class="tile locked" style="flex-direction:row;align-items:center;gap:.8em">${best ? `<div style="width:4.2em;flex:none">${this.utCard(best.c, { serial: best.i.serial })}</div>` : ''}<div><h3>${t('ut.club.best')}</h3><p>${t('ut.club.collectionText', { n: c.cards.length, a: Object.keys(c.album).length, b: Object.keys(CARD).length })}</p></div></div>`; })()}
+        </div>`;
       case 'club': case 'squad': case 'market': case 'divisions': case 'album':
-        return `<div class="view" style="grid-template-columns:1fr">${soon(t(SUB_KEY[id]), t('ut.' + id))}</div>`;
+        return this.utView(id);
       case 'opts':
         return `<div class="view" style="grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr">
           ${tile('o-lang', t('opts.lang'), getLang() === 'it' ? 'Italiano' : 'English')}
@@ -306,7 +312,7 @@ export class Menu {
 
   enterMode(m) {
     this.sfx('enter');
-    this.transition(this.modeName(m), () => { this.state.mode = m; this.state.sub = 0; this.renderHub(false); });
+    this.transition(this.modeName(m), () => { this.state.mode = m; this.state.sub = 0; this.renderHub(false); if (m === 'ut') this.utEnter(); });
   }
 
   hubBack() {
@@ -316,6 +322,7 @@ export class Menu {
   }
 
   hubAct(a, b) {
+    if (a.startsWith('ut-') && this.utAct(a, b)) return;
     const go = (kind) => { this.setup.kind = kind; this.showSetup(); };
     switch (a) {
       case 'playNow': this.launch({ ...this.setup, kind: 'cpu' }); break;
@@ -500,3 +507,4 @@ export class Menu {
 }
 
 installCups(Menu);
+installUt(Menu);

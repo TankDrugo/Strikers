@@ -25,8 +25,8 @@ Prossimo:
 | **Animazioni** (Clip originali decodificate, retarget sugli scheletri Mixamo, controlli automatici) | [`animation/`](animation/README.md) | funziona |
 | **Personaggi** (Modelli dei giocatori, roster e formazioni delle due squadre) | [`characters/`](characters/README.md) | completo |
 | **Gioco** (Partita 5 contro 5: campo, stadio, pallone, giocatori, IA, comandi) | [`game/`](game/README.md) | funziona |
-| **Interfaccia gioco** (Menu stile FC, profili, lingua, Gioco rapido, Coppe, pausa e fine partita) | [`interfaccia-gioco/`](interfaccia-gioco/README.md) | funziona |
-| **Ultimate Team** (Collezione di personaggi, carte e squadre) | [`ultimate-team/`](ultimate-team/README.md) | progettato |
+| **Interfaccia gioco** (Menu stile FC, profili, lingua, Gioco rapido, Coppe, Ultimate Team, pausa e fine partita) | [`interfaccia-gioco/`](interfaccia-gioco/README.md) | funziona |
+| **Ultimate Team** (Club, Rosa, Mercato, Divisioni e Album nel menu, pacchetti con walkout) | [`ultimate-team/`](ultimate-team/README.md) | funziona |
 <!-- aree:fine -->
 
 Il grafo del progetto è in [`graphify-out/`](graphify-out/): `graph.html` (grafo interattivo), `GRAPH_REPORT.md` (sintesi), `graph.json` (dati). La mappa navigabile è [`docs/mappa.html`](docs/mappa.html). Come aggiornarli: [`docs/grafo.md`](docs/grafo.md).

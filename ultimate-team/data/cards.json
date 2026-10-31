@@ -1,0 +1,132 @@
+{
+ "_doc": "Ultimate Team cards: one base card per character, its tier comes from the overall (bronze <65, silver 65-74, gold 75+). Variants (gold rare, holo, numbered, 1/1) add ovrBonus from economy.json to every stat. Overall = weighted stats (weights per role). At 75 a stat plays like the original game (game/src/stats.js). Edit the stats here; the overall follows.",
+ "tiers": {
+  "bronze": 0,
+  "silver": 65,
+  "gold": 75
+ },
+ "weights": {
+  "DIF": {
+   "con": 0.45,
+   "vel": 0.2,
+   "pas": 0.25,
+   "tir": 0.1
+  },
+  "CEN": {
+   "pas": 0.4,
+   "vel": 0.2,
+   "tir": 0.2,
+   "con": 0.2
+  },
+  "ALA": {
+   "vel": 0.4,
+   "pas": 0.25,
+   "tir": 0.25,
+   "con": 0.1
+  },
+  "ATT": {
+   "tir": 0.45,
+   "vel": 0.3,
+   "pas": 0.15,
+   "con": 0.1
+  },
+  "POR": {
+   "par": 0.35,
+   "rif": 0.35,
+   "usc": 0.2,
+   "vel": 0.1
+  }
+ },
+ "characters": {
+  "celestini_portiere": {
+   "role": "POR",
+   "stats": {
+    "par": 80,
+    "rif": 81,
+    "usc": 75,
+    "vel": 72
+   }
+  },
+  "celestini_difensore": {
+   "role": "DIF",
+   "stats": {
+    "vel": 68,
+    "tir": 61,
+    "pas": 72,
+    "con": 76
+   }
+  },
+  "celestini_centrocampista": {
+   "role": "CEN",
+   "stats": {
+    "vel": 78,
+    "tir": 77,
+    "pas": 87,
+    "con": 73
+   }
+  },
+  "celestini_ala": {
+   "role": "ALA",
+   "stats": {
+    "vel": 82,
+    "tir": 74,
+    "pas": 78,
+    "con": 60
+   }
+  },
+  "celestini_attaccante": {
+   "role": "ATT",
+   "stats": {
+    "vel": 87,
+    "tir": 91,
+    "pas": 82,
+    "con": 68
+   }
+  },
+  "rivali_portiere": {
+   "role": "POR",
+   "stats": {
+    "par": 78,
+    "rif": 77,
+    "usc": 72,
+    "vel": 70
+   }
+  },
+  "rivali_difensore": {
+   "role": "DIF",
+   "stats": {
+    "vel": 60,
+    "tir": 51,
+    "pas": 59,
+    "con": 71
+   }
+  },
+  "rivali_centrocampista": {
+   "role": "CEN",
+   "stats": {
+    "vel": 67,
+    "tir": 64,
+    "pas": 71,
+    "con": 65
+   }
+  },
+  "rivali_ala": {
+   "role": "ALA",
+   "stats": {
+    "vel": 68,
+    "tir": 58,
+    "pas": 59,
+    "con": 49
+   }
+  },
+  "rivali_attaccante": {
+   "role": "ATT",
+   "stats": {
+    "vel": 87,
+    "tir": 89,
+    "pas": 77,
+    "con": 71
+   }
+  }
+ }
+}

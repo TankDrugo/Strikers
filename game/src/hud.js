@@ -103,7 +103,7 @@ export class Hud {
       this.meter.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth - 43}px`;
       this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 14}px`;
       this.meter.firstChild.style.width = `${f * 100}%`;
-      this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow ? '#7dffa8' : '';
+      this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow * (h.cfg.perfectWindow ?? 1) ? '#7dffa8' : '';
     } else this.meter.style.display = 'none';
   }
 }

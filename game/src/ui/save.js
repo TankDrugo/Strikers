@@ -46,6 +46,9 @@ export const save = {
     store();
   },
   byId(id) { return data.profiles.find((p) => p.id === id) || null; },
+  // Ultimate Team numbered cards and 1/1s are unique in the whole game: until the private server exists,
+  // "the whole game" is every profile in this browser, so the register sits next to the profiles.
+  registry() { return data.registry || (data.registry = { numbered: {}, oneOfOne: {} }); },
   store,
   // Cups: per profile and cup { normalWon, hardWon, stars: { normal: { round: best }, hard: {…} } }
   cupRecord(profileId, cupId) {

@@ -2,7 +2,7 @@
 
 ## Stato
 
-**funziona** · Menu stile FC, profili, lingua, Gioco rapido, Coppe, pausa e fine partita.
+**funziona** · Menu stile FC, profili, lingua, Gioco rapido, Coppe, Ultimate Team, pausa e fine partita.
 
 Fatto:
 - Menu stile FC: LB/RB tra le schede, Coppe e Ultimate Team come parti a sé con i loro colori
@@ -10,12 +10,12 @@ Fatto:
 - Gioco rapido: contro la CPU, contro un amico, in due contro la CPU
 - Coppe complete: 4 coppe, stelle, Difficile, voto da D a Z, bacheca, tornei fino a 4 giocatori
 - Bozze scelte: stile M1, holo, teca delle numerate, walkout P1
+- Ultimate Team: Club, Rosa, Mercato, Divisioni, Album e apertura P1 con walkout 3D
 
 Prossimo:
-- Schermate di Ultimate Team
 - Suoni veri (CC0)
 
-Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). Il codice sta in `game/src/ui/` e `game/src/cups/` (non in `interfaccia-gioco/src/`: il server di sviluppo serve solo `game/`).
+Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). Il codice sta in `game/src/ui/`, `game/src/cups/` e `game/src/ut/` (non in `interfaccia-gioco/src/`), così lo compila `game/tools/build.mjs`.
 
 ## Idea
 

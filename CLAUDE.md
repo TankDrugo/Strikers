@@ -12,7 +12,7 @@ Quando l'utente nomina un'area, leggi prima il README di quella cartella: dice c
 | "animazioni", "retarget", "clip", "pose" | `animation/` | `animation/README.md` |
 | "personaggi", "nuovo personaggio", "squadre", "roster" | `characters/` e `game/assets/roster.json` | `characters/README.md` |
 | "misure", "proporzioni", "com'era nell'originale", "Strikers" | `reference/` | `reference/STRIKERS_REFERENCE.md` |
-| "Ultimate Team", "carte", "collezione", "pacchetti" | `ultimate-team/` | `ultimate-team/README.md` |
+| "Ultimate Team", "carte", "collezione", "pacchetti", "walkout" | `ultimate-team/` | `ultimate-team/README.md` |
 | "interfaccia", "menu", "HUD", "schermate", "UI" | `interfaccia-gioco/` | `interfaccia-gioco/README.md` |
 | "grafo", "mappa", "graphify" | `graphify-out/`, `docs/` | `docs/grafo.md` |
 
@@ -30,7 +30,7 @@ graphify path "add_characters.py" "Player" --undirected
 
 - **Repository privato, uso personale.** Le animazioni derivano dal disco dell'utente. Mai rendere pubblico il repository. Il gioco compilato si pubblica **solo** sull'Artifact privato del gioco, https://claude.ai/artifact/Ru4U9NJSLMxgRX2bcmH9HH, mai su un link nuovo o pubblico.
 - **Dopo ogni modifica al gioco, aggiorna il link online:** `node game/tools/build.mjs --web`, poi pubblica `game/dist/web/index.html` con tutti i file di `game/dist/web/assets/` sull'Artifact qui sopra (parametro `url`). Dettagli in `game/README.md`, sezione Link online.
-- **Mai aggiungere file del disco** (`.sanim`, `.shier`, `.bin`, `.trg`, `main.dol`, `.iso`, `.zip` del disco). Sono in `.gitignore`. Le animazioni decodificate stanno già in `animation/data/strikers_source.npz`.
+- **Mai aggiungere file del disco** (`.sanim`, `.shier`, `.bin`, `.trg`, `.nis`, `main.dol`, `.iso`, `.zip` del disco). Sono in `.gitignore`. Le animazioni decodificate stanno già in `animation/data/strikers_source.npz` e `animation/data/strikers_nis.npz`.
 - **Nessun nome o marchio Nintendo** nel gioco (testi, stadio, interfaccia). I nomi originali compaiono solo in `reference/` e `animation/`, come fonte.
 - Le misure vengono da `reference/STRIKERS_REFERENCE.md`. Se cambi un valore rispetto all'originale, scrivilo nel commento accanto (esempio: `SIZE` e `BALL.radius` in `game/src/config.js`).
 - Dopo ogni modifica al gioco: `node game/tools/build.mjs` e una partita CPU contro CPU senza errori (vedi `game/README.md`, sezione Prove).
@@ -40,12 +40,13 @@ graphify path "add_characters.py" "Player" --undirected
 ## Stato al passaggio di consegne
 
 - Gioco: partita completa 5v5 giocabile con controller Xbox (stile EA FC) o tastiera. Stadio originale. Giocatori 1,3 volte più grandi dell'originale (`SIZE`), pallone più piccolo (raggio 0,13 m): scelta dell'utente.
-- Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`.
+- Animazioni: 183 clip (84 giocatore, 99 portiere) controllate tutte, a occhio e con `animation/audit.py`. Più 3 clip del walkout (corsa e 2 esultanze) dalle scene `.nis` (`animation/nis.py`).
 - Personaggi: completi. Due squadre da 5 ruoli (portiere, difensore, centrocampista, ala, attaccante): **Celestini** (maglia celeste) e **Rivali** (maglia verde), tutti con le 183 animazioni. Nomi e colori delle squadre (anelli, punteggio, tabellone, tifosi) vengono da `teamInfo` in `game/assets/roster.json`.
-- Il gioco compilato pesa circa 89 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
-- Interfaccia gioco: menu stile FC con LB/RB, lingua, profili, Gioco rapido anche in due, **Coppe complete** (stelle, Difficile, voto D–Z, tornei fino a 4). Decisioni in `interfaccia-gioco/DESIGN.md`, codice in `game/src/ui/` e `game/src/cups/`. Prossima tappa: Ultimate Team.
+- Il gioco compilato pesa circa 91 MB (10 personaggi da circa 9 MB l'uno, metà mesh e metà animazioni).
+- Interfaccia gioco: menu stile FC con LB/RB, lingua, profili, Gioco rapido anche in due, **Coppe complete** (stelle, Difficile, voto D–Z, tornei fino a 4) e **Ultimate Team**. Decisioni in `interfaccia-gioco/DESIGN.md`, codice in `game/src/ui/`, `game/src/cups/` e `game/src/ut/`.
 - Portiere: parata decisa dal tempo del tuffo come nell'originale (non a dado), tarata a circa un tiro su cinque.
-- Ultimate Team: regole ed economia decise (`ultimate-team/DESIGN.md`, `ECONOMIA.md`), codice non iniziato. Le esultanze del walkout aspettano i file `art/nis/` dal disco dell'utente.
+- Ultimate Team: giocabile nel menu (Club, Rosa, Mercato, Divisioni, Album, pacchetti con walkout P1). Le carte cambiano il gioco (`game/src/stats.js`, a 75 = originale). Regole ed economia in `ultimate-team/DESIGN.md`, `ECONOMIA.md`, numeri in `ultimate-team/data/`. Esultanze originali: 2 su 10, le altre aspettano altri file `goal_winner` dal disco.
+- Il gioco legge `ultimate-team/data/*.json`: la pagina di sviluppo si serve dalla cartella principale (`game/dev/index.html`).
 
 ## graphify
 

@@ -280,6 +280,9 @@ const STRINGS = {
 
 let lang = 'it';
 
+// More strings from other modules (Ultimate Team): addStrings('it', { key: 'text' }).
+export function addStrings(l, table) { Object.assign(STRINGS[l], table); }
+
 export function setLang(l) { lang = STRINGS[l] ? l : 'it'; document.documentElement.lang = lang; }
 export function getLang() { return lang; }
 

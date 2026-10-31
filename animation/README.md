@@ -10,10 +10,11 @@ Fatto:
 - 183 clip originali decodificate (84 giocatore, 99 portiere)
 - Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco
 - Tutte le clip controllate su tutti i 10 personaggi
+- Scene .nis decodificate: corsa del tunnel e 2 esultanze per il walkout di Ultimate Team
 
 Prossimo:
 - Comprimere le animazioni per alleggerire il gioco
-- Esultanze del walkout dai file art/nis/ del disco
+- Altre esultanze goal_winner dal disco (oggi 2 su 10)
 
 | File | Cosa fa |
 |---|---|
@@ -23,6 +24,8 @@ Prossimo:
 | `audit.py` | Controllo automatico di ogni clip, fotogramma per fotogramma: piedi nel terreno, personaggio sospeso, scatti delle articolazioni, direzione delle ossa, ginocchia |
 | `strikers_anim.py` | Decodifica dei formati originali (`.sanim`, `.shier`, `.bin`) e convertitore per Blender (sotto) |
 | `tests/` | Prove del convertitore su file sintetici |
+| `nis.py` | Decodifica delle scene d'intermezzo (`.nis`): clip dei personaggi e telecamere. Prepara le clip del walkout di Ultimate Team e `game/assets/walkout.json` |
+| `data/strikers_nis.npz` | Le scene `.nis` già decodificate. Sostituisce i file del disco |
 
 ## Retarget su un personaggio
 
@@ -127,3 +130,23 @@ python3 tests/test_converter.py
 ```
 
 Senza Blender verifica la decodifica e i BVH. Con un Python che ha il modulo `bpy` (`pip install bpy`) importa anche in Blender e confronta ogni osso, a ogni fotogramma, con la posa calcolata come in `cPoseAccumulator::BuildNodeMatrices`. Poi reimporta i BVH con l'importer di Blender e confronta di nuovo.
+
+## Scene d'intermezzo (`.nis`) e walkout
+
+Un file `.nis` contiene una clip per ogni personaggio in scena (stesso formato delle `.sanim`, con il root motion in coordinate dello stadio) e le telecamere (posizione, punto guardato e campo visivo per fotogramma, 30 al secondo). Lo scheletro non c'è: `nis.py` lo ricostruisce dalla disposizione Biped (38 nodi come Mario, 39 senza l'osso extra della testa e con due ossa di coda). Lo `Spine` è figlio di `Bip01`, non del bacino: verificato sulle clip di Mario (distanza tra ossa costante in ogni fotogramma).
+
+Il retarget (`retarget.py`, chiamato da `add_characters.py`) aggiunge a ogni personaggio 3 clip con la calibrazione dei giocatori di movimento: `nis_run` (il capitano che esce dal tunnel, da `camera_establish_home`), `nis_win_high` e `nis_win_low` (esultanze `birdo_goal_winner`). Le camminate dei compagni di `camera_establish_home` non si usano: sono di corpi molto più piccoli e sui nostri modelli le braccia restano aperte. Le clip restano sul posto; percorso sul terreno e direzione per fotogramma stanno in `game/assets/walkout.json`. Le telecamere originali non si usano: nel walkout la telecamera è la nostra (decisione in `ultimate-team/DESIGN.md`).
+
+Rifare pacchetto, personaggi e JSON dai file `.nis` (che non vanno nel repository):
+
+```bash
+python3 animation/nis.py CARTELLA_CON_I_NIS animation/data/strikers_nis.npz
+```
+```bash
+python3 animation/add_characters.py --all
+```
+```bash
+python3 -c "import sys,json; sys.path.insert(0,'animation'); import nis; json.dump(nis.walkout_json(), open('game/assets/walkout.json','w'), separators=(',',':'))"
+```
+
+Per aggiungere esultanze: metti i nuovi file `goal_winner` nella cartella, aggiungili a `WALKOUT_CLIPS` e `CELEBRATIONS` in `nis.py` e rifai i tre passi.
