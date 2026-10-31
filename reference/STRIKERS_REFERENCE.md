@@ -135,52 +135,69 @@ Ogni personaggio è una capsula verticale. Capitani e gregari hanno `Capsule Hei
 
 ## 5. Tiri, passaggi, contrasti
 
-**Da `GameTweaks.ini`:**
+Valori riletti dal disco il 31 ottobre (elenco completo in §9 bis). Dove non è indicato altro, il file è `GameTweaks.ini` e la funzione che lo legge `GameTweaks::Init` (`GameTweaks.cpp`).
 
-| Parametro | Valore |
-|---|---|
-| Durata massima di carica del tiro | 0,66 s |
-| Punto mirato dal tiro | centro del pallone a 0,5 m dall'interno del palo (0,3 m nel pallonetto) |
-| Distanza oltre la quale si tira sempre alto | 19 m dalla porta |
-| Variazione casuale del bersaglio | ±0,08 in larghezza, ±0,04 in altezza |
-| Potenza massima del tiro al volo | 0,8 sulla barra (minimo: metà) |
-| Velocità dei passaggi | dalla minima a 1 m di distanza alla massima a 10 m |
-| Distanza minima per un passaggio al volo | 3 m |
-| Spazzata | a terra 10–15 m/s, verticale 10–12,5 m/s |
-| Scivolata: considerata entro | 2,5 m dall'avversario |
-| Scivolata: durata | 0,35 s + 0,35 s di recupero |
-| Scivolata: decelerazione | 0,66 |
-| Fungo | velocità × 1,5 per 1,33 s |
-| Stella | velocità × 1,2 per 2,5 s |
-| Gusci | 12,5 m/s; raggio piccolo 0,35 m, medio 0,7 m, grande 1,0 m |
-| Raggio delle esplosioni | 2,0 m |
-| Durata della partita (default) | 300 s (`DefaultGameplayOptions.ini`) |
+| Parametro | Valore | Chiave e uso nel codice |
+|---|---|---|
+| Durata massima di carica del tiro | 0,66 s; carica = 0,25 + 0,75 × tempo / 0,66 | `Shot Windup Seconds` · `ShotMeter::ShotReleased` |
+| Valore della barra (entra nel tiro a sorte del portiere, §6) | Shooting × 0,06 + carica × 0,29 + porta aperta × 0,40 + vicinanza × 0,25 | `Shot Ratings/Net Open/Player Distance Weight`, `Shot Net Open Angle` 35° · `ShotMeter.cpp` `CalcScoreValue`; vicinanza da 20 m (0) a 7,5 m (1): `Shot Distance Min/Max`, `FuzzyTweaks.ini` |
+| Valore della barra nel pallonetto | Shooting × 0,06 + carica × 0,04 + portiere fuori × 0,5 + porta aperta × 0,4 | `Chip Shot Goalie Out Weight`, `Chip Shot Net Open Weight` · `CalcScoreValue` |
+| Punto mirato dal tiro | centro del pallone a 0,5 m dall'interno del palo (0,3 m nel pallonetto) | `Shot Offset From Post`, `Chip Shot Offset From Post` · `cFielder::DoFindBestShotTarget` |
+| Distanza oltre la quale si tira sempre alto | 19 m dalla porta | `High Shot Distance` · `DoFindBestShotTarget` |
+| Variazione casuale del bersaglio | 0,08 in larghezza, 0,04 in altezza (× tempo di volo × (1,1 − valore della barra)) | `Shot Width/Height Variance` · `cFielder::CalcRegularShot` |
+| Tiro al volo | carica = caso fino a 0,16 + da 0,25 a 0,64 secondo direzione e distanza; 1 dopo un passaggio perfetto | `Shot Meter Max Onetimer Speed` 0,8 · `ShotMeter::CalcOneTimerValue` |
+| Velocità dei passaggi | dalla minima a 1 m di distanza alla massima a 10 m | `Pass Speed Min/Max Dist` · `Player.cpp` `DoCalculatePassSpeed` |
+| Distanza minima per un passaggio al volo | 3 m | `Volley Pass Min Distance` |
+| Passaggio perfetto | rallentatore 0,17 | `Perfect Pass Slow Mo` |
+| Spazzata | a terra 10–15 m/s, verticale 10–12,5 m/s | `Clear Ball Min/Max Ground Speed`, `Min/Max Z Speed` |
+| Scivolata: considerata entro (CPU) | 2,5 m dall'avversario | `Do Slide Attack Radius` |
+| Scivolata: durata | al massimo 0,35 s finché tieni premuto, poi 0,35 s di frenata | `Slide Attack Maximum Time`, `Slide Attack Fail Up Time` · `ActionSlideAttack` |
+| Scivolata: decelerazione | 0,66 | `Slide Attack Deceleration` |
+| Scivolata: velocità | turbo con palla livello 2: 7,5 m/s (gregari 7,4) | `WB Run Turbo Level 2 Speed` in `mario.ini`… · `GetSlideAttackSpeed` |
+| Spallata invece di scivolata per bloccare | pallone sotto 0,5 m/s | `Block Ball with LAttack under this Speed` |
+| Fungo | velocità × 1,5 per 1,33 s | `On Mushrooms Speed/Time` |
+| Stella | velocità × 1,2 per 2,5 s | `On Star Speed/Time` |
+| Gusci | 12,5 m/s; raggio piccolo 0,35 m, medio 0,7 m, grande 1,0 m | `… Shell Speed`, `Shell … Radius` |
+| Raggio delle esplosioni | 2,0 m | `Powerup Explosion Radius` |
+| Durata della partita (default) | 300 s | `Game Time` in `DefaultGameplayOptions.ini` |
 
 **Super Strike (Shoot-to-Score):**
-- rallentatore 0,68–0,78;
-- finestra "perfetta" ±0,02–0,06 attorno ai punti 0,84 e 0,16 della barra;
-- fotogrammi del calcio da `mario.ini`: salto al fotogramma 3, calcio al 27.
+- carica: 0,66 + `STS Windup Time` 0,25 = **0,91 s** a ogni livello (`Difficulty*.ini`, `ShotMeter::Update`);
+- lancetta sulla clip `captain_shoot_to_score` (127 fotogrammi): sale dal fotogramma 3 al 14,5, scende fino al 26; dopo il 26 il tempo va a 0,1 (`S2S 1st Jump Frame` 3, `S2S Nis Begin Frame` 26, `S2S Kick Frame` 27, `S2S Nis End Frame` 106, in tutti i 13 `.ini` dei personaggi; `FielderActions.cpp` `ActionShootToScore`);
+- rallentatore da 0,68 (a 9 m dalla porta) a 0,78 (a 18 m) (`S2S Slow Mo Min/Max`, `FindSTSDistanceAffectedPercentage`);
+- pressioni perfette a 0,84 e 0,16 della lancetta, verde da ±0,02 a ±0,06, giallo a 0,1 dal punto perfetto (`S2S Perfect First/Second Button Time`, `S2S Perfect Distance Min/Max`, `S2S 2 Button Press Yellow Dist`; regola in `VERIFICA.md` §3);
+- animazioni e scena, fotogramma per fotogramma (risultato al 27, effetto della squadra al 67, calcio al 103,9, pallone al 106 su 127): `VERIFICA.md` §10.
 
 ---
 
 ## 6. Portiere
 
-Da `goalie.ini`:
+Da `goalie.ini`, letto da `GoalieTweaks::Init` (`CharacterTweaks.cpp`); riletti dal disco il 31 ottobre (elenco completo in §9 bis):
 
-| Parametro | Valore |
-|---|---|
-| Corsa / corsetta | 6,0 / 4,0 m/s |
-| Rinvio con calcio | 15–19 m/s, inclinazione 50–60°, solo se il bersaglio è a più di 13 m |
-| Lancio con la mano dall'alto | oltre i 7 m |
-| Tempo massimo con la palla in mano | 2 s |
-| Tolleranza per la presa | 0,6 m |
-| Tolleranza per l'intercetto | 0,5 m |
-| Tiro troppo forte per la presa | sopra 0,3 sulla barra |
-| Tiri ignorati | quelli che mancano la porta di oltre 1 m |
-| Stordimento dopo un Super Strike | 1–2 s |
-| Fatica | sale con ogni parata: presa 5, presa in tuffo 10, deviazione 7/15, Super Strike 15/25; recupero 2/s |
+| Parametro | Valore | Chiave |
+|---|---|---|
+| Corsa / corsetta | 6,0 / 4,0 m/s | `Running Speed`, `Jog Speed` |
+| Rinvio con calcio | 15–19 m/s, inclinazione 50–60°, solo se il bersaglio è a più di 13 m | `Minimum/Maximum Kick Velocity`, `… Kick Angle`, `Minimum Kick Distance` |
+| Lancio con la mano dall'alto | oltre i 7 m | `Minimum Overhand Throw Distance` |
+| Tempo massimo con la palla in mano | 2 s | `Goalie Ball Time` |
+| Tolleranza per la presa | 0,6 m | `Catch Save Tolerance` |
+| Tolleranza per l'intercetto | 0,5 m | `Intercept Save Tolerance` |
+| Tiro troppo forte per la presa | sopra 0,3 sulla barra | `Catch Save Max Speed` |
+| Energia minima per la presa | 90 (riserva del codice 60) | `Fatigue Catch Threshold` |
+| Ritardo della parata mancata | 0,1 s | `Miss Save Delay` |
+| Pallonetto: probabilità di inciampare | 0,3 | `Lob Shot Stumble Chance` |
+| Tiri ignorati | quelli che mancano la porta di oltre 1 m | `Save Ignore Margin` |
+| Virata durante la parata | 100000, rallentamento 4000 | `Save Turn Speed/Falloff` |
+| Stordimento dopo un Super Strike | 1–2 s | `Min/Max STS Stun Time` |
+| Uscita sul capitano durante il Super Strike | sempre entro 1 m (+ distanza di presa), con l'1% a fotogramma entro 2 m | `STS Attack Close/Max Distance` (riserva del codice 7), `STS Attack Chance Per Frame` · `Goalie.cpp` |
+| Fatica | sale con ogni parata: presa 5, presa in tuffo 10, deviazione 7, deviazione in tuffo 15, pugno 7, gamba 6, Super Strike 15 (parata) / 25 (stordimento); recupero 2/s | `Shot Fatigue …`, `Fatigue Recover Rate` |
+| Rialzarsi | energia alta 80, bassa 20; con energia bassa si rialza a 0,5× e si sposta a 0,8× | `High/Low Getup Energy`, `Low Getup Speed`, `Low Strafe Speed` |
 
-Come decide la parata (da smstrikers-decomp, `Goalie::CalcSaveParameters` e `GoalieSave::FindBestSave`): **non tira a sorte**. Divide la porta in una griglia 7 × 5 e cerca un'animazione di parata che arrivi sul punto del pallone entro il tempo di arrivo del tiro; se non c'è, il tiro entra. Il tiro perfetto non cambia la scelta della parata: è più difficile perché è più veloce e curva. La fatica rallenta solo il rialzarsi e lo spostamento laterale, non fa sbagliare. La difficoltà della CPU (`Difficulty0…3.ini`) non tocca il portiere. I tempi delle animazioni di parata stanno nei file del disco, non nel codice: nel gioco li stimiamo (`GOALIE.saveReact`, `GOALIE.diveSpeed` in `game/src/config.js`).
+Come decide la parata (da smstrikers-decomp; correzione del 31 ottobre, dettagli in [`VERIFICA.md`](VERIFICA.md) §1), in due passi:
+1. **Tiro a sorte, al momento del tiro** (`cFielder::CalcRegularShot`, `Fielder.cpp`): il valore della barra del tiratore (§5) passa per la curva `Shot Value 1–3` / `Shot Chance 0–4` del **livello di difficoltà scelto**, la stessa per le due squadre (`Game.cpp` `ApplyDifficulty` la copia su entrambe). Probabilità che il portiere sbagli, a barra 0 / 0,25 / 0,6 / 0,75 / 1: Rookie 1 / 5 / 20 / 35 / 55%; Professional 1 / 3 / 17,5 / 35 / 55%; Superstar e Legend 1 / 1 / 15 / 35 / 55% (`Difficulty0…3.ini`). Se esce, il portiere deve sbagliare (`mbShouldMiss`): aspetta `Miss Save Delay` in più e gioca un'animazione di parata mancata.
+2. **Parata possibile** (`Goalie::CalcSaveParameters`, `GoalieSave::FindBestSave`): altrimenti divide la porta in una griglia 7 × 5 e cerca, tra le animazioni di parata (`gSaveInfo`), una che arrivi sul punto del pallone entro il tempo di arrivo del tiro; se non c'è, il tiro entra. Tempo di una parata = (contatto − accovacciata) × durata della clip, dai trigger di `mariogoalie.trg` (`GoalieSave::TriggerCallback`): da 0,05 a 0,32 s. Il punto è l'osso `ball` della clip al contatto. Trigger in `animation/data/strikers_triggers.json`, tabella completa delle 69 parate (clip, tipo, tempi, punto di contatto, cella della griglia) in `animation/data/strikers_saves.json`. Posizione, uscite e scelta della parata passo per passo: [`VERIFICA.md`](VERIFICA.md) §9.
+
+La presa è permessa solo per i pallonetti o con portiere riposato (energia ≥ 90) e tiro debole (carica < 0,3); altrimenti solo deviazioni. Il tiro perfetto non cambia la scelta della parata: è più difficile perché è più veloce, curva e alza il valore della barra. La difficoltà non cambia i riflessi del portiere: entra solo dalla curva del tiro. Nel gioco oggi i tempi sono stimati (`GOALIE.saveReact`, `GOALIE.diveSpeed` in `game/src/config.js`) e il tiro a sorte manca: da correggere con questi valori.
 
 ---
 
@@ -235,6 +252,76 @@ Le velocità sono misurate dal piede d'appoggio.
    - per eliminare lo scivolamento serve una clip con passi più lunghi.
 4. **Collisione:** una capsula come quella del Kritter, alta 0,8 m e larga 0,65 m, centrata sul personaggio.
 5. **Proporzioni del corpo:** una scala uniforme non rende il personaggio tozzo come quelli di Strikers. Per quello serve modificare il modello (gambe più corte, testa più grande), non i parametri di gioco.
+
+---
+
+## 9 bis. Valori letti dal disco (31 ottobre)
+
+Letti dall'ISO G4QP01 (`main.dol` SHA-1 `6dc83dc91d0a…`) col parser di `nlConfig.cpp` (chiavi senza maiuscole, `#` chiude il valore). Tra parentesi il valore di riserva del codice ricostruito.
+
+**`GameTweaks.ini` (`GameTweaks::Init`):** S2S Perfect First Button Time 0,84 · Second 0,16 · Perfect Distance Min 0,02 · Max 0,06 · 2 Button Press Yellow Dist **0,1** · S2S Slow Mo Min 0,68 · Max 0,78 · Perfect Pass Slow Mo **0,17** · Shot Windup Seconds 0,66 · Shot Net Open Angle 35 · Shot Ratings Weight **0,06** · Shot Net Open Weight 0,40 · Shot Player Distance Weight 0,25 · Chip Shot Goalie Out Weight 0,50 · Chip Shot Net Open Weight 0,40 · Shot Meter Max Onetimer Speed 0,8 · Shot Offset From Post 0,5 · Chip Shot Offset From Post 0,3 · High Shot Distance 19 · Shot Width/Height Variance 0,08/0,04 · Pass Speed Min/Max Dist 1/10 · Volley Pass Min Distance 3 · Slide Attack Maximum Time 0,35 · Fail Up Time 0,35 · Deceleration 0,66 · Do Slide Attack Radius 2,5 · Block Ball with LAttack under this Speed 0,5 · Fielder Attributes Weight **0** · Arrived In/Out Radius 0,8/1,3 · Near In/Out Radius 2,5/6,5 · Run To Strafe / Strafe To Run / Backwards To Strafe / Strafe To Backwards Angle 12000/8000/23000/25000 · Swap Controller No Swap Back Time 0,3, Dampen Facing Time 0,33. Mancano nel file e valgono la riserva: GetInPosition KeyFielder Min/Max Distance (2/12), At Target Position Min/Max Radius (0,3/0,6), At Target Remain At Position Min/Max Radius (1/4,5), Filter Dropoff Delay Time/Time (0,5/6). `FuzzyTweaks.ini`: Shot Distance Min 20, Max 7,5 (termine "distanza" del valore della barra).
+
+**Valore della barra** (`ShotMeter.cpp` `CalcScoreValue`): `Shooting × 0,06 + carica × 0,29 + porta aperta × 0,40 + vicinanza × 0,25` (vicinanza 0 a 20 m, 1 a 7,5 m; porta aperta su 35°). Pallonetto: `Shooting × 0,06 + carica × 0,04 + portiere fuori × 0,5 + porta aperta × 0,4`.
+
+**Personaggi (`FielderTweaks::Init`, `mario.ini` e gli altri):** S2S 1st Jump Frame 3 · S2S Nis Begin Frame 26 · S2S Kick Frame 27 · S2S Nis End Frame 106 (tutti i 13 personaggi uguali). Shooting 1 (capitani), 0,8 (superteam), 0 (gregari); Passing 0,6, Dekeing 0,6, Aggression 0,6 (capitani; gregari 0,5 di riserva). Shot Min/Max Speed 29/34, Chip Shot Min/Max Speed 8,5/15 (gregari: 0, riserva). WB Run Turbo Level 2 Speed 7,5 (gregari 7,4). Shot Windup Direction Seek Speed/Falloff 75000/4000 e Shot Windup Decel 6 non stanno nei `.ini`: sono in `g_pTweaks` (`CharacterTweaks.cpp`), trovato identico in `main.dol`.
+
+**Portiere (`GoalieTweaks::Init`, `goalie.ini`):** Catch Save Max Speed 0,3 · Fatigue Catch Threshold **90** (riserva 60) · Miss Save Delay 0,1 · Min/Max STS Stun Time 1/2 · Lob Shot Stumble Chance 0,3 · Catch Save Tolerance 0,6 · Intercept Save Tolerance 0,5 · Goalie Ball Time 2 · Save Turn Speed 100000, Falloff 4000 · Save Back Run Scale 1,5 · Save Ignore Margin 1 · Loose Ball Shot Distance 10 · Pounce Range 1 · STS Attack Close/Max Distance 1/**2** · STS Attack Chance Per Frame 0,01 · STS Attack Ball Speed Multiplier 0,3 · Fatica: default 10, presa 5, presa in tuffo 10, deviazione 7, deviazione in tuffo 15, pugno 7, gamba 6, STS parata 15, STS stordimento 25; recupero 2/s · High/Low Getup Energy 80/20 · Low Getup Speed 0,5 · Low Strafe Speed 0,8 · Throwing Turn Speed 50000.
+
+**Difficoltà (`SkillTweaks::Init`, `GameTweaks.cpp`).** Importante (`Game.cpp` `ApplyDifficulty`): ogni squadra legge la sua tabella (`DifficultyHuman.ini` se ha giocatori umani), ma **Shot Value/Chance, STS Windup Time, Attack Carrier Range, Loose Ball Range e Goalie Intercept Pass vengono poi sovrascritti per entrambe le squadre** con quelli del livello scelto (Braindead = allenamento, 0 Rookie, 1 Professional, 2 Superstar, 3 Legend). Il file Superhuman non è mai usato dai menu. Un valore assente vale 0,5 (*corsivo*).
+
+| Valore | Braindead | 0 | 1 | 2 | 3 | Superhuman | Human |
+|---|---|---|---|---|---|---|---|
+| Avoidance Effectiveness | 0,1 | 0,01 | 0,5 | 0,85 | 1 | 1 | 0,5 |
+| Deke Chance | 0 | 0 | 0,358 | 0,717 | 1 | 1 | 0,65 |
+| Ground Pass Chance | 0,01 | 0,05 | 0,3 | 0,672 | 0,85 | 1 | 0,75 |
+| Volley Pass Chance | 0 | 0,05 | 0,3 | 0,672 | 0,85 | 1 | 0,7 |
+| Shooting Chance | 0,01 | 0,1 | 0,525 | 0,95 | 1 | 1 | 0,95 |
+| Chip Shot Chance | 0 | 0,05 | 0,486 | 0,922 | 0,9 | 1 | 0,5 |
+| Captain ShootToScore Chance | 0 | 0,1 | 0,5 | 0,9 | 1 | 1 | 1 |
+| Ground / Volley OneTimer Chance | 0 / 0 | 0,05 / 0,05 | 0,475 / 0,525 | 0,9 / 1 | 1 / 1 | 1 / 1 | 0,8 / 0,8 |
+| OneTouch Ground = Volley Pass Chance | 0 | 0,15 | 0,25 | 0,694 | 0,85 | 1 | 0,5 |
+| PassReceive Hit / Powerup Chance | 0 / 0 | 0,1 / 0,1 | 0,3 / 0,3 | 0,683 / 0,683 | 0,8 / 1 | 1 / 1 | 0 / 0 |
+| Windup Deke / Pass / Powerup Chance | 0 / 0 / 0 | 0 / 0 / 0 | 0,25 / 0,25 / 0,25 | 0,667 / 0,672 / 0,65 | 1 / 0,983 / 1 | 1 | 0 |
+| Cut And Break Chance | 0 | 0,01 | 0,61 | 0,72 | 1 | 1 | 1 |
+| Turbo With Ball Chance | 0 | 0 | 0,333 | 0,667 | 1 | 1 | 0,75 |
+| Reaction | *0,5* | 0 | 0,25 | 0,667 | 1 | 1 | *0,5* |
+| Block Pass / Block Shot Chance | 0 / 0 | 0,02 / 0,02 | 0,15 / 0,2 | 0,55 / 0,55 | 1 / 1 | 1 | 0 / 0 |
+| Slide Attack / Heavy Attack Chance | 0 / 0 | 0,02 / 0,02 | 0,15 / 0,15 | 0,5 / 0,5 | 1 / 0,95 | 1 | 0 / 0 |
+| Defend VolleyPass Chance | 0 | 0,05 | 0,15 | 0,5 | 0,95 | 1 | 0 |
+| Marking Effectiveness | 0 | 0,05 | 0,2 | 0,55 | 1 | 1 | 0,6 |
+| Loose Heavy Attack / Shot Chance | 0 / 0 | 0,01 / 0,05 | 0,15 / 0,2 | 0,5 / 0,717 | 0,95 / 1 | 1 | 0 / 0 |
+| Loose Ground = Volley Pass Chance | 0 | 0,05 | 0,33 | 0,694 | 1 | 1 | 0 |
+| Captain S2S Perfect First = Second Button Chance | 0 | 0,2 | 0,33 | 0,6 | 0,975 | 1 | 0,4 |
+| Shot Value 1 / 2 / 3 | 0,25 / 0,6 / 0,75 | = | = | = | = | = | = |
+| Shot Chance 0 / 1 / 2 / 3 / 4 (%) | 1 / 1 / 15 / 35 / 55 | 1 / **5** / **20** / 35 / 55 | 1 / **3** / **17,5** / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 | 1 / 1 / 15 / 35 / 55 |
+| STS Windup Time | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 | 0,25 |
+| Attack Carrier Range | 1 | 2,5 | 3 | 4 | 4 | 4 | 4 |
+| Loose Ball Range | −1 | −1 | 1 | 2 | 2 | 2 | 2 |
+| Goalie Intercept Pass | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
+| Goalie Deke Chance | *0,5* | 0,5 | 0,5 | 0,5 | 0,5 | *0,5* | *0,5* |
+| Goalie Deke Speed | *0,5* | 1 | 1,1 | 1,2 | 1,3 | *0,5* | *0,5* |
+
+Curva del tiro a sorte (`cFielder::CalcRegularShot`): interpolazione lineare a tratti tra i punti (0; C0), (V1; C1), (V2; C2), (V3; C3), (1; C4); il portiere deve sbagliare se `100 × caso < valore`. Esempio Rookie: barra 0,25 → 5%, 0,6 → 20%, 0,75 → 35%, 1 → 55%. Carica del Super Strike: 0,66 + 0,25 = **0,91 s** a ogni livello.
+
+Probabilità d'uso dei power-up per la CPU (`Offensive/Defensive/Loose <power-up> Chance`, stessa tabella `SkillTweaks`): le righe `Tornado` dei file non vengono lette. I quattro gusci (verde, rosso, spinoso, ghiaccio), la banana e la bob-omba hanno sempre lo stesso valore, scritto nella colonna "Gusci, banana, bomba".
+
+| File | Situazione | Gusci, banana, bomba | Chain Chomp | Fungo | Stella |
+|---|---|---|---|---|---|
+| Braindead | tutte | 0 | 0 | 0 | 0 |
+| Difficulty0 (Rookie) | tutte | 0,05 | 0,25 | 0,25 | 0,4 |
+| Difficulty1 (Professional) | tutte | 0,35 | 0,6 | 0,5 | 0,8 |
+| Difficulty2 (Superstar) | attacco | 0,65 | 1 | 0,8 | 1 |
+| Difficulty2 (Superstar) | difesa | 0,65 | 0,8 | 0,8 | 0,8 |
+| Difficulty2 (Superstar) | palla libera | 0,65 | 0,8 | 0,8 | 1 |
+| Difficulty3 (Legend) | attacco | 0,95 | 0,95 | 0,95 | 1 |
+| Difficulty3 (Legend) | difesa | 0,95 | 0,95 | 0,95 | 0 |
+| Difficulty3 (Legend) | palla libera | 0,5 | 0,7 | 0,95 | 0,8 |
+| Superhuman | tutte | 1 | 1 | 1 | 1 |
+| Human | tutte | 0,65 | 0,65 | 0,65 | 0,65 |
+
+Probabilità di comparsa dei power-up (`GameTweaks.ini`, pesi relativi): guscio verde 16, banana 15, fungo 14, bob-omba 12, guscio ghiaccio 11, guscio rosso 9, spinoso 9, stella 7, Chain Chomp 7; cambiano fino a ±9 con 0–3 gol di scarto (`Score Difference Minimum/Maximum`). Nel `.ini` di ogni capitano un solo power-up ha `Chance` 10, gli altri 0 (Mario e Luigi fungo, Peach ghiaccio, Daisy guscio rosso, Yoshi spinoso, Wario e Waluigi bob-omba, DK banana); Wario, Waluigi e DK hanno anche `Big Chance` e `Multiples Chance` a ±0,33. Come il gioco li combini coi pesi qui sopra non è stato verificato nel codice.
+
+**Trigger delle animazioni:** `animation/data/strikers_triggers.json` (script `animation/triggers.py`): `mario.trg` 267 trigger su 72 clip (8 clip che non abbiamo), `MarioGoalie.trg` 459 trigger su 81 clip; 53 clip del portiere hanno il trigger di contatto della parata (`0xCF84E7CD`), 35 i tre milestone.
 
 ---
 

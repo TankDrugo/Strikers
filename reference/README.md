@@ -4,23 +4,28 @@ Misure e dinamiche di Super Mario Strikers, ricavate dai file del disco (version
 
 ## Stato
 
-**completo** · Misure e dinamiche del gioco originale, con le fonti. La base di tutte le costanti.
+**verificato** · Misure e dinamiche del gioco originale, con le fonti; confronto completo col codice ricostruito e coi valori del disco (`VERIFICA.md`).
 
 Fatto:
 - Campo, porte, pallone, personaggi, portiere, tiri e contrasti misurati dal gioco originale, con le fonti
-- Come il portiere decide la parata (tempo del tuffo, non il caso)
+- Confronto col codice ricostruito di parate, tiri, Super Strike, passaggi, contrasti, IA e animazioni (`VERIFICA.md`, 31 ottobre)
+- Letti dal disco tutti i valori di `GameTweaks.ini`, dei 7 `Difficulty*.ini`, dei 13 personaggi e di `goalie.ini` (`STRIKERS_REFERENCE.md` §9 bis) e i trigger delle animazioni (`animation/data/strikers_triggers.json`)
+- Corretto: la parata tira a sorte al momento del tiro con la curva del livello scelto, uguale per le due squadre (1–55% secondo la barra), poi serve un'animazione che arrivi in tempo; carica del Super Strike 0,91 s
+- Criteri completi del portiere (posizione, uscite, scelta tra 69 parate) e sequenza delle animazioni del Super Strike (`VERIFICA.md` §9 e §10)
 
 Prossimo:
-- Da misurare: telecamera originale e altezza delle mesh
+- Correggere il gioco secondo `VERIFICA.md` (righe 1–7 per prime, poi portiere e Super Strike)
+- Da misurare: telecamera originale e altezza delle mesh; tiri dei gregari
 
 | File | Contenuto |
 |---|---|
 | [`STRIKERS_REFERENCE.md`](STRIKERS_REFERENCE.md) | Il documento completo, con la fonte di ogni valore: convenzioni, campo e porte, pallone, personaggi (altezze, velocità, accelerazioni, virate), passaggi e tiri, portiere, contrasti, animazioni, telecamera |
 | [`strikers_characters.json`](strikers_characters.json) | La tabella dei personaggi originali in forma leggibile da programma |
+| [`VERIFICA.md`](VERIFICA.md) | Confronto comportamento per comportamento (parate, tiri, Super Strike, passaggi, contrasti, IA, animazioni) tra il codice ricostruito e il nostro gioco, con le correzioni da fare |
 
 ## Codice decompilato
 
-[yannicksuter/smstrikers-decomp](https://github.com/yannicksuter/smstrikers-decomp), commit `d1f357f`. Non è copiato qui: per controllare un valore, clonalo a parte e cerca il file citato nel riferimento (per esempio `Ball.cpp`, `PhysicsBall.cpp`, `Fielder.cpp`).
+[yannicksuter/smstrikers-decomp](https://github.com/yannicksuter/smstrikers-decomp), commit `d1f357f` (ancora l'ultimo il 31 ottobre). Non è copiato qui: per controllare un valore, clonalo a parte e cerca il file citato nel riferimento (per esempio `Ball.cpp`, `PhysicsBall.cpp`, `Fielder.cpp`).
 
 ## Differenze volute rispetto all'originale
 

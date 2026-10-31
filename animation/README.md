@@ -11,8 +11,11 @@ Fatto:
 - Retarget su qualsiasi scheletro Mixamo, senza bisogno del disco
 - Tutte le clip controllate su tutti i 25 personaggi
 - Scene .nis decodificate: corsa del tunnel e 2 esultanze per il walkout di Ultimate Team
+- Trigger `.trg` decodificati (`triggers.py`): 267 di Mario e 459 del portiere in `data/strikers_triggers.json`, con gli istanti delle parate
+- Tabella delle 69 parate del portiere (`saves.py` → `data/strikers_saves.json`): clip, tempi e punto di contatto
 
 Prossimo:
+- Usare i trigger nel gioco: tempi delle parate, contatto di tiri e passaggi, animazioni delle ulti
 - Comprimere le animazioni per alleggerire il gioco
 - Altre esultanze goal_winner dal disco (oggi 2 su 10)
 
@@ -26,6 +29,8 @@ Prossimo:
 | `tests/` | Prove del convertitore su file sintetici |
 | `nis.py` | Decodifica delle scene d'intermezzo (`.nis`): clip dei personaggi e telecamere. Prepara le clip del walkout di Ultimate Team e `game/assets/walkout.json` |
 | `data/strikers_nis.npz` | Le scene `.nis` già decodificate. Sostituisce i file del disco |
+| `triggers.py`, `data/strikers_triggers.json` | Trigger delle clip (`.trg`): evento e istante di ogni trigger di Mario e del portiere |
+| `saves.py`, `data/strikers_saves.json` | Tabella delle 69 parate del portiere: clip, tempi, punto di contatto |
 
 ## Retarget su un personaggio
 
@@ -47,6 +52,20 @@ Valori di `audit.py` per `portiere` (soglie nel file):
 - nessuna articolazione che scatta, nessun ginocchio al contrario.
 
 Tutte le 183 clip sono state controllate anche a occhio, con `game/dev/sheet.html` (fotogrammi del modello affiancati allo scheletro originale).
+
+## Trigger (`.trg`)
+
+`data/strikers_triggers.json`: per ogni clip di `mario.trg` e `mariogoalie.trg` (nomi come in `game/assets/characters/*.clips.json`, il portiere col prefisso `gk_`) l'evento (hash), il fotogramma e il tempo normalizzato `t` = fotogramma / chiavi. Gli eventi delle parate: `0xcf84e7cd` contatto, `0x56264bbe`, `0x0f9524ba`, `0x045424b9` milestone 0, 1, 3 (`GoalieSave::TriggerCallback`). Rigenerarlo (accetta l'`.iso` o la cartella del disco estratto):
+
+```bash
+python3 animation/triggers.py PERCORSO_DISCO animation/data/strikers_triggers.json
+```
+
+`data/strikers_saves.json`: le 69 parate di `gSaveInfo` (`GoalieSave.cpp`) con clip (e se è specchiata), tipo, clip di errore e di recupero, parate collegate, milestone, tempo di parata e posizione dell'osso `ball` al contatto, in metri originali (x avanti, y laterale con + = lato "R", z in alto). Si rifà senza il disco, dai due file di `data/`:
+
+```bash
+python3 animation/saves.py
+```
 
 ## Rifare il pacchetto dal disco
 
