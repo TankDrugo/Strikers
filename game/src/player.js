@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { FIELDER, GOALIE, FIELD, BALL, SIZE, RIG_HEIGHT, ANIM_RATE_MIN, ANIM_RATE_MAX } from './config.js';
+import { fielderConfig, goalieConfig } from './stats.js';
 
 const U16 = (Math.PI * 2) / 65536; // 16-bit angle unit in radians
 const tmpV = new THREE.Vector3();
@@ -32,13 +33,15 @@ export function seekSpeed(cur, desired, accel, decel, dt) {
 }
 
 export class Player {
-  constructor(game, template, team, role, index) {
+  // stats: Ultimate Team card stats (see stats.js), or nothing for the original values
+  constructor(game, template, team, role, index, stats = null) {
     this.game = game;
     this.team = team; // 0 or 1; team 0 attacks +X
     this.role = role; // 'fielder' | 'goalie'
     this.index = index;
     this.isGoalie = role === 'goalie';
-    this.cfg = this.isGoalie ? GOALIE : FIELDER;
+    this.stats = stats;
+    this.cfg = this.isGoalie ? goalieConfig(stats || {}) : fielderConfig(stats || {});
     this.model = SkeletonUtils.clone(template.scene);
     this.baseHeight = template.height;
     this.rigHeight = this.isGoalie ? RIG_HEIGHT.goalie : RIG_HEIGHT.fielder;
@@ -157,10 +160,11 @@ export class Player {
   locomotion(dt) {
     const hasBall = this.hasBall();
     let topSpeed = this.desiredSpeed;
-    let turn = this.cfg.turnRun ?? this.cfg.turn, accel = FIELDER.accel, decel = FIELDER.decel;
+    const c = this.isGoalie ? FIELDER : this.cfg;
+    let turn = this.cfg.turnRun ?? this.cfg.turn, accel = c.accel, decel = c.decel;
     if (!this.isGoalie) {
-      if (hasBall) { turn = this.turbo ? FIELDER.turnTurboWithBall : FIELDER.turnWithBall; accel = FIELDER.accelWB; decel = FIELDER.decelWB; }
-      else if (this.turbo) { turn = FIELDER.turnTurbo; accel = FIELDER.accelTurbo; decel = FIELDER.decelTurbo; }
+      if (hasBall) { turn = this.turbo ? c.turnTurboWithBall : c.turnWithBall; accel = c.accelWB; decel = c.decelWB; }
+      else if (this.turbo) { turn = c.turnTurbo; accel = c.accelTurbo; decel = c.decelTurbo; }
     }
     if (this.desiredSpeed > 0.05) this.facing = seekDirection(this.facing, this.desiredDir, turn, FIELDER.turnFalloff, dt);
     const align = Math.max(0, Math.cos(angleDiff(this.facing, this.desiredDir)));

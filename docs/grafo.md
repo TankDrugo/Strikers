@@ -42,3 +42,17 @@ Se cambiano README o documenti, in Claude Code esegui `/graphify . --update`: ri
 ## Aree della mappa
 
 Le aree corrispondono alle cartelle. Quando nasce una cartella nuova (per esempio `ultimate-team/src/`), i suoi nodi finiscono nell'area giusta da soli. Per aggiungere un'area nuova, aggiungi una riga ad `AREAS` in `docs/make_map.py`.
+
+## Stato delle aree
+
+La mappa non ha stati scritti a mano: li legge dalla sezione `## Stato` del README di ogni area. Lì ci sono lo stato in grassetto, una riga di descrizione, l'elenco `Fatto:` e l'elenco `Prossimo:`. `docs/make_map.py` riscrive anche la tabella delle aree nel `README.md` principale (fra i commenti `aree:inizio` e `aree:fine`) e prende la data dall'ultimo commit. Quindi, dopo un lavoro, basta aggiornare la sezione Stato del README dell'area.
+
+## In automatico a ogni commit
+
+L'hook `.githooks/pre-commit` gira a ogni commit che tocca qualcosa fuori da `docs/mappa.html` e `graphify-out/`: aggiorna il grafo del codice (`graphify update .`), rigenera la mappa e la tabella del README e li aggiunge al commit. Nelle sessioni di Claude si attiva da solo (`.claude/settings.json`, all'avvio). Su un altro computer basta una volta:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+I concetti dei documenti (README, DESIGN) richiedono invece `/graphify . --update` in Claude Code, perché vanno riletti da un modello.

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SHOT } from './config.js';
+import { t } from './ui/i18n.js';
 
 const css = `
 .hud{position:fixed;inset:0;pointer-events:none;font-family:"Trebuchet MS",system-ui,sans-serif;color:#fff;user-select:none}
@@ -47,6 +48,14 @@ export class Hud {
 
   show(on) { this.el.style.display = on ? '' : 'none'; }
 
+  // short message at the bottom (star objectives)
+  toast(text, color = '#fff5dc') {
+    if (!this.toastEl) { this.toastEl = document.createElement('div'); this.toastEl.className = 'toast'; this.el.appendChild(this.toastEl); }
+    const e = this.toastEl;
+    e.textContent = text; e.style.background = color; e.classList.add('on');
+    clearTimeout(this.toastT); this.toastT = setTimeout(() => e.classList.remove('on'), 2600);
+  }
+
   // Team names and colours on the score, from roster.json (teamInfo)
   setTeams(teams) {
     this.teams = teams;
@@ -62,7 +71,7 @@ export class Hud {
     this.flashEl.textContent = text; this.flashEl.style.color = color; this.flashEl.style.opacity = 1; this.flashT = secs;
   }
 
-  goal(team, score) { this.flash('GOL!', this.teams ? this.teams[team].color : team === 0 ? '#ffd23f' : '#ff6b6b', 2.4); this.sfx('goal'); }
+  goal(team, score) { this.flash(t('flash.goal'), this.teams ? this.teams[team].color : team === 0 ? '#ffd23f' : '#ff6b6b', 2.4); this.sfx('goal'); }
 
   end(score, humanTeam, stats) { this.onEnd && this.onEnd(score, humanTeam, stats); }
 
@@ -72,15 +81,29 @@ export class Hud {
     const c = Math.ceil(game.clock);
     this.el.querySelector('#clock').textContent = `${Math.floor(c / 60)}:${String(c % 60).padStart(2, '0')}`;
     if (this.flashT > 0) { this.flashT -= 1 / 60; if (this.flashT <= 0) this.flashEl.style.opacity = 0; }
-    const h = game.human;
-    if (h && h.state === 'windup' && !game.aiOnly) {
+    // with two humans, a "P1 / P2" tag over each one's player
+    const tags = game.controllers.length > 1 ? game.controllers : [];
+    this.tags = this.tags || [];
+    while (this.tags.length < tags.length) { const e = document.createElement('div'); e.className = 'ptag'; this.el.appendChild(e); this.tags.push(e); }
+    this.tags.forEach((e, i) => {
+      const c = tags[i];
+      if (!c || !c.player) { e.style.display = 'none'; return; }
+      this.v.set(c.player.rpos.x, c.player.cfg.height + 0.25, c.player.rpos.z).project(game.camera);
+      e.style.display = 'block';
+      e.textContent = t('hud.p', { n: i + 1 });
+      e.style.background = game.teams[c.team].color;
+      e.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth}px`;
+      e.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight}px`;
+    });
+    const h = game.controllers.map((c) => c.player).find((p) => p && p.state === 'windup');
+    if (h) {
       const f = Math.min(1, h.stateTime / SHOT.windupSeconds);
       this.v.set(h.pos.x, h.cfg.height + 0.45, h.pos.z).project(game.camera);
       this.meter.style.display = 'block';
       this.meter.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth - 43}px`;
       this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 14}px`;
       this.meter.firstChild.style.width = `${f * 100}%`;
-      this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow ? '#7dffa8' : '';
+      this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow * (h.cfg.perfectWindow ?? 1) ? '#7dffa8' : '';
     } else this.meter.style.display = 'none';
   }
 }

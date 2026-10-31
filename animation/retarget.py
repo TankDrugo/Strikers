@@ -501,6 +501,17 @@ def main(source=None):
             animations.append((clip["name"], times, tracks))
             meta["clips"][clip["name"]] = clip["meta"]
         meta["hips_scale_" + char] = hips_scale
+        if char == "Mario":
+            fielder_cal = (offsets, float(ground[0]))
+    # pack walkouts from the cut scenes (animation/nis.py), on the fielder calibration
+    import nis
+    extra, scales = nis.retarget_walkouts(rig, fielder_cal[0], fielder_cal[1], sys.modules[__name__])
+    animations += extra
+    for name, times, _ in extra:
+        meta["clips"][name] = {"duration": round(len(times) / sa.FPS, 4), "keys": len(times), "linear_speed": 0.0,
+                               "root": [[0.0, 0.0, 0.0]] * len(times), "states": [], "play_mode": "hold", "contact": None}
+    if scales:
+        meta["nis_scale"] = scales
     rest_hips = rig.rest_pos[rig.idx("mixamorig:Hips")]
     meta["model_height"] = float(rig.rest_pos[rig.idx("mixamorig:HeadTop_End")][1])
     meta["model_hips"] = float(rest_hips[1])

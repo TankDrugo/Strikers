@@ -1,6 +1,21 @@
 # Interfaccia gioco
 
-**Stato: da iniziare.** Questa cartella è pronta per il lavoro: quando l'utente dice "lavoriamo sull'interfaccia", si parte da qui.
+## Stato
+
+**funziona** · Menu stile FC, profili, lingua, Gioco rapido, Coppe, Ultimate Team, pausa e fine partita.
+
+Fatto:
+- Menu stile FC: LB/RB tra le schede, Coppe e Ultimate Team come parti a sé con i loro colori
+- Lingua all'avvio (italiano, inglese) e profili salvati nel browser
+- Gioco rapido: contro la CPU, contro un amico, in due contro la CPU
+- Coppe complete: 4 coppe, stelle, Difficile, voto da D a Z, bacheca, tornei fino a 4 giocatori
+- Bozze scelte: stile M1, holo, teca delle numerate, walkout P1
+- Ultimate Team: Club, Rosa, Mercato, Divisioni, Album e apertura P1 con walkout 3D
+
+Prossimo:
+- Suoni veri (CC0)
+
+Decisioni prese con l'utente in [`DESIGN.md`](DESIGN.md); bozze visive in [`bozze/`](bozze/) (online: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA). Il codice sta in `game/src/ui/`, `game/src/cups/` e `game/src/ut/` (non in `interfaccia-gioco/src/`), così lo compila `game/tools/build.mjs`.
 
 ## Idea
 
@@ -23,12 +38,11 @@ Funziona, ma è grezzo: niente stile coerente, niente transizioni, testi solo in
 - **Personaggi** (`game/assets/roster.json`): la scelta delle squadre prima della partita.
 - **Comandi** (`game/src/input.js`): ogni schermata deve funzionare con controller Xbox e tastiera.
 
-## Da decidere prima di scrivere codice
+## Ancora da decidere
 
-1. Stile grafico: riferimenti visivi, colori, caratteri.
-2. Quali schermate servono per prime.
-3. Restare in HTML/CSS sopra il canvas (come ora) o disegnare l'interfaccia in three.js?
-4. Lingue: solo italiano o anche inglese?
+1. Scelte sulle bozze (stile del menu, holo, top loader, pacchetti): vedi `DESIGN.md`.
+2. Nomi delle 4 coppe.
+3. Restare in HTML/CSS sopra il canvas (come ora): proposta sì, le bozze sono già in HTML/CSS.
 
 ## Struttura proposta (da confermare)
 
@@ -36,5 +50,6 @@ Funziona, ma è grezzo: niente stile coerente, niente transizioni, testi solo in
 interfaccia-gioco/
   README.md        questo file
   DESIGN.md        stile e schermate decise con l'utente
+  bozze/           pagina di prova con le proposte visive
   src/             componenti dell'interfaccia, importati da game/src/main.js
 ```
