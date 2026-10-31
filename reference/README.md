@@ -13,8 +13,10 @@ Fatto:
 - Corretto: la parata tira a sorte al momento del tiro con la curva del livello scelto, uguale per le due squadre (1–55% secondo la barra), poi serve un'animazione che arrivi in tempo; carica del Super Strike 0,91 s
 - Criteri completi del portiere (posizione, uscite, scelta tra 69 parate) e sequenza delle animazioni del Super Strike (`VERIFICA.md` §9 e §10)
 
+- Il gioco segue `VERIFICA.md` righe 1–10 e 14–17 (31 ottobre, notte; colonna «Nostro gioco»); controllo a occhio delle 69 parate, comprese le "XHi" (§9.2)
+
 Prossimo:
-- Correggere il gioco secondo `VERIFICA.md` (righe 1–7 per prime, poi portiere e Super Strike)
+- Righe ancora aperte di `VERIFICA.md`: 11 (stati di corsa), 12 (pallone sull'osso `ball`), 13 in parte; condizioni degli script della CPU
 - Da misurare: telecamera originale e altezza delle mesh; tiri dei gregari
 
 | File | Contenuto |

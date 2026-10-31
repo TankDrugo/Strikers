@@ -198,6 +198,7 @@ export const TACKLE = {
   hitReach: 2 * (0.33 / 2 + 0.1) * SIZE, // contact: the two capsules touch (FIELDER.capsuleRadius × 2)
   stunSlide: 1.7, stunHit: 1.9, // react clip lengths: down for the whole clip (InitActionHitReact)
   decisionTime: 0.3, // estimate: how often a CPU player re-rolls the table chances of his situation
+  retryTime: 1.0, // estimate: a defender rolls the tackle chances when the carrier comes within range, then once a second
 };
 
 // Player.cpp DoCalculatePassSpeed: from the minimum at 1 m to the maximum at 10 m, minus half the speed at which the

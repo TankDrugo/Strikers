@@ -116,8 +116,11 @@ export function fielderAI(game, p, dt) {
       const tx = owner.pos.x + Math.cos(owner.facing) * owner.speed * lead;
       const tz = owner.pos.z + Math.sin(owner.facing) * owner.speed * lead;
       const d = moveTo(p, tx, tz, p.cfg.run, true);
-      // Do Slide Attack Radius: slide (Slide Attack Chance); close enough for the shoulder: Heavy Attack Chance
-      if (decide && d < TACKLE.slideConsiderRadius && p.tackleCooldown <= 0) {
+      // Do Slide Attack Radius: slide (Slide Attack Chance); close enough for the shoulder: Heavy Attack Chance.
+      // One roll when the carrier comes within the radius, then one per TACKLE.retryTime while he stays there.
+      if (d >= TACKLE.slideConsiderRadius) p.tackleRollAt = null;
+      else if (reacted && p.tackleCooldown <= 0 && (p.tackleRollAt == null || game.time - p.tackleRollAt >= TACKLE.retryTime)) {
+        p.tackleRollAt = game.time;
         const facingOk = Math.abs(angleDiff(p.facing, Math.atan2(owner.pos.z - p.pos.z, owner.pos.x - p.pos.x))) < 0.6;
         if (facingOk && chance('slideAttackChance')) { game.startSlide(p); return; }
         if (d < 1.4 * SIZE && chance('heavyAttackChance')) { game.startHit(p); return; }

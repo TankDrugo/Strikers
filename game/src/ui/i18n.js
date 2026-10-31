@@ -139,7 +139,7 @@ const STRINGS = {
 <kbd>Spazio</kbd><span>finta</span>
 <span><kbd>+</kbd> <kbd>-</kbd></span><span>zoom della telecamera (anche rotella)</span>
 <span><kbd>P</kbd> <kbd>Esc</kbd></span><span>pausa</span>`,
-    'keys.perfect': 'Rilascia il tiro con la barra piena (verde) per un <b>tiro perfetto</b> a effetto. <b>Super Strike</b>: col capitano (©), nella metà campo avversaria, tieni premuto il tiro finché brilla; poi ferma le due lancette sul verde scuro. Vale 2 gol.',
+    'keys.perfect': 'Rilascia il tiro con la barra piena (verde) per un <b>tiro perfetto</b> a effetto. <b>Super Strike</b>: col capitano (©), nella metà campo avversaria, tieni premuto il tiro finché brilla; poi premi tiro quando la lancetta sale sul verde e quando scende sul verde. Vale 2 gol.',
     'keys.menu': 'Nei menu: <kbd>LB</kbd> <kbd>RB</kbd> (tastiera <kbd>Q</kbd> <kbd>E</kbd>) cambiano scheda, croce o frecce si muovono, <kbd>A</kbd> o <kbd>Invio</kbd> conferma, <kbd>B</kbd> o <kbd>Esc</kbd> torna indietro.',
     'help.kb': '<kbd>WASD</kbd> muovi · <kbd>Shift</kbd> turbo · <kbd>J</kbd> passa / cambia · <kbd>K</kbd> tiro (tieni) / scivolata · <kbd>L</kbd> pallonetto / spallata · <kbd>Spazio</kbd> finta · <kbd>P</kbd> pausa',
     'help.pad': '<kbd>A</kbd> passa · <kbd>B</kbd> tiro (tieni) / scivolata · <kbd>Y</kbd> pallonetto · <kbd>X</kbd> finta / spallata · <kbd>RT</kbd> turbo · <kbd>LB</kbd> cambia · <kbd>☰</kbd> pausa',
@@ -281,7 +281,7 @@ const STRINGS = {
 <kbd>Space</kbd><span>feint</span>
 <span><kbd>+</kbd> <kbd>-</kbd></span><span>camera zoom (mouse wheel too)</span>
 <span><kbd>P</kbd> <kbd>Esc</kbd></span><span>pause</span>`,
-    'keys.perfect': 'Release the shot with a full (green) bar for a curling <b>perfect shot</b>. <b>Super Strike</b>: with the captain (©) in the opponents\' half, hold shoot until he glows, then stop both needles on the dark green. Worth 2 goals.',
+    'keys.perfect': 'Release the shot with a full (green) bar for a curling <b>perfect shot</b>. <b>Super Strike</b>: with the captain (©) in the opponents\' half, hold shoot until he glows, then press shoot when the needle goes up through the green and when it comes down through the green. Worth 2 goals.',
     'keys.menu': 'In menus: <kbd>LB</kbd> <kbd>RB</kbd> (keyboard <kbd>Q</kbd> <kbd>E</kbd>) change tab, d-pad or arrows move, <kbd>A</kbd> or <kbd>Enter</kbd> confirms, <kbd>B</kbd> or <kbd>Esc</kbd> goes back.',
     'help.kb': '<kbd>WASD</kbd> move · <kbd>Shift</kbd> sprint · <kbd>J</kbd> pass / switch · <kbd>K</kbd> shoot (hold) / slide · <kbd>L</kbd> lob / charge · <kbd>Space</kbd> feint · <kbd>P</kbd> pause',
     'help.pad': '<kbd>A</kbd> pass · <kbd>B</kbd> shoot (hold) / slide · <kbd>Y</kbd> lob · <kbd>X</kbd> feint / charge · <kbd>RT</kbd> sprint · <kbd>LB</kbd> switch · <kbd>☰</kbd> pause',

@@ -1,17 +1,17 @@
 # Graph Report - Strikers  (2026-10-31)
 
 ## Corpus Check
-- 67 files · ~110,086 words
+- 67 files · ~111,734 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 1087 nodes · 2393 edges · 57 communities (45 shown, 12 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 185 edges (avg confidence: 0.86)
+- 1087 nodes · 2394 edges · 57 communities (46 shown, 11 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 186 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c42443e9`
+- Built from commit: `a571c38b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,7 +25,6 @@
 - build.mjs
 - nis.py
 - make_map.py
-- .play
 - club.js
 - import_into_blender
 - math
@@ -86,16 +85,16 @@
 10. `test_decode()` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Riepilogo: differenze in ordine di importanza` --references--> `contact_time()`  [INFERRED]
-  reference/VERIFICA.md → animation/retarget.py
-- `6. Passaggi` --references--> `shootAtFast()`  [INFERRED]
-  reference/VERIFICA.md → game/src/ball.js
 - `Carte con ritratto a mezzo busto calcolato dalla posa` --references--> `makePortraits()`  [INFERRED]
   interfaccia-gioco/README.md → game/src/main.js
 - `Super Strike (comandi)` --semantically_similar_to--> `Super Strike`  [INFERRED] [semantically similar]
   game/README.md → CLAUDE.md
 - `Link online (privato)` --semantically_similar_to--> `Artifact privato del gioco (build di prova)`  [INFERRED] [semantically similar]
   game/README.md → CLAUDE.md
+- `Celestini (squadra)` --semantically_similar_to--> `Celestini`  [INFERRED] [semantically similar]
+  characters/README.md → CLAUDE.md
+- `Personaggi singoli con nazionale (Goku SSJ 90, Vegeta 88, Goku, Sora, Piccolo, Ratchet, Jak, Snake, Roxas, Spike, Crilin, Riku, Big Smoke, Dastardly, Kairi)` --semantically_similar_to--> `Personaggi singoli con nazionale (Big Smoke, Crilin, Dastardly, Goku, Goku SSJ, Jak, Kairi, Piccolo, Ratchet, Riku, Roxas, Snake, Sora, Spike, Vegeta)`  [INFERRED] [semantically similar]
+  ultimate-team/DESIGN.md → characters/README.md
 
 ## Import Cycles
 - None detected.
@@ -109,7 +108,7 @@
 - **Pubblicazione del gioco (Artifact privato in passi, itch.io ristretto)** — claude_aggiorna_link_online, game_readme_web_build, claude_limite_64_mb, claude_artifact_privato_del_gioco, game_readme_itch_build, claude_itch_io_ristretto [EXTRACTED 1.00]
 - **Pipeline del walkout (scene .nis -> clip -> palco 3D)** — animation_readme_nis, animation_readme_strikers_nis_npz, animation_readme_walkout_clips, animation_readme_walkout_json, ultimate_team_design_walkout, ultimate_team_readme_walkout_p1 [INFERRED 0.85]
 
-## Communities (57 total, 12 thin omitted)
+## Communities (57 total, 11 thin omitted)
 
 ### Community 1 - "game.js"
 Cohesion: 0.16
@@ -172,8 +171,8 @@ Cohesion: 0.13
 Nodes (21): Peso gioco compilato (215 MB / 121 MB online / 89 MB itch), Azioni (passaggi, tiro, scivolate, finte), IA: uno pressa, uno marca, altri in posizione, Velocita animazioni adattata (0,6-1,4x), Fisica del pallone, Pallone oltre 50 m/s, Build di prova --prova (10 milioni di crediti), Campo 41,2 x 24,2 m, porte 5,69 x 2,56 m (+13 more)
 
 ### Community 17 - "Super Mario Strikers: misure e dinamiche di riferimento"
-Cohesion: 0.06
-Nodes (33): Super Mario Strikers: misure e dinamiche di riferimento, Accelerazioni e virate (g_pTweaks, SeekSpeed, SeekDirection), Campo 41,20 x 24,17 m, porte 5,69 x 2,56 m, area di rigore, Collisione a capsula verticale, Convenzioni (Z in alto, fisica 50 Hz ODE, 30 fps, angoli 16 bit), Cosa resta da misurare (mesh, telecamera, tiri dei gregari), Effetto Magnus solo con barra >= 0,99, Fonti: main.dol G4QP01 e smstrikers-decomp (+25 more)
+Cohesion: 0.07
+Nodes (32): Super Mario Strikers: misure e dinamiche di riferimento, Accelerazioni e virate (g_pTweaks, SeekSpeed, SeekDirection), Campo 41,20 x 24,17 m, porte 5,69 x 2,56 m, area di rigore, Collisione a capsula verticale, Convenzioni (Z in alto, fisica 50 Hz ODE, 30 fps, angoli 16 bit), Cosa resta da misurare (mesh, telecamera, tiri dei gregari), Effetto Magnus solo con barra >= 0,99, Fonti: main.dol G4QP01 e smstrikers-decomp (+24 more)
 
 ### Community 18 - "test_converter.py"
 Cohesion: 0.14
@@ -188,7 +187,7 @@ Cohesion: 0.15
 Nodes (11): Artifact privato del gioco (build di prova), Dove andare (tabella aree), Calcio arcade: istruzioni per Claude, Pagina itch.io ristretta (goleador0702/strikers), Prossimi lavori (31 ottobre), Regole del progetto, Server privato (Oracle), Sezione ## Stato dei README (+3 more)
 
 ### Community 21 - "Player"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (4): angleDiff(), Player, seekDirection(), seekSpeed()
 
 ### Community 22 - "Aggiungere un personaggio (procedura)"
@@ -291,24 +290,28 @@ Nodes (8): bestPassTarget(), dist2(), fielderAI(), moveTo(), openness(), shapeSp
 Cohesion: 0.14
 Nodes (18): integrate(), predict(), shootAtFast(), tmp, BALL, FIELD, PASS, PHYSICS_DT (+10 more)
 
+### Community 54 - ".shootBall"
+Cohesion: 0.18
+Nodes (3): clamp01(), lerpRange(), 1. Esito del tiro e parata
+
 ## Knowledge Gaps
 - **73 isolated node(s):** `Pagina sviluppo gioco senza build (dev/index.html)`, `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/`, `Chat delle regole del gioco (prossima, ramo magical-ride, VERIFICA.md, strikers_triggers.json)`, `Indicatore G1-G4 stile FIFA` (+68 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 283 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Tabella aree del progetto (scritta da make_map.py)` connect `make_map.py` to `Gioco (README)`, `Stato personaggi: completo (25 personaggi, lavoro finito)`, `Animazioni (area, clip controllate su 25 personaggi)`?**
-  _High betweenness centrality (0.284) - this node is a cross-community bridge._
+  _High betweenness centrality (0.313) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `boot()` (e.g. with `.tick()` and `.show()`) actually correct?**
   _`boot()` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Pagina sviluppo gioco senza build (dev/index.html)`, `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/` to the rest of the system?**
   _73 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Game` be split into smaller, more focused modules?**
-  _Cohesion score 0.10338680926916222 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12433862433862433 - nodes in this community are weakly interconnected._
 - **Why does `Riferimento: il gioco originale` connect `make_map.py` to `game.js`?**
-  _High betweenness centrality (0.195) - this node is a cross-community bridge._
+  _High betweenness centrality (0.212) - this node is a cross-community bridge._
 - **Should `t` be split into smaller, more focused modules?**
   _Cohesion score 0.0735930735930736 - nodes in this community are weakly interconnected._
 - **Why does `Calcio arcade (progetto)` connect `make_map.py` to `Economia di Ultimate Team (crediti, pacchetti, mercato)`, `Stato personaggi: completo (25 personaggi, lavoro finito)`, `build.mjs`, `Animazioni (area, clip controllate su 25 personaggi)`, `Gioco (README)`, `Regole del progetto`, `Interfaccia gioco: decisioni prese con l'utente`?**
