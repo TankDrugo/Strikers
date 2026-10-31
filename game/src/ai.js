@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { FIELD, FIELDER, TACKLE, SUPER } from './config.js';
+import { FIELD, FIELDER, TACKLE } from './config.js';
 import { angleDiff } from './player.js';
 
 const v = new THREE.Vector3();
@@ -52,15 +52,9 @@ export function fielderAI(game, p, dt) {
       if (d < nearest) { nearest = d; nearestAhead = (o.pos.x - p.pos.x) * p.attackDir > -0.3; }
     }
     const aimZ = Math.max(-3, Math.min(3, -p.pos.z * 0.3));
-    // the CPU captain with room in the opponents' half charges the Super Strike (config.js SUPER: chance per second)
-    if (game.canSuper(p) && dGoal < 22 && nearest > 1.8 && p.aiTimer > 0.35 && Math.random() < game.cpuTune(SUPER.cpuChance) * dt * 1.5) {
-      game.startWindup(p, SUPER.chargeSeconds + 0.1);
-      return;
-    }
     if (dGoal < 14.5 && Math.abs(p.pos.z) < 9.5 && p.aiTimer > 0.35) {
-      // or holds a close-range shot a bit longer (config.js SUPER)
-      const sup = game.canSuper(p) && Math.random() < game.cpuTune(SUPER.cpuChance) * (nearest > 2.5 ? 1 : 0.5);
-      game.startWindup(p, sup ? SUPER.chargeSeconds + 0.1 : 0.25 + Math.random() * 0.45);
+      // the captain in the opponents' half holds to the full bar: there the CPU decides on the Super Strike (game.js)
+      game.startWindup(p, game.canSuper(p) ? null : 0.25 + Math.random() * 0.45);
       return;
     }
     if (nearest < 2.4 && nearestAhead && p.aiTimer > 0.4) {

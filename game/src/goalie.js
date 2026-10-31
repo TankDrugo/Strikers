@@ -21,6 +21,7 @@ const tmp = new THREE.Vector3();
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 
 export const saveTable = SAVES;
+export { nearestDeflection };
 
 function cellOf(lat, h) {
   return [clamp(Math.floor((lat + NET_W / 2) / (NET_W / GX)), 0, GX - 1), clamp(Math.floor(h / (NET_H / GY)), 0, GY - 1)];
@@ -87,16 +88,15 @@ function rootAt(meta, t) {
 export class Keeper {
   constructor(game) { this.game = game; }
 
-  // Ball.cpp (shot released) → Goalie::InitActionSaveSetup: the keeper reacts at once. Returns true if he dives.
-  onShot(g) {
-    const game = this.game, b = game.ball;
-    if (g.state !== 'free') return false;
+  // Goalie::CalcTimeToPlane: the ball simulated up to the plane 0.2 m in front of the keeper, turned towards the ball.
+  // Returns the time, the point, and the point in the keeper's frame (original metres), or null (no dive).
+  plan(g) {
+    const b = this.game.ball;
     const out = g.attackDir, gx = -out * FIELD.halfLength;
     const path = predict(b.pos, b.vel, b.spin, b.magnus, 2.5);
     // Save Ignore Margin: a shot that misses the goal by more than 1 m gets no dive
     const line = path.find((s) => (s.p.x - gx) * out <= 0);
-    if (!line || Math.abs(line.p.z) > FIELD.goalHalfWidth + GOALIE.saveIgnoreMargin || line.p.y > FIELD.goalHeight + GOALIE.saveIgnoreMargin) return false;
-    // CalcTimeToPlane: the plane 0.2 m in front of the keeper, turned towards the ball
+    if (!line || Math.abs(line.p.z) > FIELD.goalHalfWidth + GOALIE.saveIgnoreMargin || line.p.y > FIELD.goalHeight + GOALIE.saveIgnoreMargin) return null;
     const f = Math.atan2(b.pos.z - g.pos.z, b.pos.x - g.pos.x);
     const fx = Math.cos(f), fz = Math.sin(f);
     const side = (q) => (q.x - g.pos.x) * fx + (q.z - g.pos.z) * fz - GOALIE.savePlane;
@@ -109,19 +109,37 @@ export class Keeper {
         break;
       }
     }
-    if (!cross) return false;
+    if (!cross) return null;
     // contact point in the keeper's frame: lateral along the table's +y (the "left" of applyRootMotion), height
     const lx = Math.sin(f), lz = -Math.cos(f);
     const reach = SIZE * (g.cfg.saveReach ?? 1);
-    const lat = ((cross.p.x - g.pos.x) * lx + (cross.p.z - g.pos.z) * lz) / reach, h = cross.p.y / reach;
+    return { f, cross, lat: ((cross.p.x - g.pos.x) * lx + (cross.p.z - g.pos.z) * lz) / reach, h: cross.p.y / reach };
+  }
+
+  // world point of a table point (lat, h in original metres) seen from keeper g turned to f, on the save plane
+  worldPoint(g, f, lat, h, out = new THREE.Vector3()) {
+    const reach = SIZE * (g.cfg.saveReach ?? 1);
+    return out.set(g.pos.x + Math.cos(f) * GOALIE.savePlane + Math.sin(f) * lat * reach, h * reach, g.pos.z + Math.sin(f) * GOALIE.savePlane - Math.cos(f) * lat * reach);
+  }
+
+  // Ball.cpp (shot released) → Goalie::InitActionSaveSetup: the keeper reacts at once. Returns true if he dives.
+  // opts (Super Strike): forceMiss, delay, allowCatch, extraTime
+  onShot(g, opts = {}) {
+    const b = this.game.ball;
+    if (g.state !== 'free') return false;
+    const pl = this.plan(g);
+    if (!pl) return false;
+    const { cross, lat, h } = pl;
     // CalcRegularShot: catches only for a chip shot, or a rested keeper (energy >= 90) and a soft shot (charge < 0.3)
-    const allowCatch = b.isChip || (g.energy >= GOALIE.fatigueCatch && b.shotPower < GOALIE.catchMaxShotPower);
+    const allowCatch = opts.allowCatch ?? (b.isChip || (g.energy >= GOALIE.fatigueCatch && b.shotPower < GOALIE.catchMaxShotPower));
     const rate = g.cfg.saveRate ?? 1;
+    const mustMiss = opts.forceMiss ?? b.shouldMiss;
+    const t = cross.t + (opts.extraTime ?? 0);
     let save = null, miss = false, delay = 0;
-    if (!b.shouldMiss) save = findBestSave(lat, h, cross.t, { allowCatch, rate }) || findBestSave(lat, h, cross.t, { allowCatch, rate, fromTakeoff: true });
-    if (!save) { save = nearestDeflection(lat, h); miss = true; if (b.shouldMiss) delay = GOALIE.missSaveDelay; }
+    if (!mustMiss) save = findBestSave(lat, h, t, { allowCatch, rate }) || findBestSave(lat, h, t, { allowCatch, rate, fromTakeoff: true });
+    if (!save) { save = nearestDeflection(lat, h); miss = true; if (mustMiss) delay = opts.delay ?? GOALIE.missSaveDelay; }
     if (!save) return false;
-    this.startSave(g, save, { t: cross.t + delay, f, cross, lat, h, miss, allowCatch, rate, kick: b.kickId });
+    this.startSave(g, save, { t: cross.t + delay, f: pl.f, cross, lat, h, miss, allowCatch, rate, kick: b.kickId });
     return true;
   }
 
@@ -308,7 +326,7 @@ export class Keeper {
 
   trap(g, dt) {
     const game = this.game, b = game.ball, d = g.stateData, meta = game.template.meta.gk_trap_attack;
-    g.applyRootMotion();
+    g.applyRootMotion(g.stateTime);
     if (!d.done && g.stateTime >= (meta?.contact ?? 0.15)) {
       d.done = true;
       if (Math.hypot(b.pos.x - g.pos.x, b.pos.z - g.pos.z) < g.cfg.catchTolerance + GOALIE.pounceRange * 0.5 && b.pos.y < 1.0 * SIZE) {

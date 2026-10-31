@@ -151,22 +151,39 @@ export const SKILL = {
 };
 export const SKILL_FROM_LEVEL = ['shotChance', 'stsWindup', 'attackCarrierRange', 'looseBallRange', 'goalieInterceptPass'];
 
-// Super Strike (Shoot-to-Score), captain only, never the keeper. Original values from reference/STRIKERS_REFERENCE.md
-// (Super Strike §5, goalie §6); the ones marked "estimate" are not in the files we have and were tuned by hand.
+// Super Strike (Shoot-to-Score), captain only, never the keeper (reference/VERIFICA.md §3, §9.3, §10).
+// The charge is Shot Windup Seconds + STS Windup Time (SKILL.stsWindup, 0.25 at every level): 0.91 s.
+// Frames are frames of captain_shoot_to_score (127 frames at 30 per second), which plays at rate 1 in game time.
 export const SUPER = {
-  chargeSeconds: 1.6,     // estimate: hold the shot this long (normal bar full at 0.66 s, then the captain glows)
-  slowMotion: 0.72,       // original 0.68-0.78
-  needleSeconds: 0.9,     // estimate: one sweep of a needle across the meter, in game time
-  marks: [0.84, 0.16],    // first needle goes up and stops near 0.84, the second comes down to 0.16 (original)
-  perfect: 0.05,          // dark green: within ±0.05 of the mark (original ±0.02-0.06)
-  near: 0.13,             // light green around it (estimate)
-  hangClip: [0.9, 2.0],   // captain_shoot_to_score: in the air from 0.9 s to 2.0 s (the meter runs here), kick at 'contact'
-  kickRate: 1.35,         // the part after the meter, a little faster (estimate)
-  speed: 30,              // m/s of the strike (estimate: faster than any normal shot)
-  points: 2,              // a Super Strike goal counts double
-  keeperStun: [1, 2],     // seconds the keeper stays down after stopping one (original 1-2 s)
-  cpuChance: [0.25, 0.4, 0.55, 0.7], // CPU captain tries it on this share of its shots, per difficulty (estimate)
-  cpuError: [0.16, 0.1, 0.06, 0.035], // CPU needle error, per difficulty (estimate)
+  jumpFrame: 3, nisBeginFrame: 26, kickFrame: 27, nisEndFrame: 106, // S2S 1st Jump / Nis Begin / Kick / Nis End Frame (mario.ini, same in all 13)
+  attackUntilFrame: 24, // trigger 0x85181b83 of the clip: the keeper can come out on the captain only before it (Goalie.cpp)
+  superTimeFrame: 63, // super only: time back to 1, team camera from 0.4, flash (ActionShootToScore)
+  effectFrame: 67, lightOffFrame: 94, // <team>_captain_sts_effect and the special light on the captain, off at 94
+  noReturnFrame: 103.9, // first kick: the world fades back, point of no return (super: the orbit around the ball)
+  marks: [0.84, 0.16], // S2S Perfect First/Second Button Time (GameTweaks.ini)
+  perfectMin: 0.02, perfectMax: 0.06, // S2S Perfect Distance Min/Max: first press snaps within Min; green of the second Min..Max
+  yellow: 0.1, // S2S 2 Button Press Yellow Dist (GameTweaks.ini)
+  secondBelow: 0.6, // the second press counts only going down and below 0.6
+  greenScale: 1, yellowScale: 1, // per character (DK, Wario ×1.1/×0.75; Waluigi, Yoshi ×0.92/×1.25; Peach, Daisy ×0.84/×1.5): ours use Mario's
+  yellowBounce: 0.95, // CalcShootToScoreShot: a yellow press is punched away when 0.95 × random < value
+  slowMo: [0.68, 0.78], slowMoDist: [9, 18], // S2S Slow Mo Min/Max from 9 to 18 m (FindSTSDistanceAffectedPercentage)
+  waitSlowMo: 0.1, // past the NIS begin frame without the second press
+  orbitScale: 0.005, orbitSeconds: 4.25, orbitTurns: 0.61, orbitFov: 50, // super: camera around the ball at the first kick
+  speedScale: 1.25, // CalcShootToScoreShot: flight time = distance / (1.25 × the shot speed)
+  bounceSlow: 1.2, // a strike that gets punched away flies 1.2 times slower
+  targetLow: 0.5, // low target: ball radius + post + random up to 0.5 m
+  swatDistance: 7, swatChance: 0.66, // punched away from beyond 7 m: gk_ball_swat with 66% × value
+  saveCatchShare: 0.75, saveExtraTime: 0.1, wideIfFarther: 1.0, // otherwise a normal save: 75% catches, +0.1 s, wide if the save is 1 m off
+  missDelay: 0.2, // "goal": the keeper plays a missed save at least 0.2 s late
+  points: 2, // a Super Strike goal counts double (Game.cpp m_uGoalType 6)
+  keeperStun: [1, 2], // Min/Max STS Stun Time (goalie.ini)
+  blastBehind: 1.5, // gk_s2s_blast_into_net: the keeper ends 1.5 m behind the goal line
+  attackClose: 1.0 * SIZE, attackMax: 2.0 * SIZE, attackChance: 0.01, // STS Attack Close/Max Distance, Chance Per Frame (goalie.ini)
+  nearGoalLine: 2.0, // InitActionShootToScore: within 2 m of the goal line and in front of the goal it is a normal shot
+  endOfMatch: 5, // estimate: "at the end of the match" it is a normal shot (seconds left on the clock)
+  cpuError: 0.3, // FD / S2SShootWasPressed: without the exact press (Captain S2S Perfect Button Chance) a uniform ±0.3 error
+  cpuOpen: 0.8, cpuKeeperNear: 0.65, // FD: the CPU tries it only with Open >= 0.8 and keeper closeness <= 0.65
+  cpuOpenDist: 1.5, cpuKeeperDist: [3, 12], // estimate of those two fuzzy terms: Open 1 with nobody within 1.5 m; keeper closeness 1 at 3 m, 0 at 12 m
 };
 
 export const TACKLE = {

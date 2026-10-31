@@ -156,10 +156,11 @@ export class Player {
   clipDone() { return !this.current || (this.current.time >= this.current.getClip().duration - 1e-3 && !this.current.isRunning()) || this.current.time >= this.current.getClip().duration - 1e-3; }
 
   // Root motion of the current clip, moved into world space (for slides, hits, reactions, dekes).
-  applyRootMotion() {
+  // time: clip time to sample (default: the mixer's); logic that must not depend on drawing passes its own clock
+  applyRootMotion(time = null) {
     const m = this.meta[this.currentName];
     if (!m || !this.current) return;
-    const t = Math.min(this.current.time, m.duration);
+    const t = Math.min(time ?? this.current.time, m.duration);
     const k = Math.min(m.root.length - 1, Math.max(0, t * 30));
     const i = Math.floor(k), f = k - i, a = m.root[i], b = m.root[Math.min(i + 1, m.root.length - 1)];
     const fwd = a[0] + (b[0] - a[0]) * f, left = (a[1] + (b[1] - a[1]) * f) * (this.mirrored ? -1 : 1);

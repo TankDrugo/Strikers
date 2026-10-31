@@ -5,7 +5,7 @@ import { buildField, buildBallMesh } from './field.js';
 import { Stadium } from './stadium.js';
 import { Player, angleDiff, seekDirection } from './player.js';
 import { fielderAI, bestPassTarget } from './ai.js';
-import { Keeper } from './goalie.js';
+import { Keeper, findBestSave } from './goalie.js';
 import { t } from './ui/i18n.js';
 
 const R = BALL.radius;
@@ -76,6 +76,7 @@ export class Game {
     this.acc = 0;
     this.timeScale = 1;
     this.superStrike = null; // the Super Strike in progress: { p, keeper, phase, needle, n, outcome, ... }
+    this.effects = []; // short-lived meshes (the Super Strike burst)
     this.camLift = 0;
     this.stats = { shots: [0, 0], saves: [0, 0], passes: [0, 0], tackles: [0, 0], posts: 0 };
     this.kickoff(0);
@@ -184,8 +185,14 @@ export class Game {
   }
 
   setupLights() {
-    this.scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x2a3a2a, 1.35));
+    this.hemi = new THREE.HemisphereLight(0xcfe0ff, 0x2a3a2a, 1.35);
+    this.scene.add(this.hemi);
     const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    this.sun = sun;
+    // the Super Strike scene: the world goes dark, a special light on the captain (ActionShootToScore)
+    this.capLight = new THREE.PointLight(0xfff1c0, 0, 9 * SIZE, 1.5);
+    this.scene.add(this.capLight);
+    this.darkness = 0;
     sun.position.set(-10, 34, 14); // floodlight key light
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -203,6 +210,7 @@ export class Game {
     this.ball.superStrike = null; this.superStrike = null; this.timeScale = 1;
     for (const p of this.players) {
       p.setState('free'); p.stun = 0; p.speed = 0; p.turbo = false;
+      if (p.isGoalie) p.energy = 100;
       p.pos.copy(p.home);
       if (!p.isGoalie) p.pos.x = Math.sign(p.home.x) * Math.max(Math.abs(p.home.x), 2.5);
       p.facing = p.team === 0 ? 0 : Math.PI;
@@ -431,67 +439,118 @@ export class Game {
     return this.phase === 'play' && !this.superStrike && this.isCaptain(p) && this.ball.owner === p && p.pos.x * p.attackDir > 0;
   }
 
+  // ShotMeter::Update, GetTotalDuration: Shot Windup Seconds + STS Windup Time
+  superChargeSeconds(p) { return SHOT.windupSeconds + this.skill('stsWindup', p.team); }
+
+  // FD (charge): at the switch to the long charge the CPU tries it with Captain ShootToScore Chance, only when free
+  // (Open >= 0.8) and not too close to the keeper (closeness <= 0.65). The two fuzzy terms are estimates (config.js).
+  cpuWantsSuper(p) {
+    let near = 99;
+    for (const o of this.players) if (o.team !== p.team && !o.isGoalie && o.stun <= 0) near = Math.min(near, Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z));
+    const k = this.goalieOf(1 - p.team), dk = Math.hypot(k.pos.x - p.pos.x, k.pos.z - p.pos.z);
+    const [k0, k1] = SUPER.cpuKeeperDist;
+    return clamp01(near / SUPER.cpuOpenDist) >= SUPER.cpuOpen && clamp01((k1 - dk) / (k1 - k0)) <= SUPER.cpuKeeperNear
+      && Math.random() < this.skill('captainS2SChance', p.team);
+  }
+
   startSuper(p) {
-    const err = this.cpuTune(SUPER.cpuError), gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 1.15;
-    this.superStrike = { p, keeper: this.goalieOf(1 - p.team), phase: 'jump', t: 0, needle: 0, n: [null, null], outcome: null,
-      human: p.humanControlled, cpuStops: SUPER.marks.map((m) => m + gauss() * err), pressed: false };
+    const goalX = p.attackDir * FIELD.halfLength;
+    // InitActionShootToScore: next to the goal line in front of the goal, or at the end of the match: a normal shot
+    if ((Math.abs(goalX - p.pos.x) < SUPER.nearGoalLine && Math.abs(p.pos.z) < FIELD.goalHalfWidth) || this.clock < SUPER.endOfMatch) { this.releaseShot(p); return; }
+    const dist = Math.hypot(goalX - p.pos.x, p.pos.z);
+    const meta = this.template.meta.captain_shoot_to_score;
+    // CPU presses: exact with Captain S2S Perfect First/Second Button Chance, otherwise a uniform error of ±0.3
+    const pc = this.skill('captainS2SPerfect', p.team);
+    const aim = (m) => (Math.random() < pc ? m : m + (Math.random() * 2 - 1) * SUPER.cpuError);
+    this.superStrike = { p, keeper: this.goalieOf(1 - p.team), t: 0, dur: meta?.duration ?? 127 / FPS, phase: 'meter', needle: 0, up: true,
+      n: [null, null], green: SUPER.perfectMin, outcome: null, value: 1, human: p.humanControlled,
+      cpu: p.humanControlled ? null : [aim(SUPER.marks[0]), aim(SUPER.marks[1])], pressT: null,
+      slow: lerpRange(SUPER.slowMo[0], SUPER.slowMo[1], SUPER.slowMoDist[0], SUPER.slowMoDist[1], dist), dist,
+      frozen: false, dark: 0, light: 0, orbit: null, sceneT: 0 };
     p.setState('super', {});
     p.speed = 0;
-    p.play('captain_shoot_to_score', { fade: 0.06 });
-    this.setSuperClip(p, 0);
-    this.timeScale = SUPER.slowMotion;
+    p.facing = Math.atan2(-p.pos.z, goalX - p.pos.x); // CalcAnimTurnAdjust: turned to the goal
+    p.play('captain_shoot_to_score', { fade: 0.1, mirror: p.pos.z * p.attackDir > 0 }); // mirrored by the side of the pitch
+    this.timeScale = this.superStrike.slow; // FindSTSDistanceAffectedPercentage
     this.hud.flash(t('flash.super'), '#ffd21f', 1.4);
     this.emit('superStart', { team: p.team });
   }
 
-  // the clip is driven by the sequence (the meter can last any time), not by the mixer
-  setSuperClip(p, time) {
-    const a = p.actions.captain_shoot_to_score;
-    if (!a) return;
-    a.time = Math.min(time, a.getClip().duration - 0.001);
-    a.timeScale = 0;
+  // ActionShootToScore: the needle from the clip frame: up from the jump frame to the centre, down to the NIS begin frame
+  superNeedle(f) {
+    const j = SUPER.jumpFrame, n = SUPER.nisBeginFrame, c = (j + n) / 2;
+    if (f < j) return 0;
+    return f <= c ? (f - j) / (c - j) : Math.max(0, 1 - (f - c) / (n - c));
   }
 
   superUpdate(p, dt) {
     const s = this.superStrike;
+    p.speed = 0;
+    const dur = this.template.meta.captain_shoot_to_score?.duration ?? 127 / FPS;
     if (!s || s.p !== p || s.phase === 'flight') {
-      // strike gone (goal, kickoff) or flying: finish the landing, then play on
-      const a = p.actions.captain_shoot_to_score;
-      p.stateData.t = (p.stateData.t ?? a?.time ?? 0) + dt * SUPER.kickRate;
-      this.setSuperClip(p, p.stateData.t);
-      if (!a || p.stateData.t >= a.getClip().duration - 0.05) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
+      // the ball is gone (or the strike was stopped): the clip runs to its end, then play on
+      if (p.stateTime >= dur - 0.05) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
       return;
     }
-    p.speed = 0;
-    s.t += dt;
-    const [h0, h1] = SUPER.hangClip;
-    if (s.phase === 'jump') {
-      this.setSuperClip(p, s.t);
-      if (s.t >= h0) { s.phase = 'meter1'; s.t = 0; s.pressed = false; }
-    } else if (s.phase === 'meter1' || s.phase === 'meter2') {
-      const i = s.phase === 'meter1' ? 0 : 1;
-      const f = Math.min(1, s.t / SUPER.needleSeconds);
-      s.needle = i === 0 ? f : 1 - f;
-      this.setSuperClip(p, h0 + (h1 - h0) * (i + f) / 2); // drift through the hang pose
-      const cpuStop = !s.human && (i === 0 ? s.needle >= s.cpuStops[0] : s.needle <= s.cpuStops[1]);
-      if (s.pressed || cpuStop || f >= 1) {
-        s.pressed = false; s.n[i] = s.needle; s.t = 0;
-        if (i === 0) s.phase = 'meter2';
-        else { s.outcome = this.superOutcome(s.n); s.phase = 'kick'; }
+    s.t += dt; // the clip plays at rate 1 in game time
+    const f = s.t * FPS;
+    if (s.phase === 'meter') {
+      const c = (SUPER.jumpFrame + SUPER.nisBeginFrame) / 2;
+      s.up = f <= c;
+      s.needle = this.superNeedle(f);
+      // a press counts at its own moment: the needle moves 0.05 per 50 Hz step, more than the green is wide
+      if (s.pressT !== null && s.pressT !== undefined) {
+        const fp = Math.min(s.pressT, s.t) * FPS;
+        this.superPress(s, this.superNeedle(fp), fp <= c);
+        s.pressT = null;
       }
-    } else if (s.phase === 'kick') {
-      const clipT = h1 + s.t * SUPER.kickRate;
-      this.setSuperClip(p, clipT);
-      const contact = this.template.meta.captain_shoot_to_score?.contact ?? 3.4;
-      if (clipT >= contact) { p.stateData.t = clipT; this.superShoot(p, s); }
+      if (s.cpu && f >= SUPER.jumpFrame) {
+        if (s.n[0] === null && s.up && s.needle >= s.cpu[0]) this.superPress(s, Math.max(s.cpu[0], 0), true);
+        else if (s.n[0] !== null && !s.up && s.n[1] === null && s.cpu[1] >= 0 && s.needle <= Math.min(s.cpu[1], SUPER.secondBelow - 1e-3)) this.superPress(s, Math.min(s.cpu[1], SUPER.secondBelow - 1e-3), false);
+      }
+      if (!s.up && s.n[0] === null) s.n[0] = 1; // no first press by the centre: it counts as 1
+      if (s.n[0] !== null) s.green = this.superGreen(s.n[0]);
+      if (f >= SUPER.nisBeginFrame && s.n[1] === null) this.timeScale = SUPER.waitSlowMo;
+      if (f >= SUPER.kickFrame) this.superResult(s);
+    } else if (s.phase === 'scene') {
+      if (s.outcome === 'super' && !s.atTime && f >= SUPER.superTimeFrame) { s.atTime = true; this.timeScale = 1; this.hud.flash(t('flash.super'), '#ffffff', 0.6); }
+      if (!s.fx && f >= SUPER.effectFrame) { s.fx = true; s.light = 1; this.superEffect(p); }
+      if (!s.lightOff && f >= SUPER.lightOffFrame) { s.lightOff = true; s.light = 0; }
+      if (!s.noReturn && f >= SUPER.noReturnFrame) {
+        s.noReturn = true; s.dark = 0; // fade_from_dark: the world comes back
+        if (s.outcome === 'super') { s.orbit = { real: 0 }; this.timeScale = SUPER.orbitScale; }
+      }
+      if (f >= SUPER.nisEndFrame) this.superShoot(p, s);
     }
   }
 
-  // each needle: dark green 2, light green 1, outside 0. 4 = perfect (unstoppable, keeper blasted into the net),
-  // 3 = goal (the keeper misses it), less = the keeper punches it away (MarioWiki, Super Strike)
-  superOutcome(n) {
-    const pts = n.reduce((a, v, i) => { const d = Math.abs(v - SUPER.marks[i]); return a + (d <= SUPER.perfect ? 2 : d <= SUPER.near ? 1 : 0); }, 0);
-    return pts >= 4 ? 'perfect' : pts === 3 ? 'goal' : 'saved';
+  superPress(s, v, up) {
+    // first press: only past Perfect Second Button Time; within Perfect Distance Min it is exactly perfect
+    if (s.n[0] === null && up && v >= SUPER.marks[1]) s.n[0] = Math.abs(v - SUPER.marks[0]) < SUPER.perfectMin ? SUPER.marks[0] : v;
+    // second press: only going down and below 0.6
+    else if (s.n[0] !== null && !up && s.n[1] === null && v < SUPER.secondBelow) s.n[1] = v;
+  }
+
+  // green of the second press: Perfect Distance Min, widened up to Max × the character's multiplier when the first
+  // press was within the yellow (the closer, the wider)
+  superGreen(n0) {
+    const d1 = Math.abs(n0 - SUPER.marks[0]), y = SUPER.yellow * SUPER.yellowScale;
+    return d1 <= y ? SUPER.perfectMin + (SUPER.perfectMax * SUPER.greenScale - SUPER.perfectMin) * (1 - d1 / y) : SUPER.perfectMin;
+  }
+
+  // Fielder.cpp DoCalcShootToScoreResult, at the kick frame (27)
+  superResult(s) {
+    const y = SUPER.yellow * SUPER.yellowScale, green = this.superGreen(s.n[0]);
+    const d2 = s.n[1] === null ? 1 : Math.abs(s.n[1] - SUPER.marks[1]);
+    if (d2 <= green) s.outcome = s.n[0] === SUPER.marks[0] ? 'super' : 'goal';
+    else if (d2 <= y) { s.value = (d2 - green) / (y - green); s.outcome = SUPER.yellowBounce * Math.random() < s.value ? 'saved' : 'yellow'; }
+    else { s.outcome = 'saved'; s.value = 1; }
+    s.green = green;
+    s.phase = 'scene';
+    s.dark = 1; // fade_to_dark_amount 1
+    s.frozen = s.outcome === 'super'; // FreezeEveryoneButCaptain
+    this.timeScale = s.outcome === 'super' ? s.slow : 1;
+    this.emit('superResult', { team: s.p.team, outcome: s.outcome });
   }
 
   superBallPoint(p, out) {
@@ -501,46 +560,160 @@ export class Game {
     return out.set(p.pos.x + Math.cos(p.facing) * lead, Math.max(R, y + 0.1), p.pos.z + Math.sin(p.facing) * lead);
   }
 
+  // Fielder.cpp CalcShootToScoreShot, at frame 106: a low ball at 1.25 × the shot speed; the keeper's part by result
   superShoot(p, s) {
     const b = this.ball, k = s.keeper, goalX = p.attackDir * FIELD.halfLength;
-    const side = k.pos.z > 0 ? -1 : 1;
-    const target = s.outcome === 'saved' ? new THREE.Vector3(k.pos.x, 1.1 * SIZE, k.pos.z)
-      : new THREE.Vector3(goalX + p.attackDir * 0.4, 0.9, side * (FIELD.goalHalfWidth - 0.7));
+    s.phase = 'flight'; s.frozen = false; s.orbit = null; s.dark = 0; s.light = 0; this.timeScale = 1;
     const from = b.pos.clone();
-    const flight = Math.max(0.3, from.distanceTo(target) / SUPER.speed);
-    b.kick(shootAtFast(from, target, flight), null, { shot: true, power: 1, perfect: s.outcome === 'perfect', noPickup: 9 });
+    const dPost = Math.min(Math.hypot(goalX - from.x, -FIELD.goalHalfWidth - from.z), Math.hypot(goalX - from.x, FIELD.goalHalfWidth - from.z));
+    let speed = SUPER.speedScale * lerpRange(p.cfg.shot[0], p.cfg.shot[1], SHOT.speedRange[0], SHOT.speedRange[1], dPost * (SHOT.speedChargeBias + 1));
+    const side = k.pos.z > 0 ? -1 : 1;
+    let target = new THREE.Vector3(goalX, R + FIELD.postRadius + Math.random() * SUPER.targetLow, side * (FIELD.goalHalfWidth - R - FIELD.postRadius - SHOT.offsetFromPost));
+    const kf = Math.atan2(from.z - k.pos.z, from.x - k.pos.x);
+    let keeperDo = null;
+    if (s.outcome === 'yellow') {
+      // gk_s2s_knocked_out_start: the ball hits him (its ball bone at contact, ×SIZE)
+      target = this.keeper.worldPoint(k, kf, 0.02, 1.172);
+      keeperDo = 'stun';
+    } else if (s.outcome === 'saved') {
+      speed /= SUPER.bounceSlow;
+      if (s.dist > SUPER.swatDistance && Math.random() < SUPER.swatChance * s.value) { target = this.keeper.worldPoint(k, kf, 0, 1.0); keeperDo = 'swat'; }
+      else keeperDo = 'save';
+    }
+    let flight = Math.max(0.15, from.distanceTo(target) / speed);
+    b.kick(shootAtFast(from, target, flight), null, { shot: true, power: 1, perfect: s.outcome === 'super', noPickup: 9 });
     b.superStrike = { team: p.team, outcome: s.outcome };
+    if (keeperDo === 'save') {
+      // a normal save with 75% catches and 0.1 s more; if its point is more than 1 m off, the ball goes just wide
+      const pl = k.state === 'free' || k.state === 'react' ? this.keeper.plan(k) : null;
+      const sv = pl && findBestSave(pl.lat, pl.h, pl.cross.t + SUPER.saveExtraTime, { allowCatch: Math.random() < SUPER.saveCatchShare, rate: k.cfg.saveRate ?? 1 });
+      if (sv && sv.d <= SUPER.wideIfFarther) {
+        target = this.keeper.worldPoint(k, pl.f, sv.pt[0], sv.pt[1]);
+        flight = Math.max(0.15, from.distanceTo(target) / speed);
+        b.vel.copy(shootAtFast(from, target, flight));
+        k.setState('free');
+        this.keeper.startSave(k, sv, { t: flight, f: pl.f, cross: { t: flight, p: target.clone() }, lat: sv.pt[0], h: sv.pt[1], miss: false, allowCatch: true, rate: k.cfg.saveRate ?? 1, kick: b.kickId });
+      } else {
+        target.z = side * (FIELD.goalHalfWidth + 0.35);
+        flight = Math.max(0.15, from.distanceTo(target) / speed);
+        b.vel.copy(shootAtFast(from, target, flight));
+        k.setState('free'); this.keeper.onShot(k, { forceMiss: true, delay: SUPER.missDelay });
+      }
+    } else if (s.outcome === 'goal') {
+      k.setState('free'); this.keeper.onShot(k, { forceMiss: true, delay: SUPER.missDelay }); // a missed save, at least 0.2 s late
+    } else {
+      // stun, swat, or the unstoppable strike (FindSTSMissData: blast into the net or spin): timed on the contact trigger
+      const kind = keeperDo || (Math.random() < 0.5 ? 'blast' : 'spin');
+      const clip = { stun: 'gk_s2s_knocked_out_start', swat: 'gk_ball_swat', blast: 'gk_s2s_blast_into_net', spin: 'gk_s2s_spin' }[kind];
+      const m = this.template.meta[clip];
+      const contact = kind === 'swat' ? 5 / 45 * (m?.duration ?? 1.5) : kind === 'stun' ? 0.32 * (m?.duration ?? 1.167) : 0.08; // trigger 0xcf84e7cd
+      k.setState('sts', { kind, clip, contactAt: Math.max(0, flight - contact), started: false, hitAt: flight, from: k.pos.clone(), f: kf,
+        mirror: kind === 'spin' ? (k.pos.z - target.z) * k.attackDir < 0 : false });
+      k.facing = kf;
+    }
     this.stats.shots[p.team]++;
-    this.emit('shot', { team: p.team, perfect: s.outcome === 'perfect', superStrike: true });
-    this.timeScale = 1;
-    s.phase = 'flight'; s.t = 0; s.arrive = flight;
+    this.emit('shot', { team: p.team, perfect: s.outcome === 'super', superStrike: true });
+    s.t = 0; s.arrive = flight;
   }
 
-  // keeper reaction and, when the strike was not good enough, the punch away
-  superFlight(dt) {
-    const s = this.superStrike, b = this.ball, k = s.keeper;
-    s.t += dt;
-    if (!s.reacted && s.t >= s.arrive - 0.3) {
-      s.reacted = true;
-      k.setState('react', {});
-      if (s.outcome === 'perfect') { k.stun = 3; k.play('gk_s2s_blast_into_net', { fade: 0.05 }); }
-      else if (s.outcome === 'goal') { k.stun = 3; k.play('gk_s2s_spin', { fade: 0.05 }); }
-      else { k.stun = 0.6; k.play('gk_attack_s2s_high', { fade: 0.05 }); }
+  // the keeper's Super Strike clips (state 'sts'): stunned save, swat, blasted into the net, spin
+  superKeeper(k, dt) {
+    const d = k.stateData, b = this.ball, meta = this.template.meta;
+    if (!d.started && k.stateTime >= d.contactAt) { d.started = true; k.play(d.clip, { fade: 0.05, mirror: d.mirror }); d.t0 = k.stateTime; }
+    if (d.kind === 'blast' && d.started) {
+      // ends 1.5 m behind the goal line, through the net (no collisions)
+      const goalX = -k.attackDir * (FIELD.halfLength + SUPER.blastBehind);
+      const u = clamp01((k.stateTime - d.t0) / ((meta[d.clip]?.duration ?? 2.2) * 0.5));
+      k.pos.x = d.from.x + (goalX - d.from.x) * u;
+      k.pos.z = d.from.z * (1 - u * 0.3);
+    } else if (d.kind === 'spin' && d.started) k.applyRootMotion();
+    if (!d.hit && k.stateTime >= d.hitAt) {
+      d.hit = true;
+      if (d.kind === 'stun' || d.kind === 'swat') {
+        // the ball bounces off him (a save: m_uGoalType 4 for the stun)
+        const ang = (k.attackDir > 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 1.6, sp = b.vel.length() * 0.3;
+        b.kick(new THREE.Vector3(Math.cos(ang) * sp, 4 + Math.random() * 3, Math.sin(ang) * sp), null, { noPickup: 0.35 });
+        b.lastTouch = k; b.superStrike = null;
+        k.energy = Math.max(0, k.energy - (d.kind === 'stun' ? GOALIE.fatigue.stsStun : GOALIE.fatigue.stsSave));
+        this.stats.saves[k.team]++;
+        this.emit('save', { team: k.team, superStrike: true });
+        this.hud.flash(t('flash.superSaved'));
+        if (d.kind === 'stun') d.stunUntil = k.stateTime + Math.max(0, (meta[d.clip]?.duration ?? 1.17) - (k.stateTime - d.t0)) + SUPER.keeperStun[0] + Math.random() * (SUPER.keeperStun[1] - SUPER.keeperStun[0]);
+        this.superStrike = null;
+      }
     }
-    if (s.outcome === 'saved' && !s.deflected && (b.pos.distanceTo(tmp.set(k.pos.x, b.pos.y, k.pos.z)) < 1.0 * SIZE || s.t >= s.arrive)) {
-      s.deflected = true;
-      b.vel.set(k.attackDir * (10 + Math.random() * 4), 5 + Math.random() * 3, (Math.random() - 0.5) * 10);
-      b.spin.set(0, 0, 0); b.magnus = false; b.noPickup = 0.35; b.shotTimer = 0; b.superStrike = null; b.lastTouch = k;
-      k.stun = SUPER.keeperStun[0] + Math.random() * (SUPER.keeperStun[1] - SUPER.keeperStun[0]);
-      k.play('gk_s2s_knocked_out_start', { fade: 0.05 });
-      this.stats.saves[k.team]++;
-      this.emit('save', { team: k.team, superStrike: true });
-      this.hud.flash(t('flash.superSaved'));
-      this.superStrike = null;
-    } else if (s.outcome !== 'saved' && !b.inGoal && s.t >= s.arrive + 0.35) {
-      // unstoppable: if a post or the net edge got in the way, it still counts
+    const len = meta[d.clip]?.duration ?? 1.5;
+    if (d.kind === 'stun' && d.started) {
+      // gk_s2s_knocked_out_start, then gk_s2s_defl_knocked_out_loop for Min..Max STS Stun Time, then the recovery
+      if (!d.loop && k.stateTime - d.t0 >= len) { d.loop = true; k.play('gk_s2s_defl_knocked_out_loop', { loop: true, fade: 0.1 }); }
+      if (d.loop && !d.rec && d.stunUntil && k.stateTime >= d.stunUntil) { d.rec = true; d.recAt = k.stateTime; k.play('gk_s2s_defl_knocked_out_recovery', { fade: 0.1 }); }
+      if (d.rec && k.stateTime - d.recAt >= (meta.gk_s2s_defl_knocked_out_recovery?.duration ?? 1)) k.setState('free');
+      return;
+    }
+    if (d.kind === 'spin' && d.started && !d.getup && k.stateTime - d.t0 >= len) { d.getup = true; d.getAt = k.stateTime; k.play('gk_s2s_prone_getup', { fade: 0.1 }); }
+    const end = d.kind === 'spin' ? (d.getup ? d.getAt + (meta.gk_s2s_prone_getup?.duration ?? 2.5) : Infinity) : (d.t0 ?? Infinity) + len;
+    if (d.started && k.stateTime >= end) {
+      if (d.kind === 'blast') { k.pos.x = -k.attackDir * (FIELD.halfLength - 0.8); k.pos.z = 0; }
+      k.setState('free');
+    }
+  }
+
+  // ball flight of a strike that must go in: a post or the edge of the net cannot stop it
+  superFlight(dt) {
+    const s = this.superStrike, b = this.ball;
+    s.t += dt;
+    if ((s.outcome === 'super' || s.outcome === 'goal') && !b.inGoal && s.t >= s.arrive + 0.35) {
       b.inGoal = s.p.attackDir; b.events.push({ type: 'goal', side: s.p.attackDir });
-    } else if (s.t > s.arrive + 2.5) { b.superStrike = null; b.noPickup = 0; this.superStrike = null; } // missed somehow: play on
+    } else if (s.t > s.arrive + 2.5 || (b.owner && b.owner !== s.p)) { b.superStrike = null; b.noPickup = 0; this.superStrike = null; }
+    else if (s.outcome === 'saved' && b.lastTouch === s.keeper) {
+      this.hud.flash(t('flash.superSaved'));
+      b.superStrike = null; b.noPickup = Math.min(b.noPickup, 0.35); this.superStrike = null;
+    }
+  }
+
+  // CheckForSTSAttack (Goalie.cpp): while the captain charges, up to frame 24, the keeper may come out on him
+  superAttackCheck(g) {
+    const s = this.superStrike;
+    const c = s ? s.p : this.players.find((p) => p.team !== g.team && p.state === 'windup' && this.canSuper(p) && p.stateTime > SHOT.windupSeconds);
+    if (!c || c.team === g.team || (s && (s.keeper !== g || s.phase !== 'meter' || s.t * FPS >= SUPER.attackUntilFrame))) return false;
+    const d = Math.hypot(c.pos.x - g.pos.x, c.pos.z - g.pos.z);
+    if (d <= g.cfg.catchTolerance + SUPER.attackClose || (d <= SUPER.attackMax && Math.random() < SUPER.attackChance)) {
+      g.setState('stsAttack', { target: c, done: false });
+      g.facing = Math.atan2(c.pos.z - g.pos.z, c.pos.x - g.pos.x);
+      g.play('gk_attack_s2s_high', { fade: 0.05 });
+      return true;
+    }
+    return false;
+  }
+
+  // gk_attack_s2s_high: leaps at the captain; at the contact trigger (frame 13 of 37) he takes the ball if he is there
+  superAttack(g, dt) {
+    const d = g.stateData, c = d.target, b = this.ball, m = this.template.meta.gk_attack_s2s_high;
+    const dc = Math.hypot(c.pos.x - g.pos.x, c.pos.z - g.pos.z);
+    if (dc > 0.4 * SIZE) g.applyRootMotion(g.stateTime);
+    if (!d.done && g.stateTime >= 13 / 37 * (m?.duration ?? 1.233)) {
+      d.done = true;
+      if (b.owner === c && dc < g.cfg.catchTolerance + 0.5 * SIZE) {
+        if (this.superStrike && this.superStrike.p === c) { this.superStrike = null; this.timeScale = 1; }
+        b.owner = g; b.vel.set(0, 0, 0); b.superStrike = null; b.passTarget = null;
+        c.setState('react', {}); c.stun = TACKLE.stunHit; c.play('hit_react_1200', { fade: 0.05 });
+        this.stats.saves[g.team]++;
+        this.emit('save', { team: g.team, superStrike: true });
+      }
+    }
+    if (g.stateTime >= (m?.duration ?? 1.2)) {
+      if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.15 }); }
+      else { g.setState('react', {}); g.stun = 0.45; g.play('gk_recover_without_ball', { fade: 0.1 }); }
+    }
+  }
+
+  // <team>_captain_sts_effect at frame 67: a burst of the team colour around the captain
+  superEffect(p) {
+    const col = new THREE.Color(this.teams?.[p.team]?.color || '#ffd21f');
+    const m = new THREE.Mesh(new THREE.TorusGeometry(0.6 * SIZE, 0.08 * SIZE, 8, 40), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    m.position.copy(p.rpos); m.position.y = 1.2 * SIZE; m.rotation.x = Math.PI / 2;
+    this.scene.add(m);
+    this.effects.push({ mesh: m, t: 0, life: 0.9 });
   }
 
   // ------------------------------------------------------------- per-step logic
@@ -571,7 +744,8 @@ export class Game {
     } else if (p.state === 'windup' && !inp.shootHeld) {
       this.releaseShot(p);
     } else if (p.state === 'super' && (inp.actions.has('shootOrSlide') || inp.actions.has('shoot')) && this.superStrike) {
-      this.superStrike.pressed = true;
+      const s = this.superStrike;
+      if (s.pressT === null || s.pressT === undefined) s.pressT = s.t + dt; // no time from the frame: at this step
     }
     inp.actions.clear();
   }
@@ -618,7 +792,13 @@ export class Game {
         if (this.ball.owner !== p) { p.setState('free'); break; }
         // ShotMeter::Update: a full bar releases the shot, except the captain in the opponents' half (Super Strike)
         const sup = this.canSuper(p);
-        const superAt = SHOT.windupSeconds + this.skill('stsWindup', p.team);
+        const superAt = this.superChargeSeconds(p);
+        // the CPU captain decides at the switch to the long charge
+        if (sup && !p.humanControlled && p.stateTime >= SHOT.windupSeconds && !p.stateData.rolled) {
+          p.stateData.rolled = true;
+          if (!this.cpuWantsSuper(p)) { this.releaseShot(p); break; }
+          p.stateData.aiHold = superAt + 1;
+        }
         if (sup && p.stateTime >= superAt) { this.startSuper(p); break; }
         if (p.stateData.aiHold !== null && p.stateData.aiHold !== undefined && p.stateTime >= p.stateData.aiHold) this.releaseShot(p);
         else if (!sup && p.stateTime >= SHOT.windupSeconds) this.releaseShot(p);
@@ -688,6 +868,8 @@ export class Game {
         break;
       case 'dive': this.keeper.dive(p, dt); break;
       case 'trap': this.keeper.trap(p, dt); break;
+      case 'sts': this.superKeeper(p, dt); break;
+      case 'stsAttack': this.superAttack(p, dt); break;
       case 'hold':
       case 'throw':
         this.goalieAction(p, dt);
@@ -700,7 +882,8 @@ export class Game {
   // ------------------------------------------------------------- goalies
 
   goalieAI(g, dt) {
-    if (this.superStrike && this.superStrike.keeper === g) { g.desiredSpeed = 0; g.locomotion(dt); return; } // reacts in superFlight
+    if (this.superAttackCheck(g)) return;
+    if (this.superStrike && this.superStrike.keeper === g && this.superStrike.phase !== 'flight') { g.desiredSpeed = 0; g.locomotion(dt); return; } // reacts at the kick
     this.keeper.think(g, dt);
   }
 
@@ -861,12 +1044,14 @@ export class Game {
       } else { this.endMatch(); return; }
     }
 
-    for (const c of this.controllers) if (c.player) this.humanControl(c, dt);
-    for (const p of this.players) this.updateState(p, dt);
-    this.separatePlayers();
+    // during the unstoppable Super Strike everybody but the captain is frozen (FreezeEveryoneButCaptain)
+    const frozen = this.superStrike && this.superStrike.frozen ? this.superStrike.p : null;
+    for (const c of this.controllers) if (c.player && (!frozen || c.player === frozen)) this.humanControl(c, dt);
+    for (const p of this.players) if (!frozen || p === frozen) this.updateState(p, dt);
+    if (!frozen) this.separatePlayers();
     this.ballStep(dt);
     if (this.superStrike && this.superStrike.phase === 'flight') this.superFlight(dt);
-    for (const p of this.players) p.update(dt);
+    for (const p of this.players) if (!frozen || p === frozen) p.update(dt);
 
     for (const e of this.ball.events) {
       if (e.type === 'goal') this.onGoal(e.side);
@@ -917,10 +1102,20 @@ export class Game {
   // ------------------------------------------------------------- frame
 
   update(realDt) {
+    const ss = this.superStrike;
+    // super: the camera turns around the ball for 4.25 real seconds with the time at 0.005, then the time is 1 again
+    if (ss && ss.orbit) { ss.orbit.real += Math.min(0.1, realDt); if (ss.orbit.real >= SUPER.orbitSeconds && this.timeScale < 1) this.timeScale = 1; }
     this.acc += Math.min(0.1, realDt) * this.timeScale;
+    // Super Strike meter: a press seen this frame happened at the game time not yet stepped (s.t + acc)
+    if (ss && ss.phase === 'meter' && ss.p.humanControlled && (ss.pressT === null || ss.pressT === undefined)) {
+      const c = this.controllerOf(ss.p);
+      if (c && (c.input.actions.has('shootOrSlide') || c.input.actions.has('shoot'))) ss.pressT = ss.t + this.acc;
+    }
     while (this.acc >= PHYSICS_DT) { this.fixedStep(PHYSICS_DT); this.acc -= PHYSICS_DT; }
     const alpha = this.acc / PHYSICS_DT, frameDt = Math.min(0.1, realDt) * this.timeScale;
-    for (const p of this.players) p.render(frameDt, alpha);
+    const frozen = this.superStrike && this.superStrike.frozen ? this.superStrike.p : null;
+    for (const p of this.players) p.render(frozen && p !== frozen ? 0 : frameDt, alpha);
+    this.updateSuperLook(Math.min(0.1, realDt));
     this.ball.updateMesh(frameDt, alpha);
     const bp = this.ball.rpos;
     this.ballShadow.position.set(bp.x, 0.008, bp.z);
@@ -930,6 +1125,26 @@ export class Game {
     this.updateCamera(realDt);
     this.stadium.update(realDt, this);
     this.hud.update(this);
+  }
+
+  // world darkness, the captain's light and the burst of the Super Strike scene (real time)
+  updateSuperLook(dt) {
+    const s = this.superStrike;
+    const want = s && s.phase === 'scene' ? s.dark * (s.outcome === 'super' ? 0.85 : 0.6) : 0;
+    this.darkness += (want - this.darkness) * (1 - Math.exp(-dt * (want > this.darkness ? 6 : 3)));
+    this.hemi.intensity = 1.35 * (1 - this.darkness);
+    this.sun.intensity = 2.2 * (1 - this.darkness);
+    const lightOn = s && s.phase === 'scene' ? (s.light ? 1 : 0.35) * Math.min(1, this.darkness * 2) : 0;
+    this.capLight.intensity += (lightOn * 6 - this.capLight.intensity) * (1 - Math.exp(-dt * 8));
+    if (s) this.capLight.position.set(s.p.rpos.x, 2.6 * SIZE, s.p.rpos.z + 1.2);
+    for (let i = this.effects.length - 1; i >= 0; i--) {
+      const e = this.effects[i];
+      e.t += dt;
+      const k = e.t / e.life;
+      e.mesh.scale.setScalar(1 + k * 3);
+      e.mesh.material.opacity = 0.9 * (1 - k);
+      if (k >= 1) { this.scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); this.effects.splice(i, 1); }
+    }
   }
 
   updateCamera(dt) {
@@ -943,12 +1158,36 @@ export class Game {
     this.camTarget.z += (tz - this.camTarget.z) * k;
     // stay in front of the near-side stand (it starts 7.6 m behind the touchline)
     const camZ = Math.min(this.camTarget.z + 0.3 + 8.9 * this.camZoom, FIELD.halfWidth + 6.8);
+    const ss = this.superStrike;
+    if (ss && ss.phase === 'scene') { this.superCamera(ss, dt); return; }
+    if (this.camera.fov !== 42) { this.camera.fov = 42; this.camera.updateProjectionMatrix(); }
     // Super Strike: closer, and looking up at the captain in the air
-    const sup = this.superStrike && this.superStrike.phase !== 'flight';
+    const sup = ss && ss.phase === 'meter';
     this.camLift += ((sup ? 1 : 0) - this.camLift) * (1 - Math.exp(-dt * 3));
     const zoom = this.camZoom * (1 - 0.22 * this.camLift);
     this.camera.position.set(this.camTarget.x, 0.5 + 5.7 * zoom, Math.min(this.camTarget.z + 0.3 + 8.9 * zoom, FIELD.halfWidth + 6.8));
     this.camera.lookAt(this.camTarget.x, 0.65 + 1.6 * this.camLift, this.camTarget.z + 0.3);
   }
 
+  // the scene from frame 27 (we have no camera animation of the original: a slow move around the captain, low; at the
+  // point of no return of a super, 0.61 turns around the ball in 4.25 s with a 50° lens)
+  superCamera(s, dt) {
+    const p = s.p, b = this.ball.rpos;
+    s.sceneT += dt;
+    const back = -p.attackDir;
+    if (s.orbit) {
+      const a = Math.PI / 2 + s.orbit.real / SUPER.orbitSeconds * SUPER.orbitTurns * Math.PI * 2;
+      if (this.camera.fov !== SUPER.orbitFov) { this.camera.fov = SUPER.orbitFov; this.camera.updateProjectionMatrix(); }
+      this.camera.position.set(b.x + Math.cos(a) * 3.2 * back, b.y + 0.6, b.z + Math.sin(a) * 3.2);
+      this.camera.lookAt(b.x, b.y, b.z);
+      return;
+    }
+    const a = 1.15 + 0.12 * s.sceneT;
+    const cx = p.rpos.x + Math.cos(a) * 6.5 * back, cz = p.rpos.z + Math.sin(a) * 6.5;
+    const k = 1 - Math.exp(-dt * 4);
+    this.camera.position.x += (cx - this.camera.position.x) * k;
+    this.camera.position.y += (1.4 * SIZE - this.camera.position.y) * k;
+    this.camera.position.z += (cz - this.camera.position.z) * k;
+    this.camera.lookAt(p.rpos.x, 1.6 * SIZE, p.rpos.z);
+  }
 }
