@@ -48,6 +48,18 @@ graphify path "add_characters.py" "Player" --undirected
 - Ultimate Team: giocabile nel menu (Club, Rosa, Mercato, Divisioni, Album, pacchetti con walkout P1). Le carte cambiano il gioco (`game/src/stats.js`, a 75 = originale). Regole ed economia in `ultimate-team/DESIGN.md`, `ECONOMIA.md`, numeri in `ultimate-team/data/`. Esultanze originali: 2 su 10, le altre aspettano altri file `goal_winner` dal disco.
 - Il gioco legge `ultimate-team/data/*.json`: la pagina di sviluppo si serve dalla cartella principale (`game/dev/index.html`).
 
+## Prossimi lavori (decisi con l'utente il 31 ottobre)
+
+Il ramo aggiornato è `main`: contiene menu, Coppe e Ultimate Team. Prima di lavorare controlla che il tuo ramo parta dall'ultimo `main` (`git log origin/main -1`).
+
+1. **Super Strike ("ulti")**: le può fare **solo il capitano**, scelto dal giocatore nella **Rosa** di Ultimate Team; il capitano **non può essere il portiere**. Partenza:
+   - clip già nel gioco (fra le 183): `captain_shoot_to_score` per chi tira, `gk_attack_s2s_high`, `gk_s2s_*` per le reazioni del portiere (`animation/strikers_anim.py`, tabella degli stati);
+   - regole e numeri dell'originale in `reference/STRIKERS_REFERENCE.md` (§ Super Strike: rallentatore 0,68–0,78, finestra perfetta attorno a 0,84 e 0,16 della barra, salto al fotogramma 3 e calcio al 27; stordimento del portiere 1–2 s);
+   - le sequenze speciali di ogni personaggio, se servono, stanno nelle scene `.nis` del disco: si decodificano con `animation/nis.py` come le esultanze del walkout;
+   - capitano: da aggiungere in `game/src/ut/club.js` (dati del club) e `game/src/ui/utMenu.js` (Rosa); in partita lo legge `game/src/game.js` dalle squadre passate da `main.js` (`withLineups`).
+2. **Nuovi personaggi**: l'utente carica i `.glb` già riggati (Mixamo). Procedura completa in `characters/README.md`, sezione "Aggiungere un personaggio", compresi Ultimate Team (`ultimate-team/data/cards.json`, nomi in `game/src/ui/i18n_ut.js`) e Coppe (le squadre CPU rimescolano tutti i personaggi del roster). Attenzione al peso: ogni personaggio vale circa 9 MB nel gioco compilato e il link online ha un limite di 64 MB per pubblicazione (oggi 49 MB): con più personaggi va compresso o pubblicato in più passi.
+3. **Server privato (Oracle)**: quando l'utente lo ha, il salvataggio dei profili passa dal solo modulo `game/src/ui/save.js` (deciso in `interfaccia-gioco/DESIGN.md`); il registro delle numerate (`save.registry()`) diventa globale sul server; il mercato simulato potrà diventare vero (`ultimate-team/ECONOMIA.md`).
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships. The navigable map for the user is docs/mappa.html.

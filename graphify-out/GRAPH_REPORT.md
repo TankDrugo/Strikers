@@ -1,14 +1,19 @@
 # Graph Report - Strikers  (2026-10-31)
 
 ## Corpus Check
-- 61 files · ~80,188 words
+- 57 files · ~80,582 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 865 nodes · 1909 edges · 43 communities (39 shown, 4 thin omitted)
+- 865 nodes · 1918 edges · 42 communities (38 shown, 4 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 160 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `d76d7a82`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Fisica del pallone
@@ -47,7 +52,6 @@
 - Clip
 - Nomi ossa da hash nlStringLowerH
 - open_source()
-- Partita e IA
 - Statistiche per giocatore
 - Le quattro coppe
 - Ordine di lavoro (menu, Gioco ra
@@ -60,8 +64,8 @@
 2. `t()` - 40 edges
 3. `Menu` - 38 edges
 4. `Player` - 25 edges
-5. `boot()` - 23 edges
-6. `Gioco (area)` - 21 edges
+5. `Gioco (area)` - 24 edges
+6. `boot()` - 23 edges
 7. `import_into_blender()` - 20 edges
 8. `installCups()` - 19 edges
 9. `UiNav` - 19 edges
@@ -76,8 +80,8 @@
   CLAUDE.md → characters/README.md
 - `Apertura dei pacchetti P1 walkout a indizi` --semantically_similar_to--> `Pacchetti P1 walkout a indizi`  [INFERRED] [semantically similar]
   ultimate-team/DESIGN.md → interfaccia-gioco/DESIGN.md
-- `Tabella 'Dove andare' (area -> cartella -> README)` --references--> `Grafo e mappa del progetto`  [EXTRACTED]
-  CLAUDE.md → docs/grafo.md
+- `Gioco (area)` --references--> `Super Mario Strikers: misure e dinamiche di riferimento`  [EXTRACTED]
+  game/README.md → reference/STRIKERS_REFERENCE.md
 
 ## Import Cycles
 - None detected.
@@ -93,7 +97,7 @@
 - **Flusso di apertura pacchetti con walkout ed esultanze NIS** — ultimate_team_design_apertura_pacchetti, interfaccia_gioco_design_pacchetti_p1_walkout, ultimate_team_design_esultanze_nis, ultimate_team_design_walkout, ultimate_team_design_strikers_nis_npz [INFERRED 0.85]
 - **Rarita delle carte e loro presentazione (holo, numerate in teca, 1/1)** — ultimate_team_design_rarita, ultimate_team_design_numerata_1_10, ultimate_team_design_uno_su_uno_oro, interfaccia_gioco_design_scelte_sulle_bozze, ultimate_team_economia_negozio_pacchetti [INFERRED 0.85]
 
-## Communities (43 total, 4 thin omitted)
+## Communities (42 total, 4 thin omitted)
 
 ### Community 0 - "Fisica del pallone"
 Cohesion: 0.07
@@ -144,8 +148,8 @@ Cohesion: 0.16
 Nodes (18): FIELDER.height (altezza uguale dei giocatori di movimento), Visualizzatore animazioni, ANIM_RATE_MAX, ANIM_RATE_MIN, FIELDER, GOALIE, MATCH, RIG_HEIGHT (+10 more)
 
 ### Community 12 - "Pallone e portiere"
-Cohesion: 0.14
-Nodes (17): Problema: pallone oltre 50 m/s, Tiro perfetto con effetto Magnus (cBall::Shoot), Partita a due giocatori, shootAtFast(), tmp, BALL, FIELD, PASS (+9 more)
+Cohesion: 0.11
+Nodes (23): Problema: pallone oltre 50 m/s, Tiro perfetto con effetto Magnus (cBall::Shoot), Partita a due giocatori, dist2(), fielderAI(), moveTo(), openness(), v (+15 more)
 
 ### Community 13 - "nis.py"
 Cohesion: 0.15
@@ -227,10 +231,6 @@ Nodes (8): Economia (rimando a ECONOMIA.md), Economia di Ultimate Team (crediti,
 Cohesion: 0.33
 Nodes (7): Nomi ossa da hash nlStringLowerHash, Disco europeo G4QP01, Clip specchiate (_mirror, direzioni 0900), smstrikers-decomp (yannicksuter, commit d1f357f), strikers_anim.py (decodifica .sanim/.shier/.bin, convertitore Blender), Riferimento: il gioco originale, strikers_characters.json
 
-### Community 36 - "Partita e IA"
-Cohesion: 0.43
-Nodes (6): dist2(), fielderAI(), moveTo(), openness(), v, TACKLE
-
 ### Community 37 - "Statistiche per giocatore"
 Cohesion: 0.52
 Nodes (5): f(), fielderConfig(), goalieConfig(), scale(), STAT_BASE
@@ -252,24 +252,24 @@ Cohesion: 0.40
 Nodes (4): Coppe (4 coppe a eliminazione diretta, torneo fino a 4 giocatori), Torneo privato, Voto della coppa D-C-B-A-S-Z (stile Dragon Ball), Rubinetti: da dove arrivano i crediti
 
 ## Knowledge Gaps
-- **63 isolated node(s):** `Cinque ruoli: portiere, difensore, centrocampista, ala, attaccante`, `Repository GitHub TankDrugo/Strikers`, `*.clips.json (metadati clip)`, `Nomi ossa da hash nlStringLowerHash`, `Clip specchiate (_mirror, direzioni 0900)` (+58 more)
+- **63 isolated node(s):** `FIELDER.height (altezza uguale dei giocatori di movimento)`, `Visualizzatore animazioni`, `Problema: pallone oltre 50 m/s`, `Tiro perfetto con effetto Magnus (cBall::Shoot)`, `Partita a due giocatori` (+58 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 226 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `game/assets/roster.json` connect `Roster e squadre` to `Avvio del gioco`, `Retarget personaggi`, `Decodifica scene NIS`?**
-  _High betweenness centrality (0.219) - this node is a cross-community bridge._
-- **Are the 12 inferred relationships involving `boot()` (e.g. with `.tick()` and `.show()`) actually correct?**
-  _`boot()` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Cinque ruoli: portiere, difensore, centrocampista, ala, attaccante`, `Repository GitHub TankDrugo/Strikers`, `*.clips.json (metadati clip)` to the rest of the system?**
+- **Why does `Gioco (area)` connect `Decodifica scene NIS` to `Istruzioni e regole progetto`, `Statistiche per giocatore`, `Comandi e input`, `Avvio del gioco`, `Pallone e portiere`, `Super Mario Strikers: misure e d`, `Roster e squadre`?**
+  _High betweenness centrality (0.261) - this node is a cross-community bridge._
+- **What connects `FIELDER.height (altezza uguale dei giocatori di movimento)`, `Visualizzatore animazioni`, `Problema: pallone oltre 50 m/s` to the rest of the system?**
   _63 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Fisica del pallone` be split into smaller, more focused modules?**
   _Cohesion score 0.07099099099099099 - nodes in this community are weakly interconnected._
-- **Why does `Gioco (area)` connect `Decodifica scene NIS` to `Istruzioni e regole progetto`, `Partita e IA`, `Statistiche per giocatore`, `Comandi e input`, `Avvio del gioco`, `Pallone e portiere`, `Roster e squadre`?**
-  _High betweenness centrality (0.130) - this node is a cross-community bridge._
+- **Why does `game/assets/roster.json` connect `Roster e squadre` to `Avvio del gioco`, `Retarget personaggi`, `Decodifica scene NIS`?**
+  _High betweenness centrality (0.222) - this node is a cross-community bridge._
 - **Should `Obiettivi delle coppe` be split into smaller, more focused modules?**
   _Cohesion score 0.07847082494969819 - nodes in this community are weakly interconnected._
-- **Why does `Game` connect `Fisica del pallone` to `Obiettivi delle coppe`, `Avvio del gioco`, `Pallone e portiere`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+- **Why does `Calcio arcade (progetto)` connect `Istruzioni e regole progetto` to `Salvataggio profili`, `Stadio`, `Decodifica scene NIS`?**
+  _High betweenness centrality (0.176) - this node is a cross-community bridge._
+- **Should `Istruzioni e regole progetto` be split into smaller, more focused modules?**
+  _Cohesion score 0.054901960784313725 - nodes in this community are weakly interconnected._

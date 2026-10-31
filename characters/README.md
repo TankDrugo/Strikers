@@ -12,8 +12,7 @@ Fatto:
 - Colori delle squadre su anelli, punteggio, tabellone e tifosi
 
 Prossimo:
-- Nuovi personaggi (serviranno anche per Coppe e Ultimate Team)
-- Statistiche diverse per personaggio (con Ultimate Team)
+- Nuovi personaggi: l'utente li ha già modellati e riggati, vanno aggiunti al gioco e a Ultimate Team (procedura sotto)
 
 | File | Squadra | Ruolo (posto in `teams`) | Stato |
 |---|---|---|---|
@@ -53,8 +52,13 @@ I posti di `teams` in `game/assets/roster.json` corrispondono alle posizioni in 
    ]
    ```
 
-4. Ricompila e prova: `node game/tools/build.mjs`, poi `node game/tools/playtest.cjs`.
-5. Guarda le animazioni del nuovo personaggio nel visualizzatore del gioco (menu → Visualizzatore animazioni, scegli il personaggio in alto). Per confrontarle fotogramma per fotogramma con lo scheletro originale, servi `game/` (`python3 -m http.server 8000`) e apri `http://localhost:8000/dev/sheet.html?char=<id>&clips=idle,run_with_ball,gk_dive_catch_far_right_high`.
+4. Mettilo in Ultimate Team (senza questi due passi il personaggio gioca ma non ha carte):
+   - in `ultimate-team/data/cards.json`, sotto `characters`, aggiungi `"<id>": {"role": "ATT", "stats": {"vel": 80, "tir": 82, "pas": 74, "con": 60}}` (ruoli `DIF`, `CEN`, `ALA`, `ATT`, `POR`; il portiere ha `par`, `rif`, `usc`, `vel`). La valutazione si calcola dalle statistiche: sotto 65 bronzo, 65-74 argento, da 75 oro con holo, da 85 anche numerate e 1/1;
+   - in `game/src/ui/i18n_ut.js` aggiungi il nome della carta, `'ut.char.<id>'`, in italiano e in inglese (e `'ut.team.<squadra>'` se la squadra è nuova).
+5. Ricompila e prova: `node game/tools/build.mjs`, poi `node game/tools/playtest.cjs` e `node game/tools/uttest.cjs`.
+6. Guarda le animazioni del nuovo personaggio nel visualizzatore del gioco (Impostazioni → Visualizzatore animazioni, scegli il personaggio in alto). Per confrontarle fotogramma per fotogramma con lo scheletro originale, servi la cartella principale del progetto (`python3 -m http.server 8000`) e apri `http://localhost:8000/game/dev/sheet.html?char=<id>&clips=idle,run_with_ball,gk_dive_catch_far_right_high`.
+
+`add_characters.py` fa il retarget anche delle 3 clip del walkout di Ultimate Team (corsa ed esultanze, da `animation/data/strikers_nis.npz`): non serve altro.
 
 ## Note
 
