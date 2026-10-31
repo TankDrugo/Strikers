@@ -14,12 +14,12 @@ Fatto:
 - Link online privato, aggiornato a ogni modifica
 - Statistiche per giocatore dalle carte di Ultimate Team (`src/stats.js`)
 - Super Strike del capitano come nell'originale (`SUPER` in `src/config.js`), indicatore G1–G4 stile FIFA sopra il giocatore controllato
-- Build di prova con 10 milioni di crediti (`--prova`) e build per itch.io (`--itch`)
+- Build di prova con 10 milioni di crediti (`--prova`) e build per itch.io (`--itch`), caricata sulla pagina ristretta https://goleador0702.itch.io/strikers
 
 Prossimo:
 - Pallone oltre il limite di 50 m/s in alcuni tiri
 - Power-up
-- Pubblicazione su itch.io (serve la pagina del progetto e il permesso di usare butler, vedi sotto)
+- Opzioni della pagina itch.io dal sito (gioco nel browser, 1280×720, schermo intero, accesso agli amici)
 
 ## Avvio
 
@@ -56,7 +56,16 @@ Poi si ripubblica `dist/web-prova/index.html` con i file di `dist/web-prova/asse
 node tools/build.mjs --itch
 ```
 
-Scrive `dist/itch/` (pagina completa con `<!doctype html>`) e `dist/calcio-arcade-itch.zip` (circa 54 MB), da caricare come gioco HTML su una pagina itch.io con visibilità **Ristretta** (con password o lista di accesso), mai pubblica: contiene le animazioni del disco. L'account itch.io collegato alla sessione è `goleador0702`. Da Claude si carica con `butler push dist/itch goleador0702/<pagina>:html5`, che richiede (1) una pagina del progetto creata dall'utente sul sito, perché le API di itch.io non creano pagine, e (2) il permesso di scaricare ed eseguire butler nella sessione.
+Scrive `dist/itch/` (pagina completa con `<!doctype html>`) e `dist/calcio-arcade-itch.zip` (circa 54 MB), da caricare come gioco HTML su una pagina itch.io con visibilità **Ristretta** (con password o lista di accesso), mai pubblica: contiene le animazioni del disco. La pagina è https://goleador0702.itch.io/strikers (Ristretta: chi non ha accesso vede un 404). Dopo ogni modifica al gioco Claude la aggiorna con butler (l'utente ha dato il permesso il 31 ottobre; si scarica da `https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default` nella cartella temporanea, la chiave la mette il proxy, a butler basta `BUTLER_API_KEY=dummy`):
+
+```bash
+node tools/build.mjs --itch
+```
+```bash
+BUTLER_API_KEY=dummy butler push dist/itch goleador0702/strikers:html5 --userversion "$(git rev-parse --short HEAD)"
+```
+
+Prima build caricata il 31 ottobre (canale `html5`). Le opzioni della pagina (gioco nel browser, dimensioni 1280×720, schermo intero, chi può accedere) si cambiano solo dal sito, nella modifica del progetto.
 
 ## Comandi
 
