@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SHOT } from './config.js';
+import { SHOT, SUPER } from './config.js';
 import { t } from './ui/i18n.js';
 
 const PAD_COLORS = ['#2b8cff', '#ff3b3b', '#ffc21f', '#2fbf4a']; // P1 blue, P2 red, P3 yellow, P4 green, like FC
@@ -13,6 +13,14 @@ const css = `
 .hud .meter{position:absolute;width:86px;height:10px;border-radius:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.6);overflow:hidden;display:none}
 .hud .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23f,#ff7b2f)}
 .hud .meter b{position:absolute;right:0;top:0;bottom:0;width:6%;background:rgba(120,255,160,.85)}
+.hud .smeter{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,80vw);display:none;text-align:center;font-family:"Bungee","Arial Black",sans-serif}
+.hud .smeter .sbar{position:relative;height:30px;border-radius:15px;border:3px solid #fff;background:linear-gradient(90deg,#3a1260,#7a2fd8);box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden}
+.hud .smeter .z{position:absolute;top:0;bottom:0}.hud .smeter .z.l{background:#7dffa8b0}.hud .smeter .z.d{background:#0d8a3c}
+.hud .smeter .nd{position:absolute;top:-4px;bottom:-4px;width:5px;margin-left:-2px;background:#fff;box-shadow:0 0 6px #fff}
+.hud .smeter .nd.stop{background:#ffd21f;box-shadow:0 0 6px #ffd21f}
+.hud .smeter b{display:block;font-size:22px;letter-spacing:.04em;color:#ffd21f;text-shadow:0 3px 0 #1b1036}
+.hud .smeter small{display:block;font-size:12px;opacity:.9;margin-top:4px}
+.hud .meter.super i{background:linear-gradient(90deg,#b07bff,#ffd21f)}
 .hud .flash{position:absolute;top:22%;left:0;right:0;text-align:center;font-size:44px;font-weight:900;letter-spacing:.04em;text-shadow:0 4px 0 rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
 .hud .help{position:absolute;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:max(12px,env(safe-area-inset-left,0px));font-size:13px;line-height:1.5;background:rgba(10,16,28,.6);padding:8px 12px;border-radius:8px;opacity:.9}
 .hud .help kbd{font-family:inherit;background:rgba(255,255,255,.18);border-radius:4px;padding:0 5px}
@@ -39,9 +47,14 @@ export class Hud {
     this.el = document.createElement('div'); this.el.className = 'hud';
     this.el.innerHTML = `<div class="score"><span class="team"><span class="tname" id="n0">Gialli</span><span class="dot" id="d0" style="background:#ffd23f"></span><span id="s0">0</span></span><span class="clock" id="clock">3:00</span><span class="team"><span id="s1">0</span><span class="dot" id="d1" style="background:#ff4f4f"></span><span class="tname" id="n1">Rossi</span></span></div>
       <div class="meter" id="meter"><i></i><b></b></div><div class="flash" id="flash"></div>
+      <div class="smeter" id="smeter"><b>SUPER STRIKE</b><div class="sbar"></div><small></small></div>
       <div class="help" id="help"><kbd>WASD</kbd>/<kbd>frecce</kbd> muovi · <kbd>Shift</kbd> turbo · <kbd>J</kbd> passa / cambia · <kbd>K</kbd> tiro (tieni) / scivolata · <kbd>L</kbd> pallonetto / spallata · <kbd>Spazio</kbd> finta · <kbd>+</kbd>/<kbd>-</kbd> o rotella: zoom · <kbd>P</kbd> pausa</div>`;
     document.body.appendChild(this.el);
     this.meter = this.el.querySelector('#meter');
+    this.smeter = this.el.querySelector('#smeter');
+    // the meter: light green bands, dark green marks (game/src/config.js SUPER), two needles
+    const zone = (m, w, cls) => `<i class="z ${cls}" style="left:${(m - w) * 100}%;width:${w * 200}%"></i>`;
+    this.smeter.querySelector('.sbar').innerHTML = SUPER.marks.map((m) => zone(m, SUPER.near, 'l') + zone(m, SUPER.perfect, 'd')).join('') + '<i class="nd stop"></i><i class="nd cur"></i>';
     this.flashEl = this.el.querySelector('#flash');
     this.flashT = 0;
     this.v = new THREE.Vector3();
@@ -89,16 +102,35 @@ export class Hud {
     while (this.tags.length < tags.length) { const e = document.createElement('div'); e.className = 'ptag'; this.el.appendChild(e); this.tags.push(e); }
     this.tags.forEach((e, i) => {
       const c = tags[i];
-      if (!c || !c.player) { e.style.display = 'none'; return; }
+      if (!c || !c.player || c.player.state === 'super') { e.style.display = 'none'; return; }
       this.v.set(c.player.rpos.x, c.player.cfg.height * 1.08 + 0.1, c.player.rpos.z).project(game.camera);
       e.style.display = 'block';
-      e.textContent = t('hud.p', { n: i + 1 });
+      e.textContent = t('hud.p', { n: i + 1 }) + (game.isCaptain && game.isCaptain(c.player) ? ' ©' : '');
       e.style.setProperty('--pc', PAD_COLORS[i % PAD_COLORS.length]);
       e.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth}px`;
       e.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight}px`;
     });
+    // Super Strike meter: needles in game time, shown to everyone (also when the computer does it)
+    const ss = game.superStrike;
+    if (ss && (ss.phase === 'meter1' || ss.phase === 'meter2' || ss.phase === 'kick')) {
+      this.smeter.style.display = 'block';
+      const [stop, cur] = this.smeter.querySelectorAll('.nd');
+      cur.style.left = `${(ss.phase === 'kick' ? ss.n[1] : ss.needle) * 100}%`;
+      stop.style.display = ss.n[0] === null ? 'none' : ''; if (ss.n[0] !== null) stop.style.left = `${ss.n[0] * 100}%`;
+      this.smeter.querySelector('small').textContent = ss.human ? t('hud.superHint') : '';
+    } else this.smeter.style.display = 'none';
     const h = game.controllers.map((c) => c.player).find((p) => p && p.state === 'windup');
-    if (h) {
+    if (h && game.canSuper && game.canSuper(h) && h.stateTime > SHOT.windupSeconds) {
+      // past the normal bar: the captain charges the Super Strike
+      const f = Math.min(1, (h.stateTime - SHOT.windupSeconds) / (SUPER.chargeSeconds - SHOT.windupSeconds));
+      this.v.set(h.rpos.x, h.cfg.height * 1.08 + 0.1, h.rpos.z).project(game.camera);
+      this.meter.style.display = 'block'; this.meter.classList.add('super');
+      this.meter.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth - 43}px`;
+      this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 48}px`;
+      this.meter.firstChild.style.width = `${f * 100}%`;
+      this.meter.firstChild.style.background = '';
+    } else if (h) {
+      this.meter.classList.remove('super');
       const f = Math.min(1, h.stateTime / SHOT.windupSeconds);
       this.v.set(h.rpos.x, h.cfg.height * 1.08 + 0.1, h.rpos.z).project(game.camera); // just above the P1 marker
       this.meter.style.display = 'block';

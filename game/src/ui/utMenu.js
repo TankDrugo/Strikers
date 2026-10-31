@@ -75,7 +75,7 @@ export function installUt(Menu) {
     const slots = C.SLOTS.map((role, i) => {
       const card = C.cardOf(club, club.squad[i]), inst = C.inst(club, club.squad[i]);
       const [col, row] = pos[i][1].split(' / ');
-      return `<button class="slotc" data-nav data-act="ut-slot" data-slot="${i}" style="grid-column:${col};grid-row:${row}"><span class="lab">${t('ut.role.' + role)}</span>
+      return `<button class="slotc" data-nav data-act="ut-slot" data-slot="${i}" style="grid-column:${col};grid-row:${row}"><span class="lab">${t('ut.role.' + role)}${i === (club.captain ?? 3) ? ' ©' : ''}</span>
         ${card ? this.utCard(card, { serial: inst.serial }) : `<div class="empty">+</div>`}</button>`;
     }).join('');
     const bench = club.bench.map((u, b) => {
@@ -86,7 +86,7 @@ export function installUt(Menu) {
       <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(4,1fr);font-size:.62em;container-type:size">${slots}</div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default;flex-direction:row;align-items:center;gap:1em"><span class="big">${C.squadRating(club)}</span><div><h3>${t('ut.squad.rating')}</h3><p style="font-size:.8em">${t('ut.squad.rule')}</p></div></div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default"><h3>${t('ut.squad.bench')}</h3><p>${t('ut.squad.benchText')}</p><div style="display:flex;gap:.6em;margin-top:auto;font-size:.8em">${bench}</div></div>
-      <div class="row-btns"><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>
+      <div class="row-btns"><button class="btn" data-nav data-act="ut-captain" title="${t('ut.squad.captainHint')}">${t('ut.squad.captain', { name: (() => { const c = C.cardOf(club, club.squad[club.captain ?? 3]); return c ? charName(c) : '–'; })() })}</button><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>
     </div>`;
   };
 
@@ -140,6 +140,7 @@ export function installUt(Menu) {
       case 'ut-slot': return this.utPickSlot(+b.dataset.slot), true;
       case 'ut-bench': return this.utPickBench(+b.dataset.b), true;
       case 'ut-auto': C.autoSquad(club); this.utSave(); this.renderHub(false); return true;
+      case 'ut-captain': C.cycleCaptain(club); this.utSave(); this.renderHub(false); this.nav.focus(this.hub.el.querySelector('[data-act="ut-captain"]'), false); return true;
       case 'ut-tabdiv': return this.setTab(3), true; // the Divisions tab (Club, Rosa, Mercato, Divisioni, Album)
       case 'ut-mk-buy': return this.utOffers(false), true;
       case 'ut-mk-watch': return this.utOffers(true), true;
@@ -505,7 +506,7 @@ export function installUt(Menu) {
         this.onStart({
           kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: this.setup.seconds,
           cpuLevel: C.cpuLevel(club.division.div),
-          lineups: [C.lineup(club, p.name, p.color), { name: opp.name, color: opp.color, slots: opp.slots, stats: opp.stats }],
+          lineups: [C.lineup(club, p.name, p.color), { name: opp.name, color: opp.color, slots: opp.slots, stats: opp.stats, captain: opp.captain }],
           onFinish: (res) => this.utAfterMatch(res),
           onQuit: () => this.utBackToUt(3),
         });

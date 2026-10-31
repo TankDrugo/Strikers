@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
-import { FIELDER, GOALIE, FIELD, BALL, SIZE, RIG_HEIGHT, ANIM_RATE_MIN, ANIM_RATE_MAX } from './config.js';
+import { FIELDER, GOALIE, FIELD, BALL, SIZE, RIG_HEIGHT, ANIM_RATE_MIN, ANIM_RATE_MAX, SHOT } from './config.js';
 import { fielderConfig, goalieConfig } from './stats.js';
 
 const U16 = (Math.PI * 2) / 65536; // 16-bit angle unit in radians
 const tmpV = new THREE.Vector3();
+const GOLD = new THREE.Color('#ffd21f');
+const JUMP_KEEP = 0.45; // share of the Super Strike leap that is drawn
 
 export function angleDiff(a, b) {
   let d = (b - a) % (Math.PI * 2);
@@ -63,6 +65,7 @@ export class Player {
     game.scene.add(this.root);
     const teamColor = game.teams?.[team]?.color ?? (team === 0 ? '#ffd23f' : '#ff4f4f');
     this.ring = new THREE.Mesh(new THREE.RingGeometry(0.28 * SIZE, 0.36 * SIZE, 28), new THREE.MeshBasicMaterial({ color: teamColor, transparent: true, opacity: 0.8, depthWrite: false }));
+    this.teamColor = new THREE.Color(teamColor);
     // dark edge around the ring so any team colour reads on the grass
     const edgeMat = new THREE.MeshBasicMaterial({ color: 0x0b1410, transparent: true, opacity: 0.55, depthWrite: false });
     for (const [a, b] of [[0.255, 0.28], [0.36, 0.39]]) this.ring.add(new THREE.Mesh(new THREE.RingGeometry(a * SIZE, b * SIZE, 28), edgeMat));
@@ -208,12 +211,34 @@ export class Player {
   // positions that only change at 50 Hz, which reads as judder/blur when anybody moves.
   render(frameDt, alpha = 1) {
     this.mixer.update(frameDt);
+    this.superLift();
     if (this.prevPos.distanceToSquared(this.pos) > 4) this.prevPos.copy(this.pos); // teleport (kickoff)
     this.rpos.lerpVectors(this.prevPos, this.pos, alpha);
     this.root.position.copy(this.rpos);
     this.root.rotation.y = Math.PI / 2 - (this.prevFacing + angleDiff(this.prevFacing, this.facing) * alpha);
     this.ring.material.opacity = this.humanControlled ? 1 : 0.85;
     this.ring.scale.setScalar(this.humanControlled ? 1.35 : 1);
+    // Super Strike charge: the captain's ring flashes gold and grows
+    const g = this.game, charging = this.state === 'super' || (this.state === 'windup' && g.canSuper && g.canSuper(this) && this.stateTime > SHOT.windupSeconds);
+    if (charging) {
+      const k = 0.5 + 0.5 * Math.sin(performance.now() / 70);
+      this.ring.material.color.copy(this.teamColor).lerp(GOLD, k);
+      this.ring.scale.setScalar(1.35 + 0.35 * k);
+    } else if (this._wasCharging) this.ring.material.color.copy(this.teamColor);
+    this._wasCharging = charging;
+  }
+
+  // captain_shoot_to_score leaps about six hip heights: drawn at JUMP_KEEP of that, so the captain stays in the
+  // picture with the meter (the ball follows the drawn hips, see Game.superBallPoint)
+  superLift() {
+    if (this.state !== 'super') { if (this.model.position.y) this.model.position.y = 0; this._liftRest = null; return; }
+    if (this._hipsBone === undefined) { this._hipsBone = null; this.model.traverse((o) => { if (!this._hipsBone && o.isBone && o.name.replace(':', '').endsWith('Hips')) this._hipsBone = o; }); }
+    if (!this._hipsBone) return;
+    this.model.position.y = 0;
+    this.root.updateMatrixWorld(true);
+    const y = this._hipsBone.getWorldPosition(tmpV).y - this.root.position.y;
+    if (this._liftRest == null) this._liftRest = y;
+    this.model.position.y = -Math.max(0, y - this._liftRest) * (1 - JUMP_KEEP);
   }
 
   // Ball carried at the feet while dribbling (the original follows the 'ball' bone of each clip).
