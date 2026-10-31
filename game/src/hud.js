@@ -12,7 +12,7 @@ const css = `
 .hud .clock{font-size:16px;opacity:.85;min-width:52px;text-align:center}
 .hud .meter{position:absolute;width:86px;height:10px;border-radius:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.6);overflow:hidden;display:none}
 .hud .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23f,#ff7b2f)}
-.hud .meter b{position:absolute;right:0;top:0;bottom:0;width:6%;background:rgba(120,255,160,.85)}
+.hud .meter b{position:absolute;right:0;top:0;bottom:0;width:1%;background:rgba(120,255,160,.85)}
 .hud .smeter{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(520px,80vw);display:none;text-align:center;font-family:"Bungee","Arial Black",sans-serif}
 .hud .smeter .sbar{position:relative;height:30px;border-radius:15px;border:3px solid #fff;background:linear-gradient(90deg,#3a1260,#7a2fd8);box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden}
 .hud .smeter .z{position:absolute;top:0;bottom:0}.hud .smeter .z.l{background:#7dffa8b0}.hud .smeter .z.d{background:#0d8a3c}
@@ -131,13 +131,14 @@ export class Hud {
       this.meter.firstChild.style.background = '';
     } else if (h) {
       this.meter.classList.remove('super');
-      const f = Math.min(1, h.stateTime / SHOT.windupSeconds);
+      // ShotMeter: the bar shows the charge, 0.25 at the press and 1 (perfect, green) when full
+      const f = h.stateTime >= SHOT.windupSeconds ? 1 : SHOT.chargeMin + (1 - SHOT.chargeMin) * h.stateTime / SHOT.windupSeconds;
       this.v.set(h.rpos.x, h.cfg.height * 1.08 + 0.1, h.rpos.z).project(game.camera); // just above the P1 marker
       this.meter.style.display = 'block';
       this.meter.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth - 43}px`;
       this.meter.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight - 48}px`;
       this.meter.firstChild.style.width = `${f * 100}%`;
-      this.meter.firstChild.style.background = f >= 1 - SHOT.perfectWindow * (h.cfg.perfectWindow ?? 1) ? '#7dffa8' : '';
+      this.meter.firstChild.style.background = f >= SHOT.perfectFrom ? '#7dffa8' : '';
     } else this.meter.style.display = 'none';
   }
 }

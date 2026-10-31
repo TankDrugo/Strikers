@@ -1,13 +1,17 @@
 import * as THREE from 'three';
-import { BALL, FIELD, FIELDER, GOALIE, SHOT, SUPER, TACKLE, PASS, MATCH, PHYSICS_DT, SIZE } from './config.js';
+import { BALL, FIELD, FIELDER, GOALIE, SHOT, SUPER, TACKLE, PASS, MATCH, PHYSICS_DT, SIZE, SKILL, SKILL_FROM_LEVEL } from './config.js';
 import { Ball, predict, shootAtFast } from './ball.js';
 import { buildField, buildBallMesh } from './field.js';
 import { Stadium } from './stadium.js';
-import { Player, angleDiff } from './player.js';
+import { Player, angleDiff, seekDirection } from './player.js';
 import { fielderAI, bestPassTarget } from './ai.js';
 import { t } from './ui/i18n.js';
 
 const R = BALL.radius;
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+// InterpolateRangeClamped(a, b, x0, x1, x)
+const lerpRange = (a, b, x0, x1, x) => a + (b - a) * clamp01((x - x0) / (x1 - x0));
+const FPS = 30; // the clips are sampled at 30 frames per second (trigger frames are clip frames)
 const tmp = new THREE.Vector3();
 const tmp2 = new THREE.Vector3();
 
@@ -76,10 +80,55 @@ export class Game {
 
   emit(type, data) { if (this.onEvent) this.onEvent(type, data); }
 
-  // value for the current CPU level from a table per whole level (0..3), blended for fractions
+  // A value of the difficulty tables (config.js SKILL). A side with human players reads DifficultyHuman.ini, a CPU side
+  // the file of the chosen level; the keys in SKILL_FROM_LEVEL come from the chosen level for both (Game.cpp
+  // ApplyDifficulty). Our menus also use fractional levels (Ultimate Team divisions, cup finals): those blend the two
+  // whole levels around them (our choice; the original only has whole levels).
+  skill(key, team = null) {
+    const e = SKILL[key];
+    if (team !== null && e.human !== undefined && !SKILL_FROM_LEVEL.includes(key) && !this.isCpuTeam(team)) return e.human;
+    const l = Math.max(0, Math.min(3, this.cpuLevel)), i = Math.floor(l), k = l - i;
+    const a = e.level[i], b = e.level[Math.min(3, i + 1)];
+    return Array.isArray(a) ? a.map((v, j) => v + (b[j] - v) * k) : a + (b - a) * k;
+  }
+
+  // temporary: the Super Strike CPU numbers and the CPU speed still use it (removed with steps 3 and 4)
   cpuTune(table) {
     const l = Math.max(0, Math.min(table.length - 1, this.cpuLevel)), i = Math.floor(l), k = l - i;
     return table[i] + ((table[i + 1] ?? table[i]) - table[i]) * k;
+  }
+
+  // Fielder.cpp CalcRegularShot: chance (0..1) that the keeper must miss, from the bar value and the chosen level's curve
+  shotMissChance(value) {
+    const c = this.skill('shotChance'), v = [0, ...SKILL.shotValue, 1];
+    const x = clamp01(value);
+    for (let i = 1; i < v.length; i++) if (x <= v[i]) return (c[i - 1] + (c[i] - c[i - 1]) * (x - v[i - 1]) / (v[i] - v[i - 1])) / 100;
+    return c[c.length - 1] / 100;
+  }
+
+  // ShotMeter.cpp CalcScoreValue: Shooting × 0.06 + charge × 0.29 + net open × 0.40 + distance × 0.25
+  shotValue(p, charge, from, gk) {
+    const goalX = p.attackDir * FIELD.halfLength, W = SHOT.weights, [d0, d1] = SHOT.valueDistance;
+    const near = clamp01((d0 - Math.hypot(goalX - from.x, from.z)) / (d0 - d1));
+    return (p.cfg.shooting ?? 1) * W.rating + charge * W.charge + this.netOpen(p, from, gk).open * W.netOpen + near * W.distance;
+  }
+
+  // The goal as seen from the ball: angles of the two posts and of the keeper, and the widest gap beside him over
+  // Shot Net Open Angle (ShotMeter.cpp). Angles grow towards +Z for both teams.
+  netOpen(p, from, gk) {
+    const goalX = p.attackDir * FIELD.halfLength;
+    const ang = (x, z) => Math.atan2((z - from.z) * p.attackDir, Math.max(0.05, (x - from.x) * p.attackDir)) * p.attackDir;
+    const a0 = ang(goalX, -FIELD.goalHalfWidth), a1 = ang(goalX, FIELD.goalHalfWidth);
+    const lo = Math.min(a0, a1), hi = Math.max(a0, a1);
+    let ak = (lo + hi) / 2, gap = hi - lo, gaps = [gap / 2, gap / 2];
+    if (gk && (gk.pos.x - from.x) * p.attackDir > 0.1) {
+      const dk = Math.hypot(gk.pos.x - from.x, gk.pos.z - from.z), hw = Math.atan(SHOT.keeperHalfWidth / dk);
+      ak = Math.max(lo, Math.min(hi, ang(gk.pos.x, gk.pos.z)));
+      gaps = [Math.max(0, ak - hw - lo), Math.max(0, hi - ak - hw)];
+      gap = Math.max(gaps[0], gaps[1]);
+    }
+    // gaps[0] is on the -Z post (side -1), gaps[1] on the +Z post (side +1)
+    return { open: Math.min(1, gap * 180 / Math.PI / SHOT.netOpenAngle), sideAngles: [Math.max(0, ak - lo), Math.max(0, hi - ak)] };
   }
 
   newInput() { return { x: 0, z: 0, turbo: false, shootHeld: false, actions: new Set() }; }
@@ -238,18 +287,44 @@ export class Game {
 
   startWindup(p, aiHold = null) {
     p.setState('windup', { aiHold });
-    p.play('windup', { fade: 0.08 });
+    p.play('windup', { fade: 0.067 }); // globalanimproperties.cpp: windup blends in 0.067 s
   }
 
+  // ShotMeter::ShotReleased: charge 0.25..1 over Shot Windup Seconds, 1 once the bar is full
+  shotCharge(t) { return t >= SHOT.windupSeconds ? 1 : SHOT.chargeMin + (1 - SHOT.chargeMin) * t / SHOT.windupSeconds; }
+
   releaseShot(p) {
-    const charge = Math.min(1, p.stateTime / SHOT.windupSeconds);
-    const perfect = charge >= 1 - SHOT.perfectWindow * (p.cfg.perfectWindow ?? 1) && p.stateTime <= SHOT.windupSeconds + 0.12;
-    p.setState('kick', { charge, perfect });
-    const clip = perfect ? 'windup_powershot' : 'windup_kick';
-    p.play(clip, { fade: 0.04, rate: perfect ? 1.35 : 1.25 });
-    p.stateData.release = (this.template.meta[clip]?.contact ?? 0.15) / (perfect ? 1.35 : 1.25);
+    const charge = this.shotCharge(p.stateTime);
+    const perfect = charge >= SHOT.perfectFrom;
     const c = this.controllerOf(p);
-    p.stateData.aimZ = c ? c.input.z : null;
+    const aimZ = c ? c.input.z : null;
+    p.setState('kick', { charge, perfect, aimZ });
+    const target = this.shotTarget(p, this.ball.pos, aimZ);
+    p.stateData.target = target;
+    // InitActionShot: windup_kick, or windup_powershot with charge >= 0.99; the LEFT versions are the clips mirrored
+    const clip = perfect ? 'windup_powershot' : 'windup_kick';
+    const mirror = angleDiff(p.facing, Math.atan2(target.z - p.pos.z, target.x - p.pos.x)) < 0;
+    p.play(clip, { fade: 0.04, mirror });
+    p.stateData.release = SHOT.contactFrame / FPS; // ActionShot: TestFrameTrigger(1.825) at rate 1
+    p.stateData.end = this.template.meta[clip]?.duration ?? 0.7;
+  }
+
+  // Fielder.cpp DoFindBestShotTarget: one of the posts (by the angles post/keeper, or the stick), a height between
+  // the ground and the bar margins, always high from beyond High Shot Distance, the centre when very close
+  shotTarget(p, from, aimZ) {
+    const goalX = p.attackDir * FIELD.halfLength, gk = this.goalieOf(1 - p.team);
+    const margin = R + FIELD.postRadius + SHOT.offsetFromPost;
+    const dist = Math.hypot(goalX - from.x, from.z);
+    let side;
+    if (aimZ !== null && aimZ !== undefined && Math.abs(aimZ) > 0.2) side = Math.sign(aimZ);
+    else {
+      const [g0, g1] = this.netOpen(p, from, gk).sideAngles;
+      side = Math.random() * (g0 + g1) < g1 ? 1 : -1;
+    }
+    const target = new THREE.Vector3(goalX, 0, side * (FIELD.goalHalfWidth - margin));
+    target.y = dist > SHOT.highShotDistance ? FIELD.goalHeight - margin : margin + Math.random() * (FIELD.goalHeight - 2 * margin);
+    if (dist < SHOT.straightDistance) target.z = 0;
+    return target;
   }
 
   shootBall(p) {
@@ -257,22 +332,19 @@ export class Game {
     const b = this.ball;
     const goalX = p.attackDir * FIELD.halfLength;
     const gk = this.goalieOf(1 - p.team);
-    const w = FIELD.goalHalfWidth - SHOT.offsetFromPost;
-    let side;
-    if (p.stateData.aimZ !== null && p.stateData.aimZ !== undefined && Math.abs(p.stateData.aimZ) > 0.2) side = Math.sign(p.stateData.aimZ);
-    else side = gk.pos.z > 0 ? -1 : 1;
-    const dist = Math.hypot(goalX - b.pos.x, b.pos.z);
-    const target = new THREE.Vector3(goalX, 0, side * w + (Math.random() * 2 - 1) * SHOT.widthVariance * (p.cfg.shotSpread ?? 1) * 2 * w);
-    target.y = dist > SHOT.highShotDistance ? FIELD.goalHeight - 0.4 : 0.35 + Math.random() * 1.3;
-    target.y += (Math.random() * 2 - 1) * SHOT.heightVariance * FIELD.goalHeight;
-    const power = perfect ? 1 : 0.15 + 0.85 * charge;
-    const speed = p.cfg.shot[0] + (p.cfg.shot[1] - p.cfg.shot[0]) * power;
     const from = b.pos.clone();
-    const flight = Math.max(0.25, from.distanceTo(target) / speed);
+    const target = p.stateData.target.clone();
+    // speed from the distance to the nearest post and the charge (DoFindBestShotTarget)
+    const dPost = Math.min(Math.hypot(goalX - from.x, -FIELD.goalHalfWidth - from.z), Math.hypot(goalX - from.x, FIELD.goalHalfWidth - from.z));
+    const speed = lerpRange(p.cfg.shot[0], p.cfg.shot[1], SHOT.speedRange[0], SHOT.speedRange[1], dPost * (SHOT.speedChargeBias + charge));
+    const value = this.shotValue(p, charge, from, gk);
+    let flight = Math.max(0.1, from.distanceTo(target) / speed);
+    // CalcRegularShot: aim error grows with the flight time and a low bar value
+    const sc = flight * (SHOT.errorBias - value);
+    target.z += (Math.random() * 2 - 1) * sc * SHOT.widthVariance * 2 * FIELD.goalHalfWidth;
+    target.y = Math.max(R, target.y + (Math.random() * 2 - 1) * sc * SHOT.heightVariance * FIELD.goalHeight);
+    flight = Math.max(0.1, from.distanceTo(target) / speed);
     let vel = shootAtFast(from, target, flight);
-    // weak shots are less accurate
-    const err = (1 - power) * 0.12 * (p.cfg.shotSpread ?? 1);
-    vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), (Math.random() * 2 - 1) * err);
     let spin = new THREE.Vector3();
     if (perfect) {
       // Fielder.cpp: random spin in the shooter's frame (fwd ±7.5, side ±15, vertical 10..25), Magnus on
@@ -288,7 +360,9 @@ export class Game {
       vel.applyQuaternion(q);
       if (vel.y < 1 && from.y < 1) vel.y = 1;
     }
-    b.kick(vel, spin, { magnus: perfect, shot: true, power, perfect });
+    // the dice roll: must the keeper miss this one? (mbShouldMiss)
+    const shouldMiss = Math.random() < this.shotMissChance(value);
+    b.kick(vel, spin, { magnus: perfect, shot: true, power: charge, perfect, value, shouldMiss });
     this.stats.shots[p.team]++;
     this.emit('shot', { team: p.team, perfect });
     this.hud.flash(perfect ? t('flash.perfect') : null);
@@ -531,24 +605,20 @@ export class Game {
         if (p.stateTime > (p.isGoalie ? 0.6 : 0.3)) p.setState('free');
         break;
       case 'windup': {
-        p.speed = Math.max(0, p.speed - 6 * dt);
-        const ctl = p.humanControlled && this.controllerOf(p);
-        if (ctl) {
-          const mag = Math.hypot(ctl.input.x, ctl.input.z);
-          if (mag > 0.15) p.facing += Math.max(-dt * 6, Math.min(dt * 6, angleDiff(p.facing, Math.atan2(ctl.input.z, ctl.input.x))));
-        } else {
-          const goalX = p.attackDir * FIELD.halfLength;
-          p.facing += Math.max(-dt * 6, Math.min(dt * 6, angleDiff(p.facing, Math.atan2(-p.pos.z * 0.6, goalX - p.pos.x))));
-        }
+        // asmRunningWB: turn towards the goal (Shot Windup Direction Seek Speed/Falloff), brake to a stop by the end
+        const left = Math.max(0.01, SHOT.windupSeconds - p.stateTime);
+        p.speed = Math.max(0, p.speed - Math.max(SHOT.windupDecel[0], Math.min(SHOT.windupDecel[1], p.speed / left)) * dt);
+        const goalX = p.attackDir * FIELD.halfLength;
+        p.facing = seekDirection(p.facing, Math.atan2(-p.pos.z, goalX - p.pos.x), SHOT.windupTurn, SHOT.windupTurnFalloff, dt);
         p.pos.x += Math.cos(p.facing) * p.speed * dt; p.pos.z += Math.sin(p.facing) * p.speed * dt;
         if (this.ball.owner !== p) { p.setState('free'); break; }
-        // the captain keeps holding in the opponents' half: Super Strike
+        // ShotMeter::Update: a full bar releases the shot, except the captain in the opponents' half (Super Strike)
         const sup = this.canSuper(p);
-        if (sup && p.stateTime >= SUPER.chargeSeconds) { this.startSuper(p); break; }
+        const superAt = SHOT.windupSeconds + this.skill('stsWindup', p.team);
+        if (sup && p.stateTime >= superAt) { this.startSuper(p); break; }
         if (p.stateData.aiHold !== null && p.stateData.aiHold !== undefined && p.stateTime >= p.stateData.aiHold) this.releaseShot(p);
-        else if (!sup && p.stateTime > SHOT.windupSeconds + 0.4) this.releaseShot(p);
-        else if (sup && !p.humanControlled && p.stateTime > SUPER.chargeSeconds + 0.5) this.releaseShot(p);
-        else if (sup && !p.humanControlled && p.stateData.aiHold > SUPER.chargeSeconds && this.players.some((o) => o.team !== p.team && !o.isGoalie && o.stun <= 0
+        else if (!sup && p.stateTime >= SHOT.windupSeconds) this.releaseShot(p);
+        else if (sup && !p.humanControlled && p.stateData.aiHold > superAt && this.players.some((o) => o.team !== p.team && !o.isGoalie && o.stun <= 0
           && Math.hypot(o.pos.x - p.pos.x, o.pos.z - p.pos.z) < 0.5 * SIZE)) this.releaseShot(p); // CPU: someone is on it, shoot now
         break;
       }
@@ -561,7 +631,7 @@ export class Game {
         if (!p.stateData.released && p.stateTime >= p.stateData.release) {
           if (this.ball.owner === p) this.shootBall(p); else p.stateData.released = true;
         }
-        if (p.stateTime > 0.55) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
+        if (p.stateTime > (p.stateData.end ?? 0.55)) { p.setState('free'); p.play('idle', { loop: true, fade: 0.2 }); }
         break;
       case 'slide': {
         const slideEnd = TACKLE.slideTime;
@@ -685,14 +755,12 @@ export class Game {
     const time = Math.max(0.05, cross.t);
     // like the original: saved if the dive gets there in time (reaction + travel), and the ball is within reach.
     // High balls far from the body take a little longer. CPU level only changes the keeper's reaction.
-    const react = g.cfg.saveReact * (this.isCpuTeam(g.team) ? this.cpuTune([1.4, 1, 0.85, 0.75]) : 1);
     const high = cross.p.y > 1.35 * SIZE && reach > GOALIE.standReach;
-    // a perfect shot curves: the keeper reads it late (our choice, so the perfect shot stays the best weapon)
-    const needed = react + (b.shotPerfect ? GOALIE.perfectReadDelay : 0) + Math.max(0, reach - GOALIE.standReach) / g.cfg.diveSpeed + (high ? 0.08 : 0);
-    const success = time >= needed && reach <= g.cfg.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
+    const needed = 0.14 + Math.max(0, reach - GOALIE.standReach) / 9 + (high ? 0.08 : 0); // interim (step 1): replaced by the save table
+    const success = !b.shouldMiss && time >= needed && reach <= g.cfg.diveReach + GOALIE.standReach && cross.p.y <= GOALIE.reachHeight;
     const height = cross.p.y < 0.55 * SIZE ? 'low' : cross.p.y < 1.35 * SIZE ? 'med' : 'high';
     let clip;
-    const catchIt = power < GOALIE.catchMaxShotPower + 0.25 && !b.shotPerfect && Math.random() < (g.cfg.catchChance ?? 0.65);
+    const catchIt = power < GOALIE.catchMaxShotPower && !b.shotPerfect;
     if (reach < 0.6 * SIZE) clip = catchIt ? 'gk_catch_' + height : 'gk_stand_defl_center_parry_' + height;
     else if (reach < 1.4 * SIZE) clip = catchIt ? 'gk_dive_catch_near_right_' + height : 'gk_dvng_defl_parry_near_right_' + height;
     else clip = catchIt ? 'gk_dive_catch_far_right_' + height : 'gk_dvng_defl_parry_far_right_' + height;

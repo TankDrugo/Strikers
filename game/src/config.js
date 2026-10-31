@@ -79,23 +79,63 @@ export const GOALIE = {
   // Saves are not a dice roll in the original (Goalie::CalcSaveParameters, GoalieSave::FindBestSave): the keeper
   // saves when one of his save animations reaches the ball in time. We model that with a reaction time plus a dive
   // speed (both estimated: the shipped save-timing grid is not in the decompilation).
-  saveReact: 0.14,
-  diveSpeed: 9.0, // m/s sideways once the dive starts (tuned on CPU matches: about 1 shot in 5 goes in, 1 perfect shot in 2; was 2 in 5 with the old dice roll)
-  perfectReadDelay: 0.1,
   standReach: 0.6 * SIZE, // shots this close to the body need no dive
   pass: [9.0, 19.0],
 };
 
 export const SHOT = {
-  windupSeconds: 0.66, // Shot Windup Seconds
-  perfectFrom: 0.99, // Magnus only above 0.99 (Fielder.cpp)
-  perfectWindow: 0.06, // generous window on top of the meter (S2S Perfect Distance Max)
-  offsetFromPost: 0.5, // Shot Offset From Post
-  highShotDistance: 19.0,
-  widthVariance: 0.08,
-  heightVariance: 0.04,
-  maxOnetimer: 0.8,
+  windupSeconds: 0.66, // Shot Windup Seconds (GameTweaks.ini)
+  chargeMin: 0.25, // ShotMeter::ShotReleased: charge = Interpolate(0.25, 1.0, t / Shot Windup Seconds); 1 once the bar is full
+  perfectFrom: 0.99, // Fielder.cpp: windup_powershot and Magnus only with charge >= 0.99 (bar held to the end)
+  contactFrame: 1.825, // FielderActions.cpp ActionShot: TestFrameTrigger(1.825), the kick clip plays at rate 1 (30 frames/s)
+  // Fielder.cpp DoFindBestShotTarget: speed = InterpolateRangeClamped(Shot Min, Shot Max, 3, 18, d × (0.3 + charge)),
+  // d = distance from the ball to the nearest post
+  speedRange: [3, 18], speedChargeBias: 0.3,
+  offsetFromPost: 0.5, // Shot Offset From Post (GameTweaks.ini): ball centre 0.5 m inside the post, and as far from ground and bar
+  highShotDistance: 19.0, // High Shot Distance (GameTweaks.ini): from farther, always under the bar
+  straightDistance: 3.0, // estimate: DoFindBestShotTarget shoots at the centre "close to the goal"; the threshold is not in our notes
+  // CalcRegularShot: error scale = flight time × (1.1 − bar value), × Shot Width/Height Variance (GameTweaks.ini).
+  // The unit is not written down: we read it as a fraction of the goal width and height.
+  widthVariance: 0.08, heightVariance: 0.04, errorBias: 1.1,
+  // ShotMeter.cpp CalcScoreValue: Shooting × 0.06 + charge × 0.29 + net open × 0.40 + distance × 0.25
+  // (Shot Ratings / Net Open / Player Distance Weight, GameTweaks.ini; the 0.29 is in the code)
+  weights: { rating: 0.06, charge: 0.29, netOpen: 0.40, distance: 0.25 },
+  netOpenAngle: 35, // Shot Net Open Angle (GameTweaks.ini): the widest gap beside the keeper, in degrees, over 35
+  keeperHalfWidth: (0.65 / 2) * SIZE, // estimate: what the keeper covers in that gap (his capsule radius, goalie.ini)
+  valueDistance: [20, 7.5], // Shot Distance Min/Max (FuzzyTweaks.ini): distance term 0 at 20 m from the goal, 1 at 7.5 m
+  // Fielder.cpp CalcRegularShot: the bar value goes through the Shot Value / Shot Chance curve of the chosen level
+  // (SKILL below); the keeper must miss when 100 × random < chance
+  windupTurn: 75000, windupTurnFalloff: 4000, // Shot Windup Direction Seek Speed/Falloff (g_pTweaks, CharacterTweaks.cpp)
+  windupDecel: [6, 50], // asmRunningWB: brake = speed / time left, between Shot Windup Decel (g_pTweaks) and 50
+  maxOnetimer: 0.8, // Shot Meter Max Onetimer Speed (GameTweaks.ini), not used yet
 };
+
+// Difficulty tables (Difficulty0..3.ini = Rookie, Professional, Superstar, Legend; DifficultyHuman.ini for a side with
+// human players), read by SkillTweaks::Init (GameTweaks.cpp); values in STRIKERS_REFERENCE.md §9 bis. `level` is
+// indexed by the chosen level 0..3. Game.cpp ApplyDifficulty copies the keys in SKILL_FROM_LEVEL from the chosen level
+// onto both teams (also the human one). A value missing from a file is 0.5 (SkillTweaks default).
+export const SKILL = {
+  shotValue: [0.25, 0.6, 0.75], // Shot Value 1..3: same in every file
+  shotChance: { level: [[1, 5, 20, 35, 55], [1, 3, 17.5, 35, 55], [1, 1, 15, 35, 55], [1, 1, 15, 35, 55]] }, // Shot Chance 0..4 (%)
+  stsWindup: { level: [0.25, 0.25, 0.25, 0.25], human: 0.25 }, // STS Windup Time
+  attackCarrierRange: { level: [2.5, 3, 4, 4], human: 4 },
+  looseBallRange: { level: [-1, 1, 2, 2], human: 2 },
+  goalieInterceptPass: { level: [0, 1, 1, 1], human: 1 },
+  goalieDekeChance: { level: [0.5, 0.5, 0.5, 0.5], human: 0.5 },
+  goalieDekeSpeed: { level: [1, 1.1, 1.2, 1.3], human: 0.5 },
+  captainS2SChance: { level: [0.1, 0.5, 0.9, 1], human: 1 }, // Captain ShootToScore Chance
+  captainS2SPerfect: { level: [0.2, 0.33, 0.6, 0.975], human: 0.4 }, // Captain S2S Perfect First = Second Button Chance
+  shootingChance: { level: [0.1, 0.525, 0.95, 1], human: 0.95 },
+  groundPassChance: { level: [0.05, 0.3, 0.672, 0.85], human: 0.75 },
+  volleyPassChance: { level: [0.05, 0.3, 0.672, 0.85], human: 0.7 },
+  dekeChance: { level: [0, 0.358, 0.717, 1], human: 0.65 },
+  turboWithBallChance: { level: [0, 0.333, 0.667, 1], human: 0.75 },
+  reaction: { level: [0, 0.25, 0.667, 1], human: 0.5 }, // reaction delay = 0.3 × (1 − Reaction) (CommonScript.cpp)
+  slideAttackChance: { level: [0.02, 0.15, 0.5, 1], human: 0 },
+  heavyAttackChance: { level: [0.02, 0.15, 0.5, 0.95], human: 0 },
+  markingEffectiveness: { level: [0.05, 0.2, 0.55, 1], human: 0.6 },
+};
+export const SKILL_FROM_LEVEL = ['shotChance', 'stsWindup', 'attackCarrierRange', 'looseBallRange', 'goalieInterceptPass'];
 
 // Super Strike (Shoot-to-Score), captain only, never the keeper. Original values from reference/STRIKERS_REFERENCE.md
 // (Super Strike §5, goalie §6); the ones marked "estimate" are not in the files we have and were tuned by hand.

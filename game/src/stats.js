@@ -25,8 +25,7 @@ export function fielderConfig(st = {}) {
     shot: scale(FIELDER.shot, sho),
     passGround: scale(FIELDER.passGround, pas), passVolley: scale(FIELDER.passVolley, pas), chip: scale(FIELDER.chip, pas),
     // extras read by game.js and hud.js
-    shotSpread: Math.max(0.4, f(st.tir, -0.02)), // aim error: 99 = 0.52×, 55 = 1.4×
-    perfectWindow: f(st.tir, 0.01), // green zone of the shot meter: ±1 % per point
+    shooting: (st.tir ?? STAT_BASE) / STAT_BASE, // the "Shooting" attribute of the bar value (mario.ini 1 at 75; weight 0.06)
     passError: Math.max(0, (80 - (st.pas ?? 80)) * 0.003), // radians of random error below 80
     tackleReach: f(st.con, 0.005), slideSpeed: f(st.con, 0.004), // shoulder charge reach, slide speed
     stunTime: Math.max(0.6, f(st.con, -0.008)), // knocked down for shorter

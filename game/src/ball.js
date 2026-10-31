@@ -67,6 +67,8 @@ export class Ball {
     this.shotTimer = 0; // > 0 while a shot is in flight (goalie reacts)
     this.shotPower = 0;
     this.shotPerfect = false;
+    this.shotValue = 0;
+    this.shouldMiss = false;
     this.passTarget = null;
     this.inGoal = 0; // side of the goal it went in, once
     this.events = [];
@@ -88,6 +90,8 @@ export class Ball {
     this.shotTimer = opts.shot ? 1.5 : 0;
     this.shotPower = opts.power || 0;
     this.shotPerfect = !!opts.perfect;
+    this.shotValue = opts.value ?? 0; // bar value of the shot (ShotMeter.cpp CalcScoreValue)
+    this.shouldMiss = !!opts.shouldMiss; // the dice roll said the keeper must miss (Fielder.cpp mbShouldMiss)
     this.passTarget = opts.passTarget || null;
   }
 
