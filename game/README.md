@@ -68,7 +68,7 @@ node tools/build.mjs --itch
 BUTLER_API_KEY=dummy butler push dist/itch goleador0702/strikers:html5 --userversion "$(git rev-parse --short HEAD)"
 ```
 
-Prima build caricata il 31 ottobre (canale `html5`). Le opzioni della pagina (gioco nel browser, dimensioni 1280×720, schermo intero, chi può accedere) si cambiano solo dal sito, nella modifica del progetto.
+Prima build caricata il 31 ottobre (canale `html5`). Per provare Ultimate Team con tanti crediti c'è la build di prova anche per itch.io: `node tools/build.mjs --itch --credits=1000000` scrive `dist/itch-prova/` (ogni club torna a 1 milione quando scende sotto la metà; nel menu compare "PROVA"), da caricare con `butler push dist/itch-prova …`. Dal 1° novembre su itch.io c'è questa (versione `a683bde-1M`); per tornare alla normale si ricarica `dist/itch`. Le opzioni della pagina (gioco nel browser, dimensioni 1280×720, schermo intero, chi può accedere) si cambiano solo dal sito, nella modifica del progetto.
 
 ## Comandi
 

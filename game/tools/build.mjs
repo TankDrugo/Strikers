@@ -4,6 +4,7 @@
 //   node tools/build.mjs --web [out_dir]   page + assets/ as separate files, for the private online link (see README)
 //   node tools/build.mjs --itch            the same for itch.io (full HTML document) in dist/itch and dist/calcio-arcade-itch.zip
 //   add --prova for the test build: Ultimate Team clubs always have 10 million credits (dist/gioco-prova.html, dist/web-prova)
+//   add --credits=N for a test build with N credits instead (implies --prova; e.g. --itch --credits=1000000)
 import { build } from 'esbuild';
 import fs from 'fs';
 import zlib from 'zlib';
@@ -13,10 +14,12 @@ import { fileURLToPath } from 'url';
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const assets = path.join(root, 'assets');
 const args = process.argv.slice(2);
-const itch = args.includes('--itch'), web = args.includes('--web') || itch, prova = args.includes('--prova');
+const creditsArg = args.find((a) => a.startsWith('--credits='));
+const credits = creditsArg ? Math.max(0, parseInt(creditsArg.split('=')[1], 10) || 0) : 10000000;
+const itch = args.includes('--itch'), web = args.includes('--web') || itch, prova = args.includes('--prova') || !!creditsArg;
 const pos = args.filter((a) => !a.startsWith('--'))[0];
 const out = pos || path.join(root, 'dist', itch ? (prova ? 'itch-prova' : 'itch') : web ? (prova ? 'web-prova' : 'web') : (prova ? 'gioco-prova.html' : 'gioco.html'));
-const provaJs = prova ? '<script>window.__PROVA = { credits: 10000000 };</script>\n' : '';
+const provaJs = prova ? `<script>window.__PROVA = { credits: ${credits} };</script>\n` : '';
 const roster = JSON.parse(fs.readFileSync(path.join(assets, 'roster.json'), 'utf8'));
 const used = new Set(roster.teams.flat());
 const chars = roster.characters; // all of them: the animation viewer can show characters not in a team
