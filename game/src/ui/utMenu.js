@@ -506,7 +506,7 @@ export function installUt(Menu) {
         if (a === 'back') return this.nav.pop(l);
         this.nav.clear(); this.hub = null;
         this.onStart({
-          kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: this.setup.seconds,
+          kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: this.setup.seconds, stadium: 'random',
           cpuLevel: C.cpuLevel(club.division.div),
           lineups: [C.lineup(club, p.name, p.color), { name: opp.name, color: opp.color, slots: opp.slots, stats: opp.stats, captain: opp.captain }],
           onFinish: (res) => this.utAfterMatch(res),

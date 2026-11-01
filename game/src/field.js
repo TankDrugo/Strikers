@@ -3,14 +3,14 @@ import { FIELD, BALL } from './config.js';
 
 const F = FIELD;
 
-function pitchTexture() {
+function pitchTexture(grass = ['#3f9a45', '#47a84d']) {
   const c = document.createElement('canvas');
   c.width = 2048; c.height = 1200;
   const g = c.getContext('2d');
   const sx = c.width / (2 * (F.halfLength + 1.5)), sz = c.height / (2 * (F.halfWidth + 1.5));
   const X = (x) => c.width / 2 + x * sx, Z = (z) => c.height / 2 + z * sz;
   for (let i = 0; i < 14; i++) {
-    g.fillStyle = i % 2 ? '#3f9a45' : '#47a84d';
+    g.fillStyle = i % 2 ? grass[0] : grass[1];
     g.fillRect((i * c.width) / 14, 0, c.width / 14 + 1, c.height);
   }
   g.strokeStyle = 'rgba(255,255,255,0.92)';
@@ -61,13 +61,13 @@ function ballTexture() {
   return t;
 }
 
-export function buildField(scene, { stadium = false } = {}) {
+export function buildField(scene, { stadium = false, grass } = {}) {
   const root = new THREE.Group();
   scene.add(root);
 
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(2 * (F.halfLength + 1.5), 2 * (F.halfWidth + 1.5)),
-    new THREE.MeshStandardMaterial({ map: pitchTexture(), roughness: 0.95 }));
+    new THREE.MeshStandardMaterial({ map: pitchTexture(grass), roughness: 0.95 }));
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   root.add(ground);

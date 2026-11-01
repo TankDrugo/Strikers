@@ -3,6 +3,7 @@ import { BALL, FIELD, FIELDER, GOALIE, SHOT, SUPER, TACKLE, PASS, MATCH, PHYSICS
 import { Ball, predict, shootAtFast } from './ball.js';
 import { buildField, buildBallMesh } from './field.js';
 import { Stadium } from './stadium.js';
+import { stadiumTheme } from './stadiums.js';
 import { Player, angleDiff, seekDirection } from './player.js';
 import { fielderAI, bestPassTarget } from './ai.js';
 import { Keeper, findBestSave } from './goalie.js';
@@ -20,7 +21,8 @@ const tmp2 = new THREE.Vector3();
 const HOMES = [[-11, -5], [-11, 5], [-4, -3.5], [-4, 3.5]];
 
 export class Game {
-  constructor(renderer, template, hud) {
+  // opts.stadium: one of the stadiums of stadiums.js (default the Electric Arena)
+  constructor(renderer, template, hud, opts = {}) {
     this.renderer = renderer;
     this.template = template;
     this.teams = template.teams; // [{ name, color }] per team, from roster.json
@@ -32,8 +34,15 @@ export class Game {
     this.camTarget = new THREE.Vector3();
     this.camZoom = 1; // 0.6 (closer) .. 2.2 (whole pitch)
     this.setupLights();
-    buildField(this.scene, { stadium: true });
-    this.stadium = new Stadium(this.scene, this.teams);
+    const theme = stadiumTheme(opts.stadium);
+    this.stadiumId = theme.id;
+    buildField(this.scene, { stadium: true, grass: theme.grass });
+    this.stadium = new Stadium(this.scene, this.teams, theme.id);
+    // the stadium's light rig
+    const L = theme.light;
+    this.hemi.color.setHex(L.sky); this.hemi.groundColor.setHex(L.ground); this.hemi.intensity = L.hemi;
+    this.sun.color.setHex(L.sun); this.sun.intensity = L.sunI; this.sun.position.set(...L.sunPos);
+    this.lightBase = { hemi: L.hemi, sun: L.sunI };
     this.ball = new Ball(buildBallMesh());
     this.keeper = new Keeper(this);
     this.scene.add(this.ball.mesh);
@@ -80,6 +89,9 @@ export class Game {
     this.camLift = 0;
     this.stats = { shots: [0, 0], saves: [0, 0], passes: [0, 0], tackles: [0, 0], posts: 0 };
     this.kickoff(0);
+    // opening shot: the camera goes round the stadium for a few seconds before the first kick-off (any button skips)
+    this.intro = { t: 0, dur: 3.6 };
+    this.hud.flash(t('stadium.' + this.stadiumId), '#ffffff', 2.8);
   }
 
   emit(type, data) { if (this.onEvent) this.onEvent(type, data); }
@@ -1102,7 +1114,12 @@ export class Game {
     if (this.phase === 'kickoff') {
       for (const p of this.players) { p.speed = 0; p.locomotionAnim(); p.update(dt); }
       this.ballStep(dt);
-      if (this.phaseTime > 1.2) this.phase = 'play';
+      if (this.intro) {
+        this.intro.t += dt;
+        if (this.intro.t >= this.intro.dur || this.controllers.some((c) => c.input.actions.size)) { this.intro = null; this.phaseTime = 0; }
+        for (const c of this.controllers) c.input.actions.clear();
+      }
+      if (this.phaseTime > 1.2 && !this.intro) this.phase = 'play';
       return;
     }
     if (this.phase === 'goal' || this.phase === 'end') {
@@ -1214,8 +1231,8 @@ export class Game {
     const s = this.superStrike;
     const want = s && s.phase === 'scene' ? s.dark * (s.outcome === 'super' ? 0.85 : 0.6) : 0;
     this.darkness += (want - this.darkness) * (1 - Math.exp(-dt * (want > this.darkness ? 6 : 3)));
-    this.hemi.intensity = 1.35 * (1 - this.darkness);
-    this.sun.intensity = 2.2 * (1 - this.darkness);
+    this.hemi.intensity = this.lightBase.hemi * (1 - this.darkness);
+    this.sun.intensity = this.lightBase.sun * (1 - this.darkness);
     const lightOn = s && s.phase === 'scene' ? (s.light ? 1 : 0.35) * Math.min(1, this.darkness * 2) : 0;
     this.capLight.intensity += (lightOn * 6 - this.capLight.intensity) * (1 - Math.exp(-dt * 8));
     if (s) this.capLight.position.set(s.p.rpos.x, 2.6 * SIZE, s.p.rpos.z + 1.2);
@@ -1241,6 +1258,17 @@ export class Game {
     // stay in front of the near-side stand (it starts 7.6 m behind the touchline)
     const camZ = Math.min(this.camTarget.z + 0.3 + 8.9 * this.camZoom, FIELD.halfWidth + 6.8);
     const ss = this.superStrike;
+    if (this.intro) {
+      // from high above, outside the stands (the scenery shows), down in an arc to the touchline camera
+      const u = Math.min(1, this.intro.t / this.intro.dur), e = u * u * (3 - 2 * u);
+      const end = new THREE.Vector3(0, 0.5 + 5.7 * this.camZoom, 0.3 + 8.9 * this.camZoom);
+      const r1 = Math.hypot(end.x, end.z), a = Math.PI / 2 + 1.05 * (1 - e), r = 74 + (r1 - 74) * e;
+      if (this.camera.fov !== 42) { this.camera.fov = 42; this.camera.updateProjectionMatrix(); }
+      this.camera.position.set(Math.cos(a) * r, 34 + (end.y - 34) * e, Math.sin(a) * r);
+      this.camera.lookAt(0, 6 * (1 - e) + 0.65 * e, -14 * (1 - e) + 0.3 * e);
+      this.camTarget.set(0, 0, 0);
+      return;
+    }
     if (ss && ss.phase === 'scene') { this.superCamera(ss, dt); return; }
     if (this.camera.fov !== 42) { this.camera.fov = 42; this.camera.updateProjectionMatrix(); }
     // Super Strike: closer, and looking up at the captain in the air

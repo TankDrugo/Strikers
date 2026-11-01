@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { stadiumIds } from './stadiums.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Game } from './game.js';
 import { Hud } from './hud.js';
@@ -211,8 +212,9 @@ async function boot() {
   function startMatch(opts = {}) {
     if (opts.aiOnly) opts = { kind: 'watch', humans: [], bindings: [] }; // old API (tools/playtest.cjs)
     match = { kind: 'cpu', humans: [0], bindings: [{ device: 'any', ctrl: 0 }], seconds: MATCH.seconds, cpuLevel: 1, ...opts };
+    if (match.stadium === 'random') match = { ...match, stadium: stadiumIds[Math.floor(Math.random() * stadiumIds.length)] };
     if (viewer) { viewer.dispose(); viewer = null; }
-    game = new Game(renderer, match.lineups ? withLineups(match.lineups) : template, hud);
+    game = new Game(renderer, match.lineups ? withLineups(match.lineups) : template, hud, { stadium: match.stadium });
     game.setHumans(match.humans);
     game.knockout = !!match.knockout;
     // star objectives: one tracker per human team playing the computer

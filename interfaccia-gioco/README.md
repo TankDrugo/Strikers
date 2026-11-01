@@ -8,7 +8,8 @@ Fatto:
 - Menu stile FC: LB/RB tra le schede, Coppe e Ultimate Team come parti a sé con i loro colori
 - Lingua all'avvio (italiano, inglese) e profili salvati nel browser
 - Gioco rapido: contro la CPU, contro un amico, in due contro la CPU
-- Coppe complete: 4 coppe, stelle, Difficile, voto da D a Z, bacheca, tornei fino a 4 giocatori
+- Coppe complete: 9 coppe (1° novembre: 5 nuove a tema dei nostri personaggi, ognuna nel suo stadio), stelle, Difficile, voto da D a Z, bacheca, tornei fino a 4 giocatori
+- Scelta dello stadio in Gioco rapido (9 stadi a tema o Casuale)
 - Bozze scelte: stile M1, holo, teca delle numerate, walkout P1
 - Ultimate Team: Club, Rosa, Mercato, Divisioni, Album e apertura P1 con walkout 3D
 - Scelta della squadra in Gioco rapido, Coppe e tornei: squadre pronte o formazione libera con capitano (`game/src/ui/squads.js`)

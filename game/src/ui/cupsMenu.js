@@ -1,6 +1,8 @@
 // Cup screens (stage 3): cup list with grades, cup detail, tournament with friends and private tournament set-up,
 // bracket (LB/RB through the rounds), pre-match with the star objectives, result, trophy. Installed on Menu.
 import { el } from './nav.js';
+import { STADIUMS } from '../stadiums.js';
+const castOf = (id) => STADIUMS.find((x) => x.id === id)?.cast || [];
 import { t } from './i18n.js';
 import { save } from './save.js';
 import { CUPS, cupById, cpuTeams, baseTeams, makeBracket, nextRound, simulate, roundKey, progress, grade, unlocked, rng } from '../cups/cups.js';
@@ -22,12 +24,12 @@ export function installCups(Menu) {
 
   P.cupsView = function () {
     const p = save.active();
-    return `<div class="view" style="grid-template-columns:repeat(4,1fr)">${CUPS.map((c, i) => {
+    return `<div class="view" style="grid-template-columns:repeat(3,1fr)">${CUPS.map((c, i) => {
       const rec = p.cups?.[c.id], pct = progress(c, rec), g = grade(pct, rec), open = unlocked(i, p.cups);
       const stars = rec ? Object.values(rec.stars.normal).reduce((a, b) => a + b, 0) + Object.values(rec.stars.hard).reduce((a, b) => a + b, 0) : 0;
       return `<button class="tile${open ? '' : ' locked'}" data-nav data-act="cup" data-cup="${c.id}" style="${this.cupColors(c)}">
         ${open ? '' : `<span class="soon-tag">${t('cup.locked')}</span>`}<span class="big" style="margin-top:.6em">${open ? g : '🔒'}</span>
-        <h3>${t('cups.' + c.id)}</h3><p>${t('cups.' + c.id + 't')} · ${t('cups.matches', { n: c.rounds })}</p>
+        <h3>${t('cups.' + c.id)}</h3><p>${t('stadium.' + c.stadium)} · ${t('cups.matches', { n: c.rounds })}</p>
         <p>${t('cup.complete', { n: pct })} · ${t('cup.stars', { n: stars, max: c.rounds * 6 })}</p></button>`;
     }).join('')}</div>`;
   };
@@ -40,7 +42,7 @@ export function installCups(Menu) {
 
   P.trophiesView = function () {
     const p = save.active();
-    return `<div class="view" style="grid-template-columns:repeat(4,1fr)">${CUPS.map((c) => {
+    return `<div class="view" style="grid-template-columns:repeat(3,1fr)">${CUPS.map((c) => {
       const rec = p.cups?.[c.id], pct = progress(c, rec), g = grade(pct, rec), won = rec?.normalWon;
       const metal = !won ? '' : g === 'Z' ? 'filter:drop-shadow(0 0 .4em #fff) hue-rotate(160deg) saturate(2)' : rec.hardWon ? '' : 'filter:grayscale(.6)';
       return `<div class="tile${won ? '' : ' locked'}" data-nav tabindex="-1" style="${this.cupColors(c)}">
@@ -177,7 +179,7 @@ export function installCups(Menu) {
     const squads = baseTeams(this.roster);
     // h.lineup: chosen in the set-up (presets or custom); h.squad: runs saved before line-ups existed
     const teams = humans.map((h, i) => ({ ...(h.lineup ? { name: h.lineup.name, color: h.lineup.color, slots: [...h.lineup.slots], captain: h.lineup.captain, rating: 1.1 } : squads[h.squad]), human: { ...h, slot: i } }));
-    teams.push(...cpuTeams(this.roster, cup ? cup.teamsKey : 'race', n - humans.length, cup ? cup.id : seed));
+    teams.push(...cpuTeams(this.roster, cup ? cup.teamsKey : 'race', n - humans.length, cup ? cup.id : seed, cup ? castOf(cup.stadium) : []));
     return { cupId: cup ? cup.id : null, level, rounds, seconds, cpuLevel, teams, bracket: makeBracket(n, humans.map((_, i) => i), seed), seed, view: 0 };
   };
 
@@ -265,7 +267,7 @@ export function installCups(Menu) {
         });
         const final = nx.r === run.rounds - 1;
         this.onStart({
-          kind: 'cup', humans, bindings, seconds: run.seconds, knockout: true, objectives,
+          kind: 'cup', humans, bindings, seconds: run.seconds, knockout: true, objectives, stadium: cup ? cup.stadium : 'random',
           cpuLevel: cup ? cup.cpu[run.level] + (final ? 0.5 : 0) : run.cpuLevel,
           lineups: sidesColors(...[A, B].map((tm) => ({ name: tm.name, color: tm.color, slots: tm.slots, captain: tm.captain }))),
           onFinish: (res) => this.afterCupMatch(run, nx, res),

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FIELD } from './config.js';
+import { stadiumTheme, buildDecor } from './stadiums.js';
 
 // An original enclosed arena built around the measured pitch: apron, electric barrier,
 // stepped stands with an animated crowd, roof ring, four floodlight towers,
@@ -32,19 +33,19 @@ function perimeterPoints(hl, hw, r, spacing) {
   return pts.map((p) => new THREE.Vector2(p.x, p.y));
 }
 
-function ledTexture(lines) {
+function ledTexture(lines, bg = ['#0b1a3a', '#122a5c'], colors = ['#ffd23f', '#ffffff', '#ff6b6b', '#7dd3ff']) {
   const c = document.createElement('canvas');
   c.width = 2048; c.height = 64;
   const g = c.getContext('2d');
   const grad = g.createLinearGradient(0, 0, c.width, 0);
-  grad.addColorStop(0, '#0b1a3a'); grad.addColorStop(0.5, '#122a5c'); grad.addColorStop(1, '#0b1a3a');
+  grad.addColorStop(0, bg[0]); grad.addColorStop(0.5, bg[1]); grad.addColorStop(1, bg[0]);
   g.fillStyle = grad; g.fillRect(0, 0, c.width, c.height);
   g.font = 'bold 40px Trebuchet MS, sans-serif';
   g.textBaseline = 'middle';
   let x = 30;
   for (let i = 0; x < c.width; i++) {
     const t = lines[i % lines.length];
-    g.fillStyle = ['#ffd23f', '#ffffff', '#ff6b6b', '#7dd3ff'][i % 4];
+    g.fillStyle = colors[i % colors.length];
     g.fillText(t, x, 34);
     x += g.measureText(t).width + 90;
   }
@@ -55,11 +56,14 @@ function ledTexture(lines) {
 }
 
 export class Stadium {
-  constructor(scene, teams = [{ color: '#ffd23f' }, { color: '#ff4f4f' }]) {
+  // themeId: one of the stadiums of stadiums.js (sky, lights, materials, LED boards, scenery)
+  constructor(scene, teams = [{ color: '#ffd23f' }, { color: '#ff4f4f' }], themeId = 'arena') {
     this.teams = teams;
+    this.theme = stadiumTheme(themeId);
     this.root = new THREE.Group();
     scene.add(this.root);
     this.time = 0;
+    this.anim = [];
     this.buildSky(scene);
     this.buildApron();
     this.buildBarrier();
@@ -67,32 +71,35 @@ export class Stadium {
     this.buildCrowd();
     this.buildRoofAndLights();
     this.buildScreen();
+    buildDecor(this.root, this.theme, { outer: this.outer, top: this.top, anim: this.anim });
     this.lastScreen = '';
   }
 
   buildSky(scene) {
+    const th = this.theme;
     const geo = new THREE.SphereGeometry(180, 32, 16);
     const mat = new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false,
-      uniforms: { top: { value: new THREE.Color(0x0b1430) }, bottom: { value: new THREE.Color(0x3a4f7a) } },
+      uniforms: { top: { value: new THREE.Color(th.sky[0]) }, bottom: { value: new THREE.Color(th.sky[1]) }, stars: { value: th.stars ? 1 : 0 },
+        sunDir: { value: new THREE.Vector3(...(th.sun ? th.sun.dir : [0, -1, 0])).normalize() }, sunCol: { value: new THREE.Color(th.sun ? th.sun.color : 0) }, sunSize: { value: th.sun ? th.sun.size : 0 } },
       vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-      fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);} void main(){ float t = clamp(vP.y*1.6+0.15,0.0,1.0); vec3 c = mix(bottom, top, t); float s = step(0.9975, h(floor(vP*240.0))) * smoothstep(0.15,0.6,vP.y); gl_FragColor = vec4(c + s*0.8, 1.0); }',
+      fragmentShader: 'uniform vec3 top; uniform vec3 bottom; uniform float stars; uniform vec3 sunDir; uniform vec3 sunCol; uniform float sunSize; varying vec3 vP; float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);} void main(){ float t = clamp(vP.y*1.6+0.15,0.0,1.0); vec3 c = mix(bottom, top, t); float s = stars * step(0.9975, h(floor(vP*240.0))) * smoothstep(0.15,0.6,vP.y); float d = 1.0 - dot(normalize(vP), sunDir); float sun = sunSize > 0.0 ? smoothstep(sunSize*0.06, sunSize*0.04, d) + 0.35*exp(-d/(sunSize*0.6)) : 0.0; gl_FragColor = vec4(c + s*0.8 + sunCol*sun, 1.0); }',
     });
     const sky = new THREE.Mesh(geo, mat);
     scene.add(sky);
     scene.background = null;
-    scene.fog = new THREE.Fog(0x1d2a48, 70, 170);
+    scene.fog = new THREE.Fog(th.fog[0], th.fog[1], th.fog[2]);
   }
 
   buildApron() {
     // run-off area between pitch and stands
     const g = ringGeometry(F.halfLength + 1.4, F.halfWidth + 1.4, F.cornerRadius + 1.4, F.halfLength + 7.5, F.halfWidth + 7.5, F.cornerRadius + 7.5, 0.02);
-    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x24324a, roughness: 0.95 }));
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: this.theme.apron, roughness: 0.95 }));
     m.position.y = -0.03; m.receiveShadow = true;
     this.root.add(m);
     // under the pitch edge
     const edge = ringGeometry(F.halfLength, F.halfWidth, F.cornerRadius, F.halfLength + 1.45, F.halfWidth + 1.45, F.cornerRadius + 1.45, 0.02);
-    const e = new THREE.Mesh(edge, new THREE.MeshStandardMaterial({ color: 0x2f7d3a, roughness: 1 }));
+    const e = new THREE.Mesh(edge, new THREE.MeshStandardMaterial({ color: this.theme.edge, roughness: 1 }));
     e.position.y = -0.025; this.root.add(e);
   }
 
@@ -100,9 +107,10 @@ export class Stadium {
     // electric barrier: glass panels, glowing rails and posts following the rounded pitch edge
     const h = 1.15, hl = F.halfLength + 0.25, hw = F.halfWidth + 0.25, r = F.cornerRadius + 0.25;
     const pts = perimeterPoints(hl, hw, r, 0.5);
-    const glass = new THREE.MeshStandardMaterial({ color: 0x8fe3ff, emissive: 0x1677aa, emissiveIntensity: 0.6, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
-    this.railMat = new THREE.MeshStandardMaterial({ color: 0x9ff0ff, emissive: 0x4fd8ff, emissiveIntensity: 1.6 });
-    const postMat = new THREE.MeshStandardMaterial({ color: 0xc9d6e4, metalness: 0.6, roughness: 0.3 });
+    const th = this.theme;
+    const glass = new THREE.MeshStandardMaterial({ color: th.glass[0], emissive: th.glass[1], emissiveIntensity: 0.6, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+    this.railMat = new THREE.MeshStandardMaterial({ color: th.rail[0], emissive: th.rail[1], emissiveIntensity: 1.6 });
+    const postMat = new THREE.MeshStandardMaterial({ color: th.post, metalness: 0.6, roughness: 0.3 });
     const panelPos = [], railPos = [];
     for (let i = 0; i < pts.length; i++) {
       const a = pts[i], b = pts[(i + 1) % pts.length];
@@ -131,11 +139,12 @@ export class Stadium {
 
   buildStands() {
     // stepped bowl; the near touchline side (+Z, where the camera sits) stays low
-    const concrete = new THREE.MeshStandardMaterial({ color: 0x51607a, roughness: 0.9 });
-    const seatA = new THREE.MeshStandardMaterial({ color: 0x2b3f6b, roughness: 0.8 });
-    const seatB = new THREE.MeshStandardMaterial({ color: 0x34508a, roughness: 0.8 });
+    const th = this.theme;
+    const concrete = new THREE.MeshStandardMaterial({ color: th.concrete, roughness: 0.9 });
+    const seatA = new THREE.MeshStandardMaterial({ color: th.seats[0], roughness: 0.8 });
+    const seatB = new THREE.MeshStandardMaterial({ color: th.seats[1], roughness: 0.8 });
     this.tiers = [];
-    const base = 7.6, depth = 0.95, rise = 0.55, steps = 12;
+    const base = 7.6, depth = 0.95, rise = 0.55, steps = th.steps;
     for (let i = 0; i < steps; i++) {
       const o = base + i * depth;
       const g = ringGeometry(F.halfLength + o, F.halfWidth + o, F.cornerRadius + o, F.halfLength + o + depth + 0.02, F.halfWidth + o + depth + 0.02, F.cornerRadius + o + depth + 0.02, 1.2 + i * rise);
@@ -152,8 +161,9 @@ export class Stadium {
     const back = new THREE.Mesh(ringGeometry(F.halfLength + outer, F.halfWidth + outer, F.cornerRadius + outer, F.halfLength + outer + 0.6, F.halfWidth + outer + 0.6, F.cornerRadius + outer + 0.6, 1.2 + steps * rise + 2.5), concrete);
     this.root.add(back);
     this.outer = outer;
+    this.top = 1.2 + steps * rise; // height of the last step
     // LED boards: a strip on the inside face of the front wall
-    this.led = ledTexture(['CALCIO ARCADE', '5 CONTRO 5', 'TIRO PERFETTO', 'GOL!', 'ARENA ELETTRICA', 'PARATA!']);
+    this.led = ledTexture(th.led.lines, th.led.bg, th.led.colors);
     const ledMat = new THREE.MeshBasicMaterial({ map: this.led, toneMapped: false });
     const pts = perimeterPoints(F.halfLength + 7.28, F.halfWidth + 7.28, F.cornerRadius + 7.28, 0.6);
     const pos = [], uv = [];
@@ -194,7 +204,7 @@ export class Stadium {
     const phase = new Float32Array(spots.length);
     const m = new THREE.Matrix4(), c = new THREE.Color();
     const shades = (hex) => [0, 0.08, -0.1].map((dl) => new THREE.Color(hex).offsetHSL(0, 0, dl).getHex());
-    const home = shades(this.teams[0].color), away = shades(this.teams[1].color), neutral = [0xdfe6ee, 0x6b7a90, 0x2e3a4f, 0xb9c4d4];
+    const home = shades(this.teams[0].color), away = shades(this.teams[1].color), neutral = this.theme.crowd;
     spots.forEach(([x, y, z], i) => {
       m.makeTranslation(x, y, z);
       crowd.setMatrixAt(i, m);
@@ -209,21 +219,24 @@ export class Stadium {
   }
 
   buildRoofAndLights() {
-    const o = this.outer;
-    const roofY = 1.2 + 12 * 0.55 + 4.5;
-    const roof = new THREE.Mesh(ringGeometry(F.halfLength + o - 6, F.halfWidth + o - 6, F.cornerRadius + o - 6, F.halfLength + o + 0.8, F.halfWidth + o + 0.8, F.cornerRadius + o + 0.8, 0.35),
-      new THREE.MeshStandardMaterial({ color: 0x2a3550, roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide }));
-    roof.position.y = roofY;
-    this.root.add(roof);
-    const strip = new THREE.Mesh(ringGeometry(F.halfLength + o - 6.05, F.halfWidth + o - 6.05, F.cornerRadius + o - 6.05, F.halfLength + o - 5.75, F.halfWidth + o - 5.75, F.cornerRadius + o - 5.75, 0.2),
-      new THREE.MeshBasicMaterial({ color: 0x8fe3ff, toneMapped: false }));
-    strip.position.y = roofY - 0.05;
-    this.root.add(strip);
-    // floodlight towers at the four corners
+    const o = this.outer, th = this.theme;
+    const roofY = this.top + 4.5;
+    if (th.roof) {
+      const roof = new THREE.Mesh(ringGeometry(F.halfLength + o - 6, F.halfWidth + o - 6, F.cornerRadius + o - 6, F.halfLength + o + 0.8, F.halfWidth + o + 0.8, F.cornerRadius + o + 0.8, 0.35),
+        new THREE.MeshStandardMaterial({ color: th.roof.color, roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide }));
+      roof.position.y = roofY;
+      this.root.add(roof);
+      const strip = new THREE.Mesh(ringGeometry(F.halfLength + o - 6.05, F.halfWidth + o - 6.05, F.cornerRadius + o - 6.05, F.halfLength + o - 5.75, F.halfWidth + o - 5.75, F.cornerRadius + o - 5.75, 0.2),
+        new THREE.MeshBasicMaterial({ color: th.roof.strip, toneMapped: false }));
+      strip.position.y = roofY - 0.05;
+      this.root.add(strip);
+    }
+    if (!th.towers) return;
+    // floodlight towers at the far corners (the near ones are behind the touchline camera and got in the way of the opening shot)
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x9aa7ba, metalness: 0.6, roughness: 0.4 });
     const lampMat = new THREE.MeshBasicMaterial({ color: 0xfffbe8, toneMapped: false });
     const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(255,250,230,1)'); r.addColorStop(0.25, 'rgba(255,240,200,.5)'); r.addColorStop(1, 'rgba(255,240,200,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    for (const sx of [-1, 1]) for (const sz of [-1]) {
       const x = sx * (F.halfLength + o - 1), z = sz * (F.halfWidth + o - 1);
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, roofY + 9, 10), poleMat);
       pole.position.set(x, (roofY + 9) / 2, z); this.root.add(pole);
@@ -241,8 +254,8 @@ export class Stadium {
     this.screenTex = new THREE.CanvasTexture(c);
     this.screenTex.colorSpace = THREE.SRGBColorSpace;
     const o = this.outer;
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(16.6, 6.6, 0.6), new THREE.MeshStandardMaterial({ color: 0x1b2233, metalness: 0.4 }));
-    frame.position.set(0, 1.2 + 12 * 0.55 + 4.5 + 4.2, -(F.halfWidth + o - 2));
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(16.6, 6.6, 0.6), new THREE.MeshStandardMaterial({ color: this.theme.screen, metalness: 0.4 }));
+    frame.position.set(0, this.top + 4.5 + 4.2, -(F.halfWidth + o - 2));
     this.root.add(frame);
     const scr = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), new THREE.MeshBasicMaterial({ map: this.screenTex, toneMapped: false }));
     scr.position.copy(frame.position); scr.position.z += 0.31;
@@ -278,6 +291,7 @@ export class Stadium {
     this.crowdUniforms.uHype.value += (hype - this.crowdUniforms.uHype.value) * Math.min(1, dt * 3);
     this.led.offset.x = (this.time * 0.05) % 1;
     this.railMat.emissiveIntensity = 1.3 + Math.sin(this.time * 9) * 0.25;
+    for (const f of this.anim) f(this.time);
     if (game) this.drawScreen(game.score, game.clock, game.phase === 'goal' ? 'GOL!' : '');
   }
 }

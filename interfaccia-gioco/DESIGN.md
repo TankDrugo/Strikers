@@ -44,23 +44,30 @@ Stato: **decisioni raccolte, bozze scelte** (pagina di prova: vedi "Bozze" in fo
 
 ## Coppe
 
-- **4 coppe**, ognuna di 3-5 partite a **eliminazione diretta**. Le squadre avversarie si fanno rimescolando tutti i personaggi del roster (nomi e maglie nuovi); i portieri sono quelli in porta (posto 4) nelle squadre base e nelle squadre pronte.
+- **9 coppe**, ognuna di 3-5 partite a **eliminazione diretta**. Le squadre avversarie si fanno rimescolando tutti i personaggi del roster (nomi e maglie nuovi); i portieri sono quelli in porta (posto 4) nelle squadre base e nelle squadre pronte.
 - Si giocano da soli contro la CPU, oppure in **torneo fino a 4 giocatori**, stile Tenkaichi 3. Tutti entrano nello stesso tabellone e ognuno gioca le proprie partite a turno sullo stesso schermo. Una partita CPU contro CPU si guarda o si salta con una simulazione. Quando due umani si incontrano, si sfidano.
 - **Torneo privato**: si crea un tabellone con squadre, numero di turni e regole a scelta, fino a 4 giocatori umani.
 - **Premi**: solo trofei in bacheca, niente crediti per Ultimate Team.
 
-### Le 4 coppe
+### Le 9 coppe
 
 Decisione dell'utente: ogni coppa è una citazione ironica a uno dei giochi PS2 scelti come riferimento, senza loghi e senza personaggi. Crash Bandicoot non ha una coppa perché è già il tema della Home e del menu (M1).
 
-| Coppa | Citazione | Tema dello stadio e dei menu | Partite |
-|---|---|---|---|
-| **Coppa Scimmie in Fuga** | Ape Escape 3 | giungla, banane, retini | 3 |
-| **Gran Premio Pazzo Pazzo** | Le corse più pazze del mondo | circuito, bandiere a scacchi, avversari imbroglioni | 4 |
-| **Coppa Lost Heaven** | Mafia | anni '30, gangster, grammofono, seppia | 5 |
-| **Coppa Bullone Galattico** | Ratchet & Clank | spazio, robot, bulloni come moneta | 5 |
+Il 1° novembre l'utente ha chiesto uno stadio per ogni gioco da cui vengono i nostri personaggi e una coppa a tema per ciascuno: le prime 4 coppe hanno ora il loro stadio, e se ne aggiungono 5. Le squadre della CPU di una coppa sono fatte per metà circa coi personaggi di quel mondo. Stadi e scenografie in `game/src/stadiums.js`, coppe in `game/src/cups/cups.js`.
 
-Si sbloccano in quest'ordine, dalla più facile alla più difficile.
+| Coppa | Citazione | Stadio | Partite |
+|---|---|---|---|
+| **Coppa Scimmie in Fuga** | Ape Escape 3 (Spike) | Giungla delle Scimmie | 3 |
+| **Gran Premio Pazzo Pazzo** | Le corse più pazze del mondo (Dastardly) | Circuito Pazzo Pazzo | 4 |
+| **Coppa Chiave del Cuore** | Kingdom Hearts (Sora, Riku, Kairi, Roxas) | Isola del Tramonto | 4 |
+| **Coppa dell'Eco Blu** | Jak and Daxter (Jak) | Villaggio dell'Eco | 4 |
+| **Coppa Lost Heaven** | Mafia (nessun personaggio) | Arena Elettrica | 5 |
+| **Coppa Rispetto** | GTA San Andreas (Big Smoke) | Quartiere delle Palme | 5 |
+| **Coppa Scatola di Cartone** | Metal Gear Solid (Snake) | Base Artica | 5 |
+| **Coppa Bullone Galattico** | Ratchet & Clank (Ratchet) | Pianeta Bullone | 5 |
+| **Torneo Celeste** | Dragon Ball (Goku, Goku SSJ, Crilin, Piccolo, Vegeta) | Torneo Celeste | 5 |
+
+Si sbloccano in quest'ordine, dalla più facile alla più difficile. Una coppa già giocata resta aperta anche se nell'ordine nuovo la precedente non è ancora vinta.
 
 ### Stelle e obiettivi
 

@@ -9,6 +9,8 @@ Prototipo giocabile 5 contro 5 con le misure e le dinamiche di [`reference/STRIK
 Fatto:
 - Partita 5 contro 5 completa, CPU contro CPU o con controller Xbox
 - Stadio, fisica del pallone, IA
+- 9 stadi a tema (1° novembre): l'Arena Elettrica più uno per ogni gioco da cui vengono i personaggi, con apertura a giro di telecamera; si scelgono in Gioco rapido (anche Casuale), ognuno ha la sua coppa, in Ultimate Team sono a caso (`src/stadiums.js`)
+- Gambe nella corsa: le clip di turbo tornano alla velocità del passo e il cambio tra clip di corsa tiene la fase del passo (1° novembre)
 - Regole della partita dell'originale (31 ottobre, notte, `reference/VERIFICA.md` righe 1–17, colonna «Nostro gioco»): tiro con valore della barra e tiro a sorte con la curva del livello, portiere con la tabella delle 69 parate, Super Strike sui fotogrammi della clip, CPU con le tabelle della difficoltà, scivolata, spallata e passaggi dell'originale
 - Partita a due giocatori (uno contro uno o insieme contro la CPU), difficoltà della CPU
 - Link online privato, aggiornato a ogni modifica
@@ -128,7 +130,8 @@ Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; d
 | `src/ai.js` | IA dei giocatori di movimento |
 | `src/input.js` | Controller Xbox e tastiera; `Input.bind` decide quale dispositivo guida quale umano |
 | `src/hud.js` | Punteggio, tempo, barra del tiro, scritte |
-| `src/field.js`, `src/stadium.js` | Campo, porte e stadio (disegno originale) |
+| `src/field.js`, `src/stadium.js` | Campo, porte e stadio (disegno originale): erba, bordo, barriera, spalti col pubblico, tabellone, LED, tetto e torri faro secondo il tema |
+| `src/stadiums.js` | I 9 stadi a tema (`STADIUMS`, `stadiumTheme`): cielo e sole, luci, colori, scritte LED e scenografie di ogni mondo, e i personaggi di quel mondo (`cast`) per le squadre della sua coppa |
 | `assets/roster.json` | Personaggi disponibili e formazione delle due squadre (posti 0–3 giocatori, posto 4 portiere) |
 | `assets/characters/` | Personaggi pronti per il gioco, scritti da `animation/add_characters.py` (183 animazioni di gioco + 3 del walkout) |
 | `assets/walkout.json` | Percorsi e direzioni delle clip del walkout, da `animation/nis.py` |
@@ -142,6 +145,7 @@ Fisica e logica girano a passo fisso di 50 Hz come l'originale. Ogni fotogramma 
 ## Cosa c'è
 
 - **Campo:** 41,2 × 24,2 m chiuso da barriere con angoli arrotondati; porte 5,69 × 2,56 m; aree di rigore.
+- **Stadi:** 9, tutti attorno allo stesso campo misurato. Arena Elettrica (l'originale nostro, di notte), Giungla delle Scimmie (Spike: giungla, vulcano, banane), Circuito Pazzo Pazzo (Dastardly: canyon al tramonto, bandiere a scacchi, semaforo sulla partenza), Isola del Tramonto (Sora, Riku, Kairi, Roxas: mare, palme, torre dell'orologio), Villaggio dell'Eco (Jak: rovine e eco blu che galleggia), Quartiere delle Palme (Big Smoke: grattacieli, palme, graffiti, lampioni), Base Artica (Snake: neve, fari che cercano, casse e una scatola di cartone), Pianeta Bullone (Ratchet: pianeti, torri al neon, bulloni che girano), Torneo Celeste (Goku, Goku SSJ, Crilin, Piccolo, Vegeta: torneo all'aperto su un'isola, porte di tempio, nuvole). Nessun logo né nome vero.
 - **Pallone:** fisica a 50 Hz con gravità −14 m/s², resistenza dell'aria e al rotolamento, rimbalzi diversi per terreno, barriere e pali. Velocità massima 50 m/s.
 - **Tiro:** carica 0,25 + 0,75 × tempo / 0,66, rilascio automatico a barra piena; velocità tra 29 e 34 m/s secondo distanza e carica; bersaglio vicino a un palo, errore di mira che cresce col tempo di volo e un valore della barra basso; contatto al fotogramma 1,825 della clip.
 - **Tiro perfetto:** carica ≥ 0,99 (barra tenuta fino in fondo); effetto Magnus con correzione della mira, come in `cBall::Shoot`.

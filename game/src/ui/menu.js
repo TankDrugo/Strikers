@@ -2,6 +2,7 @@
 // Cups and Ultimate Team as separate parts of the menu with their own tabs and colours, quick play set-up,
 // players joining with their controller, pause and full-time screens.
 import { UiNav, el } from './nav.js';
+import { stadiumIds } from '../stadiums.js';
 import { installTheme, cardHtml } from './theme.js';
 import { t, setLang, getLang } from './i18n.js';
 import { save, PROFILE_COLORS } from './save.js';
@@ -51,7 +52,7 @@ export class Menu {
     this.sfx = makeBlips();
     this.nav.onSound = (n) => this.sfx(n);
     this.state = { mode: 'main', tab: 0, sub: 0 };
-    this.setup = { kind: 'cpu', seconds: 180, cpuLevel: 1, sides: null };
+    this.setup = { kind: 'cpu', seconds: 180, cpuLevel: 1, sides: null, stadium: 'random' };
     this.newsIdx = 0;
     setInterval(() => this.rotateNews(), 7000);
   }
@@ -256,7 +257,7 @@ export class Menu {
           ${tile('q-watch', t('quick.watch'), t('quick.watchText'), `<span class="big" style="margin-top:auto">${t('quick.big4')}</span>`)}
           <div class="tile" style="grid-column:span 4;cursor:default;justify-content:center"><div class="keys" style="grid-template-columns:auto 1fr auto 1fr">
             <b>${t('setup.team')}</b><span>${this.roster ? presets(this.roster).map((x) => esc(x.name)).join(' · ') : ''} · ${t('lineup.custom')}</span><b>${t('setup.time')}</b><span>2 · 3 · 5 min</span>
-            <b>${t('setup.cpu')}</b><span>${t('setup.easy')} · ${t('setup.normal')} · ${t('setup.hard')}</span><b>${t('setup.stadium')}</b><span>${t('setup.stadiumMain')}</span></div></div>
+            <b>${t('setup.cpu')}</b><span>${t('setup.easy')} · ${t('setup.normal')} · ${t('setup.hard')}</span><b>${t('setup.stadium')}</b><span>${t('setup.stadiumCount', { n: stadiumIds.length })}</span></div></div>
         </div>`;
       case 'cups':
         if (this.state.mode === 'main') {
@@ -385,6 +386,7 @@ export class Menu {
 
   showSetup() {
     const s = this.setup, sides = this.sides();
+    if (!s.stadium) s.stadium = 'random';
     const rows = () => {
       const vsCpu = s.kind !== 'friend';
       const lbl = { cpu: ['setup.yourTeam', 'setup.opponent'], coop: ['setup.yourTeam', 'setup.opponent'], friend: ['setup.teamP1', 'setup.teamP2'], watch: ['setup.side1', 'setup.side2'] }[s.kind];
@@ -393,7 +395,7 @@ export class Menu {
         ['edit0', t('setup.lineup'), t('setup.lineupEdit'), true, true],
         ['team1', t(lbl[1]), lineupLabel(sides[1]), true],
         ['edit1', t('setup.lineup'), t('setup.lineupEdit'), true, true],
-        ['stadium', t('setup.stadium'), t('setup.stadiumMain'), false],
+        ['stadium', t('setup.stadium'), s.stadium === 'random' ? t('setup.stadiumRandom') : t('stadium.' + s.stadium), true],
         ['time', t('setup.time'), t('setup.minutes', { n: s.seconds / 60 }), true],
         ...(vsCpu ? [['cpu', t('setup.cpu'), [t('setup.easy'), t('setup.normal'), t('setup.hard')][s.cpuLevel], s.kind !== 'watch']] : []),
       ].map(([k, lbl, val, can, btn]) => btn
@@ -423,6 +425,7 @@ export class Menu {
         return;
       }
       if (k.startsWith('team')) { const i = +k.slice(4); sides[i] = this.cyclePreset(sides[i], d); }
+      else if (k === 'stadium') { const o = ['random', ...stadiumIds]; s.stadium = o[(o.indexOf(s.stadium) + d + o.length) % o.length]; }
       else if (k === 'time') { const o = [120, 180, 300]; s.seconds = o[(o.indexOf(s.seconds) + d + 3) % 3]; }
       else if (k === 'cpu' && s.kind !== 'watch') s.cpuLevel = (s.cpuLevel + d + 3) % 3;
       else return;
