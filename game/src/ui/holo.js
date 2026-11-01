@@ -161,11 +161,15 @@ export function installHolo() {
   const st = document.createElement('style'); st.id = 'ui-holo'; st.textContent = CSS; document.head.appendChild(st);
   const tx = textures();
   for (const [k, v] of Object.entries(tx)) document.documentElement.style.setProperty('--' + k, `url(${v})`);
+  // every card that appears anywhere in the menus gets the pointer light
+  const bindNew = () => bindHolo(document.body);
+  new MutationObserver(() => { if (!bindNew.t) bindNew.t = requestAnimationFrame(() => { bindNew.t = 0; bindNew(); }); }).observe(document.body, { childList: true, subtree: true });
+  bindNew();
 }
 
 // The light follows the pointer on every card under root (and its case), with a spring; it goes back to rest
 // when the pointer leaves.
-const SHINY = ['r-goldRare', 'h-rainbow', 'h-glitter', 'h-prism', 'h-lava', 'h-galaxy', 'r-numbered', 'r-oneOfOne'];
+export const SHINY = ['r-goldRare', 'h-rainbow', 'h-glitter', 'h-prism', 'h-lava', 'h-galaxy', 'r-numbered', 'r-oneOfOne'];
 export function bindHolo(root) {
   for (const card of root.querySelectorAll('.card')) {
     if (card._holo) continue;

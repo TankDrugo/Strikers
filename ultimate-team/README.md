@@ -5,6 +5,7 @@
 **funziona** · Club, Rosa, Mercato, Divisioni e Album nel menu, pacchetti con walkout.
 
 Fatto:
+- Carte olografiche (1° novembre, studiando pokebox): strati di luce che seguono il puntatore con una molla, arcobaleno, bande, brillantini, stelle, mosaico e incisioni secondo la rarità, il personaggio ridisegnato sopra la lamina per restare nitido, passata dorata all'uscita dal pacchetto (`game/src/ui/holo.js`)
 - Carte con statistiche che cambiano il gioco (a 75 = valori originali)
 - Pacchetti con probabilità dichiarate, protezione holo, numerate 1-10 e 1/1 uniche
 - Walkout P1: indizi, corsa e esultanza originale in 3D, teca per numerate e 1/1

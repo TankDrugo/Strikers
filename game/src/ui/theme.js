@@ -1,3 +1,4 @@
+import { installHolo } from './holo.js';
 // Menu look "M1, cartoon tropicale" chosen by the player (interfaccia-gioco/DESIGN.md): thick outlines, saturated
 // colours, bouncy tiles, chunky outlined titles, animated sunburst. Each mode has its own colours (--m1/--m2/--m3).
 // Sizes are in em: the root font size follows the window, so the menu scales like a console screen.
@@ -117,13 +118,8 @@ const CSS = `
 .ui .card .ovr{position:absolute;z-index:3;left:7%;top:4%;font-size:17cqw;line-height:.9;-webkit-text-stroke:1.2cqw #fff;paint-order:stroke fill}
 .ui .card .role{position:absolute;z-index:3;left:8%;top:20%;font-size:8cqw;-webkit-text-stroke:.8cqw #fff;paint-order:stroke fill}
 .ui .card .nm{position:absolute;z-index:3;left:5%;right:5%;bottom:8%;text-align:center;background:var(--ink);color:#fff;border-radius:3cqw;font-size:8.4cqw;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline:2cqw}
-.ui .card .foil,.ui .card .glare{position:absolute;inset:0;z-index:2;pointer-events:none}
-.ui .card .glare{z-index:4;background:radial-gradient(circle at calc(var(--mx) * 1%) calc(var(--my) * 1%),#ffffffa0,transparent 42%);mix-blend-mode:overlay}
-.ui .h-rainbow .foil{background:repeating-linear-gradient(110deg,#ff3d6e 0 4%,#ffd21f 8%,#41c24a 12%,#2bc0ff 16%,#8a4dff 20%,#ff3d6e 24%) calc(var(--mx) * 3%) calc(var(--my) * 1%)/300% 300%;mix-blend-mode:color-dodge;opacity:.65}
 .ui .h-lava{background:linear-gradient(170deg,#4a0d05,#1c0503)}
-.ui .h-lava .foil{background:radial-gradient(circle at calc(var(--mx) * 1%) 80%,#ffb31f,transparent 35%),radial-gradient(circle at 20% calc(var(--my) * 1%),#ff4a12,transparent 40%),radial-gradient(circle at 80% 20%,#ff7b1c,transparent 30%),repeating-linear-gradient(35deg,transparent 0 7%,#00000088 7.5% 8%);mix-blend-mode:screen;opacity:.95}
 .ui .h-galaxy{background:radial-gradient(ellipse at 30% 30%,#6a2fd8,transparent 60%),radial-gradient(ellipse at 75% 70%,#1fb6ff,transparent 55%),#0b0626}
-.ui .h-galaxy .foil{background:radial-gradient(ellipse at calc(var(--mx) * 1%) calc(var(--my) * 1%),#ff4fd8aa,transparent 45%),conic-gradient(from calc(var(--mx) * 2deg) at 50% 50%,#6a2fd800,#ff4fd844,#6a2fd800 30%,#1fb6ff44 60%,#6a2fd800);mix-blend-mode:screen}
 .ui .h-lava .ovr,.ui .h-lava .role,.ui .h-galaxy .ovr,.ui .h-galaxy .role{color:#fff;-webkit-text-stroke-color:var(--ink)}
 /* cups */
 .ui .match{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6em;background:#fff;border:.2em solid var(--ink);border-radius:.8em;padding:.45em .8em;box-shadow:0 .2em 0 var(--ink);min-width:0}
@@ -144,6 +140,7 @@ const CSS = `
 `;
 
 export function installTheme() {
+  installHolo();
   if (document.getElementById('ui-theme')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet'; link.href = FONTS;
@@ -156,11 +153,12 @@ export function installTheme() {
 export function cardHtml({ ovr, role, name, shirt = '#5ec8ff', cls = '', seed = 0 }) {
   const hair = ['#3a2210', '#1b1036', '#c4561a', '#e8c25a'][seed % 4];
   const skin = ['#ffd2a8', '#e9a77a', '#b87348', '#ffe0c2'][(seed + 1) % 4];
-  return `<div class="cardbox"><div class="card ${cls}"><div class="art"><svg viewBox="0 0 100 100" aria-hidden="true">
+  const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">
     <path d="M14 100 Q16 68 50 64 Q84 68 86 100Z" fill="${shirt}" stroke="#1b1036" stroke-width="3.5"/>
     <circle cx="50" cy="40" r="23" fill="${skin}" stroke="#1b1036" stroke-width="3.5"/>
     <path d="M27 36 Q30 12 52 14 Q74 14 74 36 Q66 26 56 28 Q44 22 27 36Z" fill="${hair}" stroke="#1b1036" stroke-width="3"/>
     <ellipse cx="42" cy="41" rx="3.2" ry="4.4" fill="#1b1036"/><ellipse cx="59" cy="41" rx="3.2" ry="4.4" fill="#1b1036"/>
-    <path d="M39 51 Q50 61 62 50" fill="#fff" stroke="#1b1036" stroke-width="3" stroke-linejoin="round"/></svg></div>
-    <div class="foil"></div><div class="glare"></div><div class="ovr">${ovr}</div><div class="role">${role}</div><div class="nm">${name}</div></div></div>`;
+    <path d="M39 51 Q50 61 62 50" fill="#fff" stroke="#1b1036" stroke-width="3" stroke-linejoin="round"/></svg>`;
+  return `<div class="cardbox"><div class="card ${cls}"><div class="art">${svg}</div>
+    <div class="foil"></div>${cls ? '<div class="art top">' + svg + '</div>' : ''}<div class="glare"></div><div class="ovr">${ovr}</div><div class="role">${role}</div><div class="nm">${name}</div></div></div>`;
 }

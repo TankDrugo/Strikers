@@ -1,17 +1,17 @@
 # Graph Report - Strikers  (2026-11-01)
 
 ## Corpus Check
-- 69 files · ~120,148 words
+- 69 files · ~120,119 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 1118 nodes · 2461 edges · 50 communities (43 shown, 7 thin omitted)
+- 1118 nodes · 2474 edges · 49 communities (42 shown, 7 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 186 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `74a30cd8`
+- Built from commit: `77077c04`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -63,7 +63,6 @@
 - Coppe (4 coppe a eliminazione diretta, portieri dal posto 4, torneo fino a 4 giocatori)
 - main.js
 - AnimViewer
-- value
 - ai.js
 - game.js
 
@@ -103,7 +102,7 @@
 - **Pubblicazione del gioco (Artifact privato in passi, itch.io ristretto)** — claude_aggiorna_link_online, game_readme_web_build, claude_limite_64_mb, claude_artifact_privato_del_gioco, game_readme_itch_build, claude_itch_io_ristretto [EXTRACTED 1.00]
 - **Pipeline del walkout (scene .nis -> clip -> palco 3D)** — animation_readme_nis, animation_readme_strikers_nis_npz, animation_readme_walkout_clips, animation_readme_walkout_json, ultimate_team_design_walkout, ultimate_team_readme_walkout_p1 [INFERRED 0.85]
 
-## Communities (50 total, 7 thin omitted)
+## Communities (49 total, 7 thin omitted)
 
 ### Community 0 - "Game"
 Cohesion: 0.06
@@ -115,11 +114,11 @@ Nodes (12): ANIM_RATE_MAX, ANIM_RATE_MIN, GOALIE, SIZE, GOLD, LOCO_CYCLES, tmpV,
 
 ### Community 2 - "t"
 Cohesion: 0.06
-Nodes (14): Tracker, Hud, boot(), openViewer(), resume(), showMenu(), startMatch(), togglePause() (+6 more)
+Nodes (17): Tracker, Hud, boot(), openViewer(), resume(), showMenu(), startMatch(), togglePause() (+9 more)
 
 ### Community 3 - "menu.js"
-Cohesion: 0.07
-Nodes (51): baseTeams(), cpuTeams(), cupById(), CUPS, grade(), makeBracket(), NAMES, nextRound() (+43 more)
+Cohesion: 0.09
+Nodes (46): baseTeams(), cpuTeams(), cupById(), CUPS, grade(), makeBracket(), NAMES, nextRound() (+38 more)
 
 ### Community 4 - "Stato al passaggio di consegne"
 Cohesion: 0.18
@@ -142,8 +141,8 @@ Cohesion: 0.06
 Nodes (30): Convertitore per Blender (add-on e terminale), Nomi ossa da hash nlStringLowerHash, cPoseAccumulator::BuildNodeMatrices, Comandi info / bvh / json di strikers_anim.py, *.clips.json (metadati clip), Formati del disco .shier/.sanim/.bin, Disco europeo G4QP01, Limiti noti del convertitore (posa di riposo, fotogrammi chiave, morph, .trg) (+22 more)
 
 ### Community 10 - "club.js"
-Cohesion: 0.11
-Nodes (20): cardsOf(), addCard(), albumPage(), albumRewards(), buyOffer(), buyPack(), clubOf(), DIVISIONS (+12 more)
+Cohesion: 0.09
+Nodes (31): cardsOf(), hash(), value(), addCard(), albumPage(), albumRewards(), buyOffer(), buyPack() (+23 more)
 
 ### Community 11 - "strikers_anim.py"
 Cohesion: 0.07
@@ -154,8 +153,8 @@ Cohesion: 0.11
 Nodes (21): world_mats(), _mat_to_euler_zxy(), string_hash(), string_lower_hash(), sample_props(), sample_quat(), sample_scale(), sample_trans() (+13 more)
 
 ### Community 13 - "utMenu.js"
-Cohesion: 0.17
-Nodes (19): addStrings(), getLang(), STRINGS, BEAM, bindTilt(), BUST(), caseHtml(), installCardStyles() (+11 more)
+Cohesion: 0.18
+Nodes (20): activateCard(), addStrings(), getLang(), STRINGS, BEAM, bindTilt(), BUST(), caseHtml() (+12 more)
 
 ### Community 14 - "Animazioni (area, clip controllate su 25 personaggi)"
 Cohesion: 0.13
@@ -198,8 +197,8 @@ Cohesion: 0.17
 Nodes (10): Campo team della carta (nazionale nel walkout), Ricompila e prova (build, playtest, uttest), Prova automatica playtest, Prova Ultimate Team uttest, animation/data/strikers_nis.npz (da animation/nis.py), Capitano scelto nella Rosa (mai il portiere), Prossimo: piu esultanze originali, server privato, Stato: funziona (carte, pacchetti, walkout, mercato, Divisioni, album) (+2 more)
 
 ### Community 24 - "holo.js"
-Cohesion: 0.36
-Nodes (5): canvas(), installHolo(), rnd, SHINY, textures()
+Cohesion: 0.33
+Nodes (8): bindHolo(), canvas(), installHolo(), rnd, SHINY, textures(), cardHtml(), installTheme()
 
 ### Community 25 - "Interfaccia gioco: decisioni prese con l'utente"
 Cohesion: 0.14
@@ -265,10 +264,6 @@ Nodes (6): Obiettivi stella con il colpo speciale (non ancora nel gioco), Coppe 
 Cohesion: 0.18
 Nodes (12): Pagina sviluppo gioco senza build (dev/index.html), FIELDER, MATCH, RIG_HEIGHT, TEAM_DEFAULTS, fetchOk(), loadAssets(), teamMaterials() (+4 more)
 
-### Community 50 - "value"
-Cohesion: 0.20
-Nodes (11): hash(), value(), cpuRating(), daily(), divisionResult(), fair(), fillDays(), offers() (+3 more)
-
 ### Community 52 - "ai.js"
 Cohesion: 0.44
 Nodes (8): bestPassTarget(), dist2(), fielderAI(), moveTo(), openness(), shapeSpot(), spot, angleDiff()
@@ -279,23 +274,23 @@ Nodes (20): shootAtFast(), tmp, BALL, FIELD, PASS, PHYSICS_DT, SHOT, SKILL (+12 
 
 ## Knowledge Gaps
 - **73 isolated node(s):** `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/`, `IA: uno pressa, uno marca, altri in posizione`, `Velocita animazioni adattata (0,6-1,4x)`, `Campo 41,2 x 24,2 m, porte 5,69 x 2,56 m` (+68 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 293 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 290 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Tabella aree del progetto (scritta da make_map.py)` connect `make_map.py` to `Gioco (README)`, `Personaggi (characters/README.md)`, `Animazioni (area, clip controllate su 25 personaggi)`?**
-  _High betweenness centrality (0.299) - this node is a cross-community bridge._
+  _High betweenness centrality (0.296) - this node is a cross-community bridge._
 - **What connects `WALKOUT_CLIPS e CELEBRATIONS in nis.py (esultanze goal_winner)`, `Pagine di sviluppo dev/`, `IA: uno pressa, uno marca, altri in posizione` to the rest of the system?**
   _73 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Game` be split into smaller, more focused modules?**
   _Cohesion score 0.0584385226741468 - nodes in this community are weakly interconnected._
 - **Why does `Riferimento: il gioco originale` connect `make_map.py` to `game.js`?**
-  _High betweenness centrality (0.203) - this node is a cross-community bridge._
+  _High betweenness centrality (0.204) - this node is a cross-community bridge._
 - **Should `t` be split into smaller, more focused modules?**
-  _Cohesion score 0.062173458725182866 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.058767319636884856 - nodes in this community are weakly interconnected._
 - **Why does `Calcio arcade (progetto)` connect `make_map.py` to `build.mjs`, `Animazioni (area, clip controllate su 25 personaggi)`, `Gioco (README)`, `Economia di Ultimate Team (crediti, pacchetti, mercato)`, `Aggiornare link online dopo ogni modifica (passi da 10 personaggi, oggi 3)`, `Interfaccia gioco: decisioni prese con l'utente`, `Personaggi (characters/README.md)`?**
-  _High betweenness centrality (0.174) - this node is a cross-community bridge._
+  _High betweenness centrality (0.187) - this node is a cross-community bridge._
 - **Should `menu.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.07457627118644068 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08635703918722787 - nodes in this community are weakly interconnected._

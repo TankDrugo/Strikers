@@ -4,6 +4,7 @@
 // Art: a real render of the character (portraits from main.js), the cartoon bust only while it is not ready.
 import { t } from './i18n.js';
 import { STAT_KEYS } from '../ut/cards.js';
+import { installHolo, bindHolo, SHINY } from './holo.js';
 
 const CSS = `
 .ui .card .st{position:absolute;z-index:3;left:4%;right:4%;bottom:3%;display:flex;justify-content:space-between;font-family:var(--fn);font-size:5.6cqw}
@@ -19,14 +20,7 @@ const CSS = `
 .ui .card.r-numbered .ovr,.ui .card.r-numbered .role{color:var(--sun);-webkit-text-stroke-color:var(--ink)}
 .ui .card.r-numbered .st{color:#ffe9a0}
 .ui .card.r-oneOfOne{background:linear-gradient(135deg,#fff7c8,#f5c242 25%,#a26a06 50%,#ffe27a 70%,#b27a12)}
-.ui .card.r-oneOfOne .foil{background:linear-gradient(115deg,transparent 30%,#ffffffcc 45%,transparent 60%) calc(var(--mx) * 2% - 50%) 0/200% 100%;mix-blend-mode:overlay}
-.ui .h-glitter .foil{background:var(--glitter) 0 0/40cqw 40cqw,linear-gradient(calc(var(--mx) * 3.6deg),#ff4fa3,#ffe14f,#4fffd1,#6c5bff,#ff4fa3);background-position:calc(var(--mx) * .4cqw) calc(var(--my) * .4cqw),0 0;background-blend-mode:multiply;mix-blend-mode:color-dodge;opacity:.9}
-.ui .h-prism .foil{background:repeating-conic-gradient(from calc(var(--mx) * 3.6deg) at calc(var(--mx) * 1%) calc(var(--my) * 1%),#ff3d6e 0 5deg,#ffd21f 10deg,#41c24a 15deg,#2bc0ff 20deg,#8a4dff 25deg,#ff3d6e 30deg),linear-gradient(45deg,#ffffff55 25%,transparent 25% 75%,#ffffff55 75%) 0 0/14cqw 14cqw;background-blend-mode:overlay;mix-blend-mode:color-dodge;opacity:.55}
-.ui .h-lava .foil{animation:ut-lava 4s ease-in-out infinite alternate}@keyframes ut-lava{to{filter:hue-rotate(-18deg) brightness(1.2)}}
 .ui .h-lava .st,.ui .h-galaxy .st{color:#fff}
-.ui .card.idle{animation:ut-sweep 6s ease-in-out infinite alternate}
-@keyframes ut-sweep{from{--mx:20;--my:35}to{--mx:80;--my:65}}
-@property --mx{syntax:'<number>';inherits:true;initial-value:50}@property --my{syntax:'<number>';inherits:true;initial-value:50}
 .ui .serial{position:absolute;z-index:5;right:6%;top:5%;font-family:var(--fn);font-size:7.5cqw;line-height:1;padding:1.5cqw 2.2cqw;border-radius:2cqw}
 .ui .serial.foil-num{background:linear-gradient(115deg,#fff3b0,#d79a12 40%,#fff3b0 55%,#b47706);color:var(--ink);border:.8cqw solid var(--ink)}
 .ui .serial.laser{color:#e9fbff;text-shadow:0 0 2cqw #6fe6ff,0 0 5cqw #2fb8ff;background:none;font-size:9cqw}
@@ -101,12 +95,9 @@ export const PACK_COLORS = {
 export const BEAM = { bronze: '#f6c08a', silver: '#e9eef5', gold: '#ffe27a', goldRare: '#ffe27a', holo: '#ff7bd5', holoRare: '#ff7b1c', holoEpic: '#b07bff', numbered: '#7fe8ff', oneOfOne: '#ffd21f' };
 
 export function installCardStyles() {
+  installHolo(); // holographic layers and their textures (holo.js)
   if (document.getElementById('ut-cards')) return;
   const st = document.createElement('style'); st.id = 'ut-cards'; st.textContent = CSS; document.head.appendChild(st);
-  const c = document.createElement('canvas'); c.width = c.height = 128;
-  const x = c.getContext('2d');
-  for (let i = 0; i < 420; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.9})`; const s = Math.random() < 0.1 ? 2 : 1; x.fillRect(Math.random() * 128, Math.random() * 128, s, s); }
-  document.documentElement.style.setProperty('--glitter', `url(${c.toDataURL()})`);
 }
 
 const BUST = (seed) => {
@@ -124,8 +115,11 @@ export function utCardHtml(card, { serial = null, portrait = null, idle = false,
   const st = keys.map((k) => `<span>${card.stats[k]}<small>${t('ut.stat.' + k)}</small></span>`).join('');
   const ser = card.rarity === 'numbered' ? `<div class="serial laser">${String(serial || 0).padStart(2, '0')}/10</div>`
     : card.rarity === 'oneOfOne' ? '<div class="serial foil-num">1/1</div>' : '';
-  return `<div class="cardbox"><div class="card r-${card.rarity} ${card.fx}${idle ? ' idle' : ''}"><div class="art">${portrait ? `<img src="${portrait}" alt="">` : BUST(card.char.length)}</div>
-    <div class="foil"></div><div class="glare"></div><div class="ovr">${card.ovr}</div><div class="role">${t('ut.role.' + card.role)}</div>
+  const art = `<div class="art">${portrait ? `<img src="${portrait}" alt="">` : BUST(card.char.length)}</div>`;
+  const cls = `r-${card.rarity} ${card.fx}`, shiny = SHINY.some((k) => cls.split(' ').includes(k));
+  // shiny cards draw the picture again over the foil (holo.js): the background shines, the character keeps its colours
+  return `<div class="cardbox"><div class="card ${cls}${idle ? ' idle' : ''}">${art}
+    <div class="foil"></div>${shiny ? art.replace('class="art"', 'class="art top"') : ''}<div class="glare"></div><div class="ovr">${card.ovr}</div><div class="role">${t('ut.role.' + card.role)}</div>
     <div class="nm"${nmSize(name || t('ut.char.' + card.char))}>${name || t('ut.char.' + card.char)}</div><div class="st">${st}</div>${ser}</div></div>`;
 }
 
@@ -140,15 +134,5 @@ export function caseHtml(card, opts = {}) {
   return inner;
 }
 
-// light follows the pointer on a card (and its case)
-export function bindTilt(root) {
-  for (const c of root.querySelectorAll('.card')) {
-    const box = c.closest('.loader') || c;
-    box.addEventListener('pointermove', (e) => {
-      const r = box.getBoundingClientRect();
-      c.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1));
-      c.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1));
-      c.classList.remove('idle');
-    });
-  }
-}
+// light follows the pointer on a card (and its case), with a spring (holo.js)
+export function bindTilt(root) { bindHolo(root); }

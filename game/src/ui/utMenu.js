@@ -6,6 +6,7 @@ import { t, getLang } from './i18n.js';
 import './i18n_ut.js';
 import { save } from './save.js';
 import { utCardHtml, caseHtml, bindTilt, installCardStyles, PACK_COLORS, BEAM } from './utCards.js';
+import { activateCard } from './holo.js';
 import { ECO, CATALOG, CARD, RANK, RARITIES, SPECIAL, CHARACTERS, tradable, value } from '../ut/cards.js';
 import * as C from '../ut/club.js';
 
@@ -335,6 +336,7 @@ export function installUt(Menu) {
       skipped = false;
       const r = document.createElement('div'); r.className = 'reveal'; r.innerHTML = this.utCard(best, { serial: got[0].inst.serial, idle: true }); act.appendChild(r);
       r.animate([{ transform: 'translate(-50%,-50%) rotateY(180deg) scale(.2)' }, { transform: 'translate(-50%,-50%) rotateY(0) scale(1.15)', offset: 0.7 }, { transform: 'translate(-50%,-50%) scale(1)' }], { duration: 900, easing: 'cubic-bezier(.3,1.4,.5,1)', fill: 'forwards' });
+      setTimeout(() => activateCard(r), 650); // the golden sweep once the card faces us (holo.js)
       this.sfx('ok');
       if (top) { await wait(1300); if (!skipped) await this.utSleeve(r, best, got[0].inst, th, confetti); }
       l.el.querySelector('.skip').textContent = t('ut.open.ok') + ' ▸';
