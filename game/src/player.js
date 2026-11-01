@@ -7,6 +7,10 @@ const U16 = (Math.PI * 2) / 65536; // 16-bit angle unit in radians
 const tmpV = new THREE.Vector3();
 const GOLD = new THREE.Color('#ffd21f');
 const JUMP_KEEP = 0.45; // share of the Super Strike leap that is drawn
+// running clips: strides per clip (from the original Mario clips: one stride each, two in turbo_with_ball_level_1);
+// all of them start with the left foot coming forward, so the phase carries over from one to another
+const LOCO_CYCLES = { jog: 1, run_with_ball: 1, turbo_run: 1, turbo_with_ball_level_1: 2 };
+const LOCO_MARGIN = 0.2; // m/s of margin on the speed thresholds between the running clips (estimate)
 
 export function angleDiff(a, b) {
   let d = (b - a) % (Math.PI * 2);
@@ -201,23 +205,33 @@ export class Player {
 
   locomotionAnim() {
     const hasBall = this.hasBall();
+    const cur = this.currentName;
     let name;
     if (this.isGoalie) {
       name = this.speed < 0.3 ? (hasBall ? 'gk_idle_with_Ball' : 'gk_ready_idle') : 'gk_run_fwd';
-    } else if (this.speed < 0.3) name = 'idle';
-    else if (this.turbo && this.speed > 6.2) name = hasBall ? 'turbo_with_ball_level_1' : 'turbo_run';
-    else if (this.speed < 4.6) name = 'jog';
-    else name = 'run_with_ball'; // ANIM_RUN and ANIM_RUN_WB both use this clip
-    const m = this.meta[name];
-    let rate = 1;
-    // Character.cpp MatchAnimSpeedToCharacterSpeed only for the clips with the flag (jog, run, strafe, backwards):
-    // the turbo run plays at 1×, the turbo with the ball at 2× (RUNNING_WB_TURBO)
-    if (name === 'turbo_run') rate = 1;
-    else if (name.startsWith('turbo_with_ball')) rate = 2;
-    else if (this.speed >= 0.3 && m && m.linear_speed > 0.1) {
-      rate = Math.min(ANIM_RATE_MAX, Math.max(ANIM_RATE_MIN, this.speed / (m.linear_speed * (this.cfg.height / this.rigHeight))));
+    } else {
+      // thresholds with an in/out margin (like the original's Arrived/Near In/Out radii): a speed hovering on a
+      // threshold no longer flips between two clips every step
+      const m = LOCO_MARGIN, turboClip = cur === 'turbo_run' || cur.startsWith('turbo_with_ball');
+      if (this.speed < (cur === 'idle' ? 0.3 + m : 0.3)) name = 'idle';
+      else if (this.turbo && this.speed > (turboClip ? 6.2 - m : 6.2)) name = hasBall ? 'turbo_with_ball_level_1' : 'turbo_run';
+      else if (this.speed < (cur === 'jog' ? 4.6 + m : 4.6 - m)) name = 'jog';
+      else name = 'run_with_ball'; // ANIM_RUN and ANIM_RUN_WB both use this clip
     }
-    this.play(name, { loop: true, rate, restart: false, fade: 0.133 });
+    const meta = this.meta[name];
+    let rate = 1;
+    // Character.cpp MatchAnimSpeedToCharacterSpeed: clip rate = speed / clip speed, 0.6..1.4, also for the turbo clips
+    // (mario.ini turbo with the ball 7 m/s, turbo_with_ball_level_1 moves 5.2 m/s at 1×: at 2× the feet ran twice too fast)
+    if (this.speed >= 0.3 && meta && meta.linear_speed > 0.1) {
+      rate = Math.min(ANIM_RATE_MAX, Math.max(ANIM_RATE_MIN, this.speed / (meta.linear_speed * (this.cfg.height / this.rigHeight))));
+    }
+    // Fielder.cpp: the running clips advance in step: a new one starts at the step phase of the old one
+    let start = 0;
+    if (name !== cur && LOCO_CYCLES[name] && LOCO_CYCLES[cur] && this.current && this.meta[cur]) {
+      const phase = ((this.current.time / this.meta[cur].duration) * LOCO_CYCLES[cur]) % 1;
+      start = (phase / LOCO_CYCLES[name]) * meta.duration;
+    }
+    this.play(name, { loop: true, rate, restart: false, fade: 0.133, start });
   }
 
   // Fixed step (50 Hz): game time only. Drawing happens in render().
