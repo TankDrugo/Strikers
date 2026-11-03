@@ -213,7 +213,15 @@ export const PASS = {
   leadMax: 1.5, // estimate: the intercept point is looked for within 1.5 s
 };
 
-export const MATCH = { seconds: 180, goalPause: 3.0 };
+export const MATCH = { seconds: 180, goalPause: 3.0,
+  // buzzer beater (our choice, like the console Strikers): at 0:00 a shot or Super Strike already on its way plays out
+  // and its goal counts; the match ends when the ball is caught, stops being a shot, or after buzzerMax seconds
+  buzzerMax: 7 };
+
+// Electric barrier (our values: the disc numbers for the fence are not read yet, reference/STRIKERS_REFERENCE.md):
+// a player knocked down by a shoulder charge within `range` metres of the barrier, pushed towards it, is shocked
+// (electrocution_stage1 for `shockTime`, then electrocution_stage3 to the ground)
+export const FENCE = { range: 2.4, facing: 0.2, shockTime: 0.9, fallShare: 0.95 };
 
 // Used when assets/roster.json has no teamInfo.
 export const TEAM_DEFAULTS = [{ name: 'Gialli', color: '#ffd23f' }, { name: 'Rossi', color: '#ff4f4f' }];

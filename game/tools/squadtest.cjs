@@ -1,4 +1,4 @@
-// Headless check of team choice: quick play set-up (preset teams, line-up editor, captain), the match uses the
+// Headless check of team choice: quick play set-up (preset teams, line-up editor, captain, side select), the match uses the
 // chosen line-ups; cup detail with a custom line-up. Fails on page errors.
 //   node tools/squadtest.cjs [path/to/gioco.html] [screenshot-prefix]
 const path = require('path');
@@ -38,6 +38,9 @@ const { chromium } = require('playwright');
   await shot('lineup');
   await click(top + '[data-act="ok"]');
   const sides = await page.evaluate(() => window.__proto.menu.sides().map((s) => ({ ...s })));
+  await click(top + '[data-act="go"]');
+  // side select (FC style): the keyboard starts on the left against the computer; "Via!" starts the match
+  await shot('sides');
   await click(top + '[data-act="go"]');
   await page.waitForTimeout(1500);
   await shot('match');

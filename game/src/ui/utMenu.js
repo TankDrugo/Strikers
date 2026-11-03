@@ -88,7 +88,7 @@ export function installUt(Menu) {
     return `<div class="view" style="grid-template-columns:1.5fr 1fr;grid-template-rows:auto 1fr auto">
       <div class="pitch" style="grid-row:span 3;grid-template-rows:repeat(4,1fr);font-size:.62em;container-type:size">${slots}</div>
       <div class="tile" data-nav tabindex="-1" style="cursor:default;flex-direction:row;align-items:center;gap:1em"><span class="big">${C.squadRating(club)}</span><div><h3>${t('ut.squad.rating')}</h3><p style="font-size:.8em">${t('ut.squad.rule')}</p></div></div>
-      <div class="tile" data-nav tabindex="-1" style="cursor:default"><h3>${t('ut.squad.bench')}</h3><p>${t('ut.squad.benchText')}</p><div style="display:flex;gap:.6em;margin-top:auto;font-size:.8em">${bench}</div></div>
+      <div class="tile" style="cursor:default"><h3>${t('ut.squad.bench')}</h3><p>${t('ut.squad.benchText')}</p><div style="display:flex;gap:.6em;margin-top:auto;font-size:.8em">${bench}</div></div>
       <div class="row-btns"><button class="btn" data-nav data-act="ut-captain" title="${t('ut.squad.captainHint')}">${t('ut.squad.captain', { name: (() => { const c = C.cardOf(club, club.squad[club.captain ?? 3]); return c ? charName(c) : '–'; })() })}</button><button class="btn" data-nav data-act="ut-auto">${t('ut.squad.auto')}</button><button class="btn primary" data-nav data-act="ut-tabdiv">${t('ut.squad.play')}</button></div>
     </div>`;
   };
@@ -277,14 +277,16 @@ export function installUt(Menu) {
 
   // P1: the pack shakes and opens in a flash, rays in the colour of the best rarity; clues one at a time;
   // the character walks out in 3D and celebrates; the card arrives (in its case if numbered or 1/1); all cards.
+  // walkout only for an 85+ card (decided with the user on 3 November); a rarer card under 85 still flips in alone
   P.utOpen = function (pack, got) {
-    const best = got[0].card, top = SPECIAL.includes(best.rarity), walk = RANK[best.rarity] >= RANK.goldRare;
+    const best = got[0].card, top = SPECIAL.includes(best.rarity), walk = best.ovr >= ECO.walkoutMinOvr, show = walk || RANK[best.rarity] >= RANK.goldRare;
     let skipped = false, phase = 'closed';
     const l = this.layer('', `<div class="theatre"><div class="beams"></div><div class="act"></div>
       <div class="hintline">${t('ut.open.hint')}</div><button class="btn skip" data-nav data-act="skip">${t('ut.open.skip')} ▸</button></div>`, {
       act: (a) => { if (a === 'skip' || a === 'stage') next(); },
-      onRaw: (dev, what) => { if (what === 'confirm' || what === 'back') { next(); return true; } return false; },
+      onRaw: (dev, what) => { if (what === 'confirm' || what === 'back' || what === 'y') { next(); return true; } return false; },
       onBack: () => next(),
+      stickTilt: true, // both sticks turn the card that came out (holo light)
     });
     const th = l.el.querySelector('.theatre'), act = l.el.querySelector('.act'), beams = l.el.querySelector('.beams'), hint = l.el.querySelector('.hintline');
     act.innerHTML = `<div class="pack shake" style="--pk:${PACK_COLORS[pack.id] || PACK_COLORS.gold}">${t(pack.titleKey).replace(' ', '<br>')}</div>`;
@@ -319,19 +321,26 @@ export function installUt(Menu) {
       beams.style.setProperty('--beam', BEAM[best.rarity]); beams.style.opacity = walk ? 0.55 : 0.25;
       await pk.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(1.6)', opacity: 0, filter: 'brightness(4)' }], { duration: 450, fill: 'forwards' }).finished;
       pk.remove();
-      if (!walk) return finish();
-      const clues = best.rarity === 'goldRare' ? [String(best.ovr)] : [t('ut.role.' + best.role), t('ut.team.' + best.team), String(best.ovr)];
-      if (best.rarity === 'numbered') clues.push(t('ut.numberedOf', { n: String(got[0].inst.serial).padStart(2, '0') }));
-      if (best.rarity === 'oneOfOne') clues.push('1 / 1');
-      for (const c of clues) await clue(c, c.includes('/') ? '#ffd21f' : '#fff');
-      if (best.rarity !== 'goldRare' && !skipped) confetti(top ? 80 : 40);
-      // the character walks out on the 3D stage and celebrates
-      if (this.walkout && !skipped) {
-        th.classList.add('see3d'); beams.style.opacity = 0;
-        await this.walkout.start(best, BEAM[best.rarity]);
-        this.walkout.stop();
-        th.classList.remove('see3d'); beams.style.opacity = 0.55;
-      }
+      if (!show) return finish();
+      if (walk) {
+        const clues = [t('ut.role.' + best.role), t('ut.team.' + best.team), String(best.ovr)];
+        const serial = best.rarity === 'numbered' ? t('ut.numberedOf', { n: String(got[0].inst.serial).padStart(2, '0') }) : best.rarity === 'oneOfOne' ? '1 / 1' : '';
+        if (serial) clues.push(serial);
+        if (this.walkout && !skipped) {
+          // the giant card at the back of the 3D stage unlocks with the clues while the character steps out of it
+          th.classList.add('see3d'); beams.style.opacity = 0;
+          const done = this.walkout.start(best, BEAM[best.rarity], { hold: 1.1, card: {
+            role: t('ut.role.' + best.role), team: t('ut.team.' + best.team).toUpperCase(), name: charName(best).toUpperCase(), ovr: best.ovr,
+            serial: best.rarity === 'numbered' ? `${String(got[0].inst.serial).padStart(2, '0')}/10` : best.rarity === 'oneOfOne' ? '1/1' : '',
+            portrait: this.portrait ? this.portrait(best.char, best.gk) : null } });
+          for (let i = 0; i < clues.length; i++) { this.walkout.unlock(Math.min(3, i + 1)); await clue(clues[i], clues[i].includes('/') ? '#ffd21f' : '#fff'); }
+          this.walkout.unlock(4);
+          if (!skipped) { confetti(top ? 80 : 40); this.sfx('enter'); }
+          await done;
+          this.walkout.stop();
+          th.classList.remove('see3d'); beams.style.opacity = 0.55;
+        } else for (const c of clues) await clue(c, c.includes('/') ? '#ffd21f' : '#fff');
+      } else await clue(String(best.ovr), '#fff');
       phase = 'card';
       skipped = false;
       const r = document.createElement('div'); r.className = 'reveal'; r.innerHTML = this.utCard(best, { serial: got[0].inst.serial, idle: true }); act.appendChild(r);
@@ -366,19 +375,39 @@ export function installUt(Menu) {
     this.sfx('enter'); th.classList.add('screen-shake'); confetti(40);
   };
 
-  // every card of the pack, best first, new ones tagged
+  // every card of the pack, best first, new ones tagged; each card can be selected: its stats show beside the row
+  // and A opens it (to the squad, the bench, quick sell)
   P.utRevealAll = function (pack, got, note = '') {
     const club = this.club();
     const rew = C.albumRewards(club);
     if (rew.length) this.utSave();
-    const items = got.map((g, i) => `<div class="cpick" style="animation:ui-pop .45s ${i * 0.15}s both cubic-bezier(.3,1.6,.5,1)">
-      <span class="tagnew${g.isNew ? '' : ' dup'}">${g.isNew ? t('ut.open.new') : t('ut.open.dup')}</span>${this.utCard(g.card, { serial: g.inst.serial })}<small>${t('ut.r.' + g.card.rarity)}</small></div>`).join('');
+    const gone = (g) => !C.inst(club, g.inst.uid);
+    const items = () => got.map((g, i) => `<button class="cpick${gone(g) ? ' off' : ''}" data-nav data-act="${gone(g) ? 'none' : 'card'}" data-i="${i}" style="animation:ui-pop .45s ${i * 0.15}s both cubic-bezier(.3,1.6,.5,1)">
+      <span class="tagnew${g.isNew ? '' : ' dup'}">${gone(g) ? t('ut.open.sold') : g.isNew ? t('ut.open.new') : t('ut.open.dup')}</span>${this.utCard(g.card, { serial: g.inst.serial })}<small>${t('ut.r.' + g.card.rarity)}</small></button>`).join('');
+    const info = (g) => {
+      const c = g.card, at = gone(g) ? 'sold' : C.where(club, g.inst.uid);
+      const rows = Object.entries(c.stats).map(([k, v]) => `<b>${t('ut.statLong.' + k)}</b><span class="statbar"><i style="width:${v}%"></i><em>${v}</em></span>`).join('');
+      return `<h3>${charName(c)} <span class="big">${c.ovr}</span></h3><p>${t('ut.r.' + c.rarity)} · ${t('ut.roleLong.' + c.role)} · ${t('ut.team.' + c.team)}</p>
+        <div class="keys pstats">${rows}</div><p class="hint">${at === 'sold' ? t('ut.open.sold') : t('ut.card.where.' + at)} · <span class="btnA">A</span> ${t('ut.open.details')}</p>`;
+    };
     const again = pack.id && ECO.packs[pack.id] && club.credits >= ECO.packs[pack.id].price;
-    const l = this.layer('dim', `<div class="center"><div class="panel" style="width:min(60em,100%)">
-      <h1 class="title">${t(pack.titleKey)}</h1>${note}<div class="packrow">${items}</div>${this.utRewardsHtml({ album: rew })}
-      <div class="row-btns"><button class="btn primary" data-nav data-act="ok" data-autofocus>${t('ut.open.ok')}</button><button class="btn" data-nav data-act="squad">${t('ut.open.toSquad')}</button>
+    const l = this.layer('dim', `<div class="center"><div class="panel" style="width:min(64em,100%)">
+      <h1 class="title">${t(pack.titleKey)}</h1>${note}<div class="packrow">${items()}</div><div class="pinfo" id="pinfo">${info(got[0])}</div>${this.utRewardsHtml({ album: rew })}
+      <div class="row-btns"><button class="btn primary" data-nav data-act="ok">${t('ut.open.ok')}</button><button class="btn" data-nav data-act="squad">${t('ut.open.toSquad')}</button>
       ${again ? `<button class="btn" data-nav data-act="again">${t('ut.open.again')} · ${cr(ECO.packs[pack.id].price)}</button>` : ''}</div></div></div>`, {
-      act: (a) => {
+      act: (a, el) => {
+        if (a === 'none') return;
+        if (a === 'card') {
+          const i = +el.dataset.i;
+          return this.utCardDetail(got[i].inst.uid, () => {
+            const row = l.el.querySelector('.packrow');
+            row.innerHTML = items();
+            for (const b of row.children) b.style.animation = 'none';
+            const f = row.querySelector(`[data-i="${i}"]`);
+            l.el.querySelector('#pinfo').innerHTML = info(got[i]);
+            this.nav.focus(f, false);
+          });
+        }
         this.nav.pop(l);
         if (a === 'squad') { this.state.mode = 'ut'; this.state.sub = 1; }
         if (a === 'again') { const g = C.buyPack(club, pack.id, save.registry()); if (g) { this.utSave(); return this.utOpen(pack, g); } }
@@ -386,6 +415,7 @@ export function installUt(Menu) {
       },
       onBack: () => { this.nav.pop(l); this.renderHub(false); },
     });
+    l.el.addEventListener('focusin', (e) => { const b = e.target.closest('[data-i]'); if (b) l.el.querySelector('#pinfo').innerHTML = info(got[+b.dataset.i]); });
     this.nav.push(l);
     bindTilt(l.el);
   };

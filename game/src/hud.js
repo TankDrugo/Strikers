@@ -22,6 +22,9 @@ const css = `
 .hud .smeter small{display:block;font-size:12px;opacity:.9;margin-top:4px}
 .hud .meter.super i{background:linear-gradient(90deg,#b07bff,#ffd21f)}
 .hud .flash{position:absolute;top:22%;left:0;right:0;text-align:center;font-size:44px;font-weight:900;letter-spacing:.04em;text-shadow:0 4px 0 rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
+.hud .vign{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse at center,rgba(255,210,31,0) 55%,rgba(255,190,20,.55) 85%,rgba(255,140,0,.85) 100%);mix-blend-mode:screen}
+.hud .whiteout{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at center,#fff 0,#fff6c8 40%,rgba(255,210,31,.6) 100%)}
+.hud .cap{position:absolute;width:22px;height:22px;border-radius:50%;background:#ffd21f;color:#1b1036;border:2px solid #1b1036;font:900 13px/18px "Arial Black",sans-serif;text-align:center;transform:translate(-50%,-100%);box-shadow:0 0 8px #ffd21f,0 2px 0 rgba(0,0,0,.45)}
 .hud .help{position:absolute;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:max(12px,env(safe-area-inset-left,0px));font-size:13px;line-height:1.5;background:rgba(10,16,28,.6);padding:8px 12px;border-radius:8px;opacity:.9}
 .hud .help kbd{font-family:inherit;background:rgba(255,255,255,.18);border-radius:4px;padding:0 5px}
 .screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,12,22,.78);font-family:"Trebuchet MS",system-ui,sans-serif;color:#fff;padding:16px;z-index:5}
@@ -47,6 +50,7 @@ export class Hud {
     this.el = document.createElement('div'); this.el.className = 'hud';
     this.el.innerHTML = `<div class="score"><span class="team"><span class="tname" id="n0">Gialli</span><span class="dot" id="d0" style="background:#ffd23f"></span><span id="s0">0</span></span><span class="clock" id="clock">3:00</span><span class="team"><span id="s1">0</span><span class="dot" id="d1" style="background:#ff4f4f"></span><span class="tname" id="n1">Rossi</span></span></div>
       <div class="meter" id="meter"><i></i><b></b></div><div class="flash" id="flash"></div>
+      <div class="vign" id="vign"></div><div class="whiteout" id="whiteout"></div>
       <div class="smeter" id="smeter"><b>SUPER STRIKE</b><div class="sbar"></div><small></small></div>
       <div class="help" id="help"><kbd>WASD</kbd>/<kbd>frecce</kbd> muovi · <kbd>Shift</kbd> turbo · <kbd>J</kbd> passa / cambia · <kbd>K</kbd> tiro (tieni) / scivolata · <kbd>L</kbd> pallonetto / spallata · <kbd>Spazio</kbd> finta · <kbd>+</kbd>/<kbd>-</kbd> o rotella: zoom · <kbd>P</kbd> pausa</div>`;
     document.body.appendChild(this.el);
@@ -63,6 +67,16 @@ export class Hud {
   }
 
   show(on) { this.el.style.display = on ? '' : 'none'; }
+
+  // markers over the players are hidden while the camera turns round the paused match
+  hideMarkers() { for (const e of [...(this.tags || []), ...(this.caps || [])]) e.style.display = 'none'; this.meter.style.display = 'none'; }
+
+  // Super Strike: a golden flash on the whole screen when the charge starts, a white one at the jump
+  superPulse(big = false) {
+    const w = this.el.querySelector('#whiteout');
+    w.getAnimations().forEach((a) => a.cancel());
+    w.animate([{ opacity: big ? 0.9 : 0.55 }, { opacity: 0 }], { duration: big ? 650 : 420, easing: 'ease-out' });
+  }
 
   // short message at the bottom (star objectives)
   toast(text, color = '#fff5dc') {
@@ -106,11 +120,27 @@ export class Hud {
       if (!c || !c.player || c.player.state === 'super') { e.style.display = 'none'; return; }
       this.v.set(c.player.rpos.x, c.player.cfg.height * 1.08 + 0.1, c.player.rpos.z).project(game.camera);
       e.style.display = 'block';
-      e.textContent = t('hud.p', { n: i + 1 }) + (game.isCaptain && game.isCaptain(c.player) ? ' ©' : '');
+      const cap = game.isCaptain && game.isCaptain(c.player);
+      e.textContent = t('hud.p', { n: i + 1 }) + (cap ? ' ©' : '');
+      e.classList.toggle('captain', !!cap); // the captain's marker is gold-edged (the only one who can do the Super Strike)
       e.style.setProperty('--pc', PAD_COLORS[i % PAD_COLORS.length]);
       e.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth}px`;
       e.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight}px`;
     });
+    // a gold © over both captains when nobody controls them (a controlled captain has it in the marker)
+    this.caps = this.caps || [0, 1].map(() => { const e = document.createElement('div'); e.className = 'cap'; e.textContent = 'C'; this.el.appendChild(e); return e; });
+    this.caps.forEach((e, team) => {
+      const p = game.isCaptain && game.players.find((q) => q.team === team && game.isCaptain(q));
+      if (!p || p.humanControlled || p.state === 'super' || game.intro) { e.style.display = 'none'; return; }
+      this.v.set(p.rpos.x, p.cfg.height * 1.08 + 0.1, p.rpos.z).project(game.camera);
+      if (this.v.z > 1) { e.style.display = 'none'; return; }
+      e.style.display = 'block';
+      e.style.left = `${(this.v.x * 0.5 + 0.5) * innerWidth}px`;
+      e.style.top = `${(-this.v.y * 0.5 + 0.5) * innerHeight}px`;
+    });
+    // golden edges while a captain charges the Super Strike
+    const vk = game.superAuraK || 0;
+    this.el.querySelector('#vign').style.opacity = vk ? (0.45 + 0.4 * vk) * (0.9 + 0.1 * Math.sin(performance.now() / 60)) : 0;
     // Super Strike meter: needles in game time, shown to everyone (also when the computer does it)
     const ss = game.superStrike;
     if (ss && ss.phase === 'meter') {

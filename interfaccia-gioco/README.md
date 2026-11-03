@@ -15,6 +15,7 @@ Fatto:
 - Scelta della squadra in Gioco rapido, Coppe e tornei: squadre pronte o formazione libera con capitano (`game/src/ui/squads.js`)
 - Carte con ritratto a mezzo busto stile FUT, calcolato dalla posa (testa e capelli mai tagliati)
 - In partita: indicatore G1–G4 stile FIFA sopra il giocatore controllato, barra della Super Strike
+- 3 novembre: «Scegli il lato» stile FC in Gioco rapido (ogni controller sceglie profilo e squadra), tasti mostrati solo del dispositivo in uso (controller o tastiera), pausa stile FC con il menu a sinistra e lo stadio che gira dietro, editor della formazione che salta chi è già in squadra (prima scambiava i posti), Coppe › Segreti: 4 personaggi «?» che si sbloccano con le stelle e una missione segreta (`game/src/cups/secrets.js`)
 
 Prossimo:
 - Suoni veri (CC0)

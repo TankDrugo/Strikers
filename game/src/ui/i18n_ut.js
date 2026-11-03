@@ -53,7 +53,7 @@ addStrings('it', {
   // shop and opening
   'ut.shop.title': 'Negozio pacchetti', 'ut.shop.cards': '{n} carte', 'ut.shop.guarantee': 'Almeno una {r}',
   'ut.shop.special': 'Numerata {a} · 1/1 {b} per carta', 'ut.shop.short': 'Crediti insufficienti', 'ut.shop.buy': 'Compra e apri',
-  'ut.open.hint': 'Premi A per aprire', 'ut.open.skip': 'Salta', 'ut.open.new': 'NUOVA', 'ut.open.dup': 'DOPPIA',
+  'ut.open.hint': 'Premi <span class="btnA">A</span> per aprire', 'ut.open.skip': 'Salta', 'ut.open.sold': 'VENDUTA', 'ut.open.details': 'apri la carta', 'ut.open.new': 'NUOVA', 'ut.open.dup': 'DOPPIA',
   'ut.open.all': 'Il tuo pacchetto', 'ut.open.toSquad': 'Vai alla rosa', 'ut.open.again': 'Un altro uguale', 'ut.open.ok': 'Continua',
   // market
   'ut.mk.buy': 'Compra', 'ut.mk.buyText': 'Le offerte di oggi dei venditori: si rinnovano ogni giorno.',
@@ -131,7 +131,7 @@ addStrings('en', {
   'ut.coll.title': 'Collection', 'ut.coll.all': 'All', 'ut.coll.empty': 'No card of this rarity.',
   'ut.shop.title': 'Pack store', 'ut.shop.cards': '{n} cards', 'ut.shop.guarantee': 'At least one {r}',
   'ut.shop.special': 'Numbered {a} · 1/1 {b} per card', 'ut.shop.short': 'Not enough credits', 'ut.shop.buy': 'Buy and open',
-  'ut.open.hint': 'Press A to open', 'ut.open.skip': 'Skip', 'ut.open.new': 'NEW', 'ut.open.dup': 'DUPLICATE',
+  'ut.open.hint': 'Press <span class="btnA">A</span> to open', 'ut.open.skip': 'Skip', 'ut.open.sold': 'SOLD', 'ut.open.details': 'open the card', 'ut.open.new': 'NEW', 'ut.open.dup': 'DUPLICATE',
   'ut.open.all': 'Your pack', 'ut.open.toSquad': 'Go to the squad', 'ut.open.again': 'Another one', 'ut.open.ok': 'Continue',
   'ut.mk.buy': 'Buy', 'ut.mk.buyText': 'Today\'s offers from the traders: new ones every day.',
   'ut.mk.sell': 'Sell', 'ut.mk.sellText': 'List a card: buyers turn up over time.',

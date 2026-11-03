@@ -290,7 +290,9 @@ export class Stadium {
     const hype = game && game.phase === 'goal' ? 1 : game && game.ball && game.ball.shotTimer > 0 ? 0.45 : 0.05;
     this.crowdUniforms.uHype.value += (hype - this.crowdUniforms.uHype.value) * Math.min(1, dt * 3);
     this.led.offset.x = (this.time * 0.05) % 1;
-    this.railMat.emissiveIntensity = 1.3 + Math.sin(this.time * 9) * 0.25;
+    // a shock on the barrier (Game.updateZaps) makes the rails crackle
+    const zap = game?.fenceGlow || 0;
+    this.railMat.emissiveIntensity = 1.3 + Math.sin(this.time * 9) * 0.25 + zap * (2 + Math.random() * 4);
     for (const f of this.anim) f(this.time);
     if (game) this.drawScreen(game.score, game.clock, game.phase === 'goal' ? 'GOL!' : '');
   }

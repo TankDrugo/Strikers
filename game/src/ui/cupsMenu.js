@@ -7,6 +7,8 @@ import { t } from './i18n.js';
 import { save } from './save.js';
 import { CUPS, cupById, cpuTeams, baseTeams, makeBracket, nextRound, simulate, roundKey, progress, grade, unlocked, rng } from '../cups/cups.js';
 import { drawObjectives } from '../cups/objectives.js';
+import { secretState, MISSIONS } from '../cups/secrets.js';
+import { charName } from './squads.js';
 import { cloneLineup, presetLineup, lineupLabel, sidesColors } from './squads.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -49,6 +51,30 @@ export function installCups(Menu) {
         <span class="big" style="${won ? metal : 'opacity:.25'}">🏆</span><h3>${t('cups.' + c.id)}</h3>
         <p>${won ? `${t('cup.grade')} ${g} · ${pct}%` : t('cups.noTrophy')}</p>${won ? `<p>${rec.hardWon ? t('cup.hard') : t('cup.normal')}</p>` : ''}</div>`;
     }).join('')}</div>`;
+  };
+
+  // the secret characters (cups/secrets.js): "?" until the stars reveal the mission, the portrait once unlocked
+  P.secretsView = function () {
+    const st = secretState(save.active());
+    return `<div class="view" style="grid-template-columns:repeat(4,1fr);grid-template-rows:auto 1fr"><p class="sub" style="grid-column:1/-1;font-weight:700">${t('secret.intro')}</p>${st.map((s) => {
+      const img = s.unlocked && this.portrait ? this.portrait(s.char, false) : null;
+      return `<div class="tile secret${s.unlocked ? ' on' : s.revealed ? ' half' : ''}" data-nav tabindex="-1">
+        <div class="qmark">${img ? `<img src="${img}" alt="">` : '?'}</div>
+        <h3>${s.unlocked ? esc(charName(s.char)) : t('secret.title')}</h3>
+        <p>${s.unlocked ? `★ ${t('secret.unlocked')}` : `★ ${t('secret.need', { n: s.stars, have: Math.min(s.have, s.stars) })}`}</p>
+        <div class="bar-mini"><i style="width:${Math.min(100, s.have / s.stars * 100)}%"></i></div>
+        <p class="hint"><b>${t('secret.mission')}:</b> ${s.revealed ? t('secret.m.' + s.mission) + (s.done ? ' ✓' : '') : t('secret.hidden')}</p></div>`;
+    }).join('')}</div>`;
+  };
+
+  // after a cup match or a won cup: missions of the revealed secrets, then what changed (revealed, unlocked)
+  P.secretNews = function (profileId, before) {
+    const p = save.byId(profileId);
+    if (!p || !before) return '';
+    const after = secretState(p);
+    return after.map((s, i) => s.unlocked && !before[i].unlocked ? t('secret.unlockedToast', { name: esc(charName(s.char)) })
+      : s.revealed && !before[i].revealed ? t('secret.revealedToast') : '').filter(Boolean)
+      .filter((x, i, a) => a.indexOf(x) === i).map((x) => `<div class="obj done secret-news">★ ${x}</div>`).join('');
   };
 
   // ---------------------------------------------------------------- cup detail
@@ -284,10 +310,19 @@ export function installCups(Menu) {
     const m = run.bracket[nx.r][nx.i], sides = [m.a, m.b];
     m.score = res.score; m.winner = sides[res.winner];
     const cup = run.cupId ? cupById(run.cupId) : null;
+    // secret characters: the state before this match, for every profile playing
+    const humansHere = sides.map((s, side) => ({ side, h: run.teams[s].human })).filter((x) => x.h && x.h.profileId);
+    const before = Object.fromEntries(humansHere.map((x) => [x.h.profileId, secretState(save.byId(x.h.profileId))]));
     for (const tr of res.trackers) {
       const h = run.teams[sides[tr.team]].human;
       if (cup && h.profileId && tr.stars > 0) save.addStars(h.profileId, cup.id, run.level, nx.r, tr.stars);
     }
+    // a secret mission counts once its secret is revealed (match facts from main.js: shocks, buzzer beater, Super Strike goal)
+    for (const { side, h } of humansHere) {
+      const f = res.facts?.[side];
+      if (f) for (const s of secretState(save.byId(h.profileId))) if (s.revealed && !s.done && MISSIONS[s.mission](f)) save.missionDone(h.profileId, s.mission);
+    }
+    const news = humansHere.map((x) => this.secretNews(x.h.profileId, before[x.h.profileId])).join('');
     const humansLeft = () => run.teams.some((tm, i) => tm.human && !run.bracket.some((rd) => rd.some((mm) => mm.winner !== null && (mm.a === i || mm.b === i) && mm.winner !== i)));
     const winnerTeam = run.teams[m.winner];
     const lostHuman = run.teams[sides[1 - res.winner]].human;
@@ -299,7 +334,7 @@ export function installCups(Menu) {
     const title = winnerTeam.human ? (single ? t('cup.matchWon') : `${esc(winnerTeam.human.name)}: ${t('cup.matchWon')}`) : t('cup.matchLost');
     const note = res.decided ? `<p class="sub">${t('cup.decided')}</p>` : res.golden ? `<p class="sub">${t('cup.golden')}</p>` : '';
     const l = this.layer('', `<div class="bg"></div><div class="center"><div class="panel">
-      <h1 class="title">${title}</h1><p class="sub" style="font-size:1.3em"><b>${teamName(run.teams[m.a])} ${res.score[0]} – ${res.score[1]} ${teamName(run.teams[m.b])}</b></p>${note}${lines}
+      <h1 class="title">${title}</h1><p class="sub" style="font-size:1.3em"><b>${teamName(run.teams[m.a])} ${res.score[0]} – ${res.score[1]} ${teamName(run.teams[m.b])}</b></p>${note}${lines}${news}
       <div class="row-btns">${out ? `<button class="btn primary" data-nav data-act="retry" data-autofocus>${t('cup.retry')}</button><button class="btn" data-nav data-act="menu">${t('cup.toMenu')}</button>`
         : `<button class="btn primary" data-nav data-act="on" data-autofocus>${t('cup.goOn')}</button>`}</div></div></div>`, {
       act: (a) => {
@@ -328,9 +363,12 @@ export function installCups(Menu) {
     const cup = run.cupId ? cupById(run.cupId) : null;
     let extra = '';
     if (champ?.human && cup && champ.human.profileId) {
+      const before = secretState(save.byId(champ.human.profileId));
       save.cupWon(champ.human.profileId, cup.id, run.level);
+      if (run.level === 'hard' && before.some((s) => s.mission === 'hardCup' && s.revealed)) save.missionDone(champ.human.profileId, 'hardCup');
+      extra += this.secretNews(champ.human.profileId, before);
       const rec = save.cupRecord(champ.human.profileId, cup.id), pct = progress(cup, rec);
-      extra = `<p class="sub">${t('cup.trophy')}</p><p class="sub" style="font-size:1.3em"><b>${t('cup.newGrade', { g: grade(pct, rec), n: pct })}</b></p>`;
+      extra += `<p class="sub">${t('cup.trophy')}</p><p class="sub" style="font-size:1.3em"><b>${t('cup.newGrade', { g: grade(pct, rec), n: pct })}</b></p>`;
     }
     if (!run.bindings) save.setRun(run.teams[0].human.profileId, null);
     const title = champ?.human ? t('cup.winnerIs', { name: esc(champ.human.name) }) : champ ? t('cup.cpuWins', { name: esc(champ.name) }) : t('cup.allOut');

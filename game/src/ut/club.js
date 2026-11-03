@@ -22,6 +22,17 @@ export function clubOf(profile) {
   if (!u || !u.v) profile.ultimate = { ...newClub(), credits: u?.credits || 0 };
   const c = profile.ultimate, blank = newClub();
   for (const k of Object.keys(blank)) if (c[k] === undefined) c[k] = blank[k];
+  // cards that no longer exist (holo of a player under 85 since 3 November) become the gold rare of that player
+  for (const i of c.cards) {
+    if (CARD[i.id]) continue;
+    const char = i.id.split(':')[0], alt = CARD[`${char}:goldRare`] || cardsOf(char)[0];
+    if (alt) { i.id = alt.id; c.album[alt.id] = true; }
+  }
+  c.cards = c.cards.filter((i) => CARD[i.id]);
+  for (const id of Object.keys(c.album)) if (!CARD[id]) delete c.album[id];
+  const m = c.market;
+  for (const l of m.listings) { const i = c.cards.find((x) => x.uid === l.uid); if (i) l.id = i.id; }
+  m.listings = m.listings.filter((l) => CARD[l.id]); m.log = m.log.filter((l) => CARD[l.id]); m.watch = m.watch.filter((id) => CARD[id]);
   return c;
 }
 

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BALL, FIELD, FIELDER, GOALIE, SHOT, SUPER, TACKLE, PASS, MATCH, PHYSICS_DT, SIZE, SKILL, SKILL_FROM_LEVEL } from './config.js';
+import { BALL, FIELD, FIELDER, GOALIE, SHOT, SUPER, TACKLE, PASS, MATCH, FENCE, PHYSICS_DT, SIZE, SKILL, SKILL_FROM_LEVEL } from './config.js';
 import { Ball, predict, shootAtFast } from './ball.js';
 import { buildField, buildBallMesh } from './field.js';
 import { Stadium } from './stadium.js';
@@ -86,6 +86,9 @@ export class Game {
     this.timeScale = 1;
     this.superStrike = null; // the Super Strike in progress: { p, keeper, phase, needle, n, outcome, ... }
     this.effects = []; // short-lived meshes (the Super Strike burst)
+    this.zaps = []; // electric barrier shocks in progress (lightning drawn every frame)
+    this.buzzer = false; // 0:00 with a shot on its way (buzzer beater)
+    this.buzzerT = 0;
     this.camLift = 0;
     this.stats = { shots: [0, 0], saves: [0, 0], passes: [0, 0], tackles: [0, 0], posts: 0 };
     this.kickoff(0);
@@ -506,6 +509,8 @@ export class Game {
     if (Math.abs(rel) > 2.35) dirName = '600';
     else if (rel > 0.8) { dirName = '300'; }
     else if (rel < -0.8) { dirName = '300'; mirror = true; }
+    // shoulder charge towards the electric barrier: the victim is shocked
+    if (kind === 'hit' && this.shockVictim(victim, attacker)) return;
     const base = kind === 'slide' ? 'slide_tackle_react_' : 'hit_react_';
     const name = kind === 'slide' ? base + dirName : base + dirName;
     const clip = this.template.clips[name] ? name : base + '1200';
@@ -515,6 +520,110 @@ export class Game {
     victim.speed = 0;
     victim.play(clip, { fade: 0.067, mirror });
     this.hud.sfx('hit');
+  }
+
+  // ------------------------------------------------------------- electric barrier
+
+  // nearest point of the barrier (rounded rectangle 0.25 m outside the pitch edge, open at the goal mouths):
+  // { x, z, nx, nz, d } with the outward normal, or null in front of a goal mouth
+  fencePoint(x, z) {
+    const off = 0.25, hl = FIELD.halfLength + off, hw = FIELD.halfWidth + off, r = FIELD.cornerRadius + off;
+    const ax = Math.abs(x), az = Math.abs(z), sx = Math.sign(x) || 1, sz = Math.sign(z) || 1;
+    if (ax > hl - r && az > hw - r) {
+      const cx = sx * (hl - r), cz = sz * (hw - r), dx = x - cx, dz = z - cz, l = Math.hypot(dx, dz) || 1;
+      return { x: cx + dx / l * r, z: cz + dz / l * r, nx: dx / l, nz: dz / l, d: r - l };
+    }
+    if (hl - ax < hw - az) {
+      if (az < FIELD.goalHalfWidth + 0.3) return null;
+      return { x: sx * hl, z, nx: sx, nz: 0, d: hl - ax };
+    }
+    return { x, z: sz * hw, nx: 0, nz: sz, d: hw - az };
+  }
+
+  // a shoulder charge pushing the victim into the barrier: electrocution_stage1 against it, then stage3 to the ground
+  shockVictim(victim, attacker) {
+    const w = this.fencePoint(victim.pos.x, victim.pos.z);
+    if (!w || w.d > FENCE.range || !this.template.clips.electrocution_stage1) return false;
+    const push = Math.cos(attacker.facing) * w.nx + Math.sin(attacker.facing) * w.nz;
+    if (push < FENCE.facing) return false;
+    const fall = this.template.meta.electrocution_stage3?.duration ?? 1.67;
+    const inside = 0.36; // where the body stops: against the barrier (Player.clampToField keeps 0.35 m inside the edge)
+    victim.setState('react', { shock: { x: w.x - w.nx * (0.25 + inside), z: w.z - w.nz * (0.25 + inside), fall: false } });
+    victim.facing = Math.atan2(-w.nz, -w.nx); // facing the pitch, back to the barrier
+    victim.stun = (FENCE.shockTime + fall * FENCE.fallShare) * (victim.cfg.stunTime ?? 1);
+    victim.speed = 0;
+    victim.play('electrocution_stage1', { loop: true, fade: 0.05 });
+    this.zaps.push({ p: victim, t: 0, life: FENCE.shockTime + 0.15, x: w.x, z: w.z, nx: w.nx, nz: w.nz, mesh: null, light: null });
+    this.hud.flash(t('flash.shock'), '#7fe6ff', 1.0);
+    this.hud.sfx('shock');
+    this.emit('shock', { team: attacker.team });
+    return true;
+  }
+
+  shockUpdate(p) {
+    const d = p.stateData.shock;
+    if (p.stateTime < 0.25) { p.pos.x += (d.x - p.pos.x) * 0.3; p.pos.z += (d.z - p.pos.z) * 0.3; }
+    if (!d.fall && p.stateTime >= FENCE.shockTime) { d.fall = true; p.play('electrocution_stage3', { fade: 0.06 }); }
+  }
+
+  // lightning between the barrier and the shocked body, redrawn every frame (real time)
+  updateZaps(dt) {
+    for (let i = this.zaps.length - 1; i >= 0; i--) {
+      const z = this.zaps[i];
+      z.t += dt;
+      if (!z.mesh) {
+        // each bolt segment is a thin box: a white core and a wider cyan glow
+        const box = new THREE.BoxGeometry(1, 1, 1);
+        const mk = (col, op) => { const m = new THREE.InstancedMesh(box, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false }), 80); m.frustumCulled = false; return m; };
+        z.mesh = mk(0xe8ffff, 1); z.glow = mk(0x33bbff, 0.45);
+        z.light = new THREE.PointLight(0x66ddff, 0, 7, 1.5);
+        this.scene.add(z.mesh, z.glow, z.light);
+      }
+      const pts = [], p = z.p.rpos, h = z.p.cfg.height;
+      const tx = -z.nz, tz = z.nx; // along the barrier
+      const bolt = (ax, ay, az, bx, by, bz, n, j) => {
+        let px = ax, py = ay, pz = az;
+        for (let k = 1; k <= n; k++) {
+          const u = k / n, jj = k === n ? 0 : j;
+          const qx = ax + (bx - ax) * u + (Math.random() - 0.5) * jj, qy = ay + (by - ay) * u + (Math.random() - 0.5) * jj, qz = az + (bz - az) * u + (Math.random() - 0.5) * jj;
+          pts.push(px, py, pz, qx, qy, qz); px = qx; py = qy; pz = qz;
+        }
+      };
+      if (z.t < z.life) {
+        for (let b = 0; b < 4; b++) {
+          const s = (Math.random() - 0.5) * 2.2;
+          bolt(z.x + tx * s, 0.15 + Math.random() * 0.95, z.z + tz * s, p.x + (Math.random() - 0.5) * 0.3, h * (0.25 + Math.random() * 0.65), p.z + (Math.random() - 0.5) * 0.3, 7, 0.35);
+        }
+        // sparks running along the barrier rail
+        const s0 = (Math.random() - 0.5) * 4;
+        bolt(z.x + tx * s0, 1.15, z.z + tz * s0, z.x + tx * (s0 + 1.5), 1.15, z.z + tz * (s0 + 1.5), 5, 0.25);
+        // crackle round the body
+        for (let b = 0; b < 3; b++) {
+          const a0 = Math.random() * 6.28, a1 = a0 + 1 + Math.random() * 2, y0 = h * Math.random(), y1 = h * Math.random(), r = 0.32 * SIZE;
+          bolt(p.x + Math.cos(a0) * r, y0, p.z + Math.sin(a0) * r, p.x + Math.cos(a1) * r, y1, p.z + Math.sin(a1) * r, 4, 0.2);
+        }
+      }
+      const n = Math.min(80, pts.length / 6), M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), X = new THREE.Vector3(1, 0, 0);
+      for (let j = 0; j < n; j++) {
+        tmp.set(pts[j * 6], pts[j * 6 + 1], pts[j * 6 + 2]); tmp2.set(pts[j * 6 + 3], pts[j * 6 + 4], pts[j * 6 + 5]);
+        const len = tmp.distanceTo(tmp2);
+        Q.setFromUnitVectors(X, tmp2.clone().sub(tmp).divideScalar(len || 1));
+        tmp.add(tmp2).multiplyScalar(0.5);
+        z.mesh.setMatrixAt(j, M.compose(tmp, Q, S.set(len, 0.025, 0.025)));
+        z.glow.setMatrixAt(j, M.compose(tmp, Q, S.set(len, 0.09, 0.09)));
+      }
+      z.mesh.count = z.glow.count = n;
+      z.mesh.instanceMatrix.needsUpdate = z.glow.instanceMatrix.needsUpdate = true;
+      z.mesh.material.opacity = 0.7 + Math.random() * 0.3;
+      z.light.position.set(p.x, h * 0.7, p.z);
+      z.light.intensity = z.t < z.life ? 6 + Math.random() * 10 : 0;
+      if (z.t >= z.life) {
+        this.scene.remove(z.mesh, z.glow, z.light);
+        for (const m of [z.mesh, z.glow]) { m.material.dispose(); m.dispose(); }
+        z.mesh.geometry.dispose(); z.light.dispose(); this.zaps.splice(i, 1);
+      }
+    }
+    this.fenceGlow = this.zaps.length ? 1 : Math.max(0, (this.fenceGlow || 0) - dt * 3);
   }
 
   // ------------------------------------------------------------- Super Strike
@@ -560,6 +669,8 @@ export class Game {
     p.play('captain_shoot_to_score', { fade: 0.1, mirror: p.pos.z * p.attackDir > 0 }); // mirrored by the side of the pitch
     this.timeScale = this.superStrike.slow; // FindSTSDistanceAffectedPercentage
     this.hud.flash(t('flash.super'), '#ffd21f', 1.4);
+    this.hud.superPulse(true);
+    this.superEffect(p, 0.06);
     this.emit('superStart', { team: p.team });
   }
 
@@ -795,10 +906,10 @@ export class Game {
   }
 
   // <team>_captain_sts_effect at frame 67: a burst of the team colour around the captain
-  superEffect(p) {
+  superEffect(p, y = 1.2 * SIZE) {
     const col = new THREE.Color(this.teams?.[p.team]?.color || '#ffd21f');
     const m = new THREE.Mesh(new THREE.TorusGeometry(0.6 * SIZE, 0.08 * SIZE, 8, 40), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
-    m.position.copy(p.rpos); m.position.y = 1.2 * SIZE; m.rotation.x = Math.PI / 2;
+    m.position.copy(p.rpos); m.position.y = y; m.rotation.x = Math.PI / 2;
     this.scene.add(m);
     this.effects.push({ mesh: m, t: 0, life: 0.9 });
   }
@@ -954,9 +1065,10 @@ export class Game {
         if (p.stateTime > 0.55) { p.setState('free'); p.speed = p.cfg.runWithBall * 0.7; }
         break;
       case 'react':
-        p.applyRootMotion();
+        if (p.stateData.shock) this.shockUpdate(p); else p.applyRootMotion();
         if (p.stun <= 0) { p.setState('free'); p.speed = 0; }
         break;
+      case 'pickup': this.keeperPickupUpdate(p); break;
       case 'celebrate':
       case 'dejected':
         break;
@@ -1001,16 +1113,58 @@ export class Game {
     g.locomotion(1 / 50);
   }
 
+  // the keeper takes a loose ball: picks it up from the ground or catches it at chest or head height, the clip
+  // started so that its hands reach the ball at once (the ball is drawn from where it was to the hands, see ballInHands)
+  keeperPickup(g, from) {
+    const y = from.y, meta = this.template.meta;
+    const clip = y < 0.45 * SIZE ? 'gk_pick_up' : y < 1.1 * SIZE ? 'gk_catch_med' : 'gk_catch_high';
+    const m = meta[clip];
+    if (!m || !this.template.clips[clip]) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.15 }); return; }
+    const contact = m.contact ?? 0.25, start = Math.max(0, contact - 0.15);
+    g.setState('pickup', { from, contact: contact - start, end: m.duration - start });
+    g.facing = Math.atan2(from.z - g.pos.z, from.x - g.pos.x);
+    g.speed = 0; g.desiredSpeed = 0;
+    g.play(clip, { fade: 0.08, start });
+  }
+
+  keeperPickupUpdate(g) {
+    g.speed = 0;
+    if (this.ball.owner !== g) { g.setState('free'); return; }
+    if (g.stateTime >= g.stateData.end - 0.15) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.25 }); }
+  }
+
+  // drawn ball of a keeper who holds it: between the two hands (palms), eased in from the ground during a pick-up
+  ballInHands(g, out) {
+    if (g._hands === undefined) {
+      const find = (suf) => { let b = null; g.model.traverse((o) => { if (!b && o.isBone && o.name.replace(':', '').endsWith(suf)) b = o; }); return b; };
+      const l = find('LeftHandMiddle1') || find('LeftHand'), r = find('RightHandMiddle1') || find('RightHand');
+      g._hands = l && r ? [l, r] : null;
+    }
+    if (!g._hands) return false;
+    g.root.updateMatrixWorld(true);
+    g._hands[0].getWorldPosition(out);
+    out.add(g._hands[1].getWorldPosition(tmp2)).multiplyScalar(0.5);
+    out.y = Math.max(R, out.y);
+    if (g.state === 'pickup' && g.stateData.from) {
+      const k = clamp01((g.stateTime - g.stateData.contact + 0.12) / 0.12);
+      out.lerpVectors(g.stateData.from, out, k * k * (3 - 2 * k));
+    }
+    return true;
+  }
+
   goalieAction(g, dt) {
     const b = this.ball;
     if (g.state === 'hold') {
       g.speed = 0;
       g.facing += angleDiff(g.facing, g.attackDir > 0 ? 0 : Math.PI) * 0.1;
+      // a recovery clip (from a dive or a trap) first, then standing with the ball
+      const clipEnd = g.stateData.clipEnd || 0;
+      if (clipEnd && g.stateTime >= clipEnd && g.currentName !== 'gk_idle_with_Ball') g.play('gk_idle_with_Ball', { loop: true, fade: 0.2 });
       // Goalie Ball Time: out within 2 s, earlier if a teammate is free
-      if (g.stateTime > GOALIE.holdLookTime) {
+      if (g.stateTime > Math.max(GOALIE.holdLookTime, clipEnd)) {
         const t = bestPassTarget(this, g);
         const free = t && this.players.every((o) => o.team === t.team || o.isGoalie || Math.hypot(o.pos.x - t.pos.x, o.pos.z - t.pos.z) > 4);
-        if (t && (free || g.stateTime >= GOALIE.holdTime)) {
+        if (t && (free || g.stateTime >= GOALIE.holdTime + clipEnd)) {
           const dist = Math.hypot(t.pos.x - g.pos.x, t.pos.z - g.pos.z);
           if (dist > GOALIE.kickMinDist) {
             g.setState('throw', { kick: true, target: t });
@@ -1084,7 +1238,9 @@ export class Game {
         if (taker.state === 'dive') taker.stateData.done = true;
       }
       if (taker.team !== this.possTeam) { this.passChain[taker.team] = 0; this.possTeam = taker.team; }
+      const from = b.pos.clone();
       b.owner = taker; b.magnus = false; b.shotTimer = 0;
+      if (taker.isGoalie && taker.state === 'free') this.keeperPickup(taker, from);
       if (b.passTarget && b.passTarget.team === taker.team && b.passTarget !== taker) { /* intercepted by a teammate: fine */ }
       b.passTarget = null;
       this.giveToTeamHuman(taker);
@@ -1125,22 +1281,25 @@ export class Game {
     if (this.phase === 'goal' || this.phase === 'end') {
       for (const p of this.players) {
         if (p.state === 'free' && !p.isGoalie) { p.desiredSpeed = 0; p.locomotion(dt); }
-        if (p.state === 'react') p.applyRootMotion();
+        if (p.state === 'react' && !p.stateData.shock) p.applyRootMotion();
         p.update(dt);
       }
       this.ball.step(dt);
       if (this.phase === 'goal' && this.phaseTime > MATCH.goalPause) {
-        if (this.golden) this.endMatch(); else this.kickoff(this.ball.inGoal > 0 ? 1 : 0);
+        // a buzzer beater: the time was already up (a knockout still level goes on to the golden goal)
+        if (this.golden) this.endMatch();
+        else if (this.clock <= 0) { if (!this.timeUp()) this.kickoff(this.ball.inGoal > 0 ? 1 : 0); }
+        else this.kickoff(this.ball.inGoal > 0 ? 1 : 0);
       }
       return;
     }
     if (this.phase !== 'play') return;
     this.clock = Math.max(0, this.clock - dt);
     if (this.clock <= 0) {
-      // knockout draw: one minute of golden goal, then the team with more shots
-      if (this.knockout && !this.golden && this.score[0] === this.score[1]) {
-        this.golden = true; this.clock = 60; this.hud.flash(t('flash.golden'), '#ffd21f', 2);
-      } else { this.endMatch(); return; }
+      // buzzer beater: a shot (or Super Strike) already on its way at 0:00 plays out, and its goal counts
+      if (this.shotLive() && (this.buzzerT += dt) < MATCH.buzzerMax) {
+        if (!this.buzzer) { this.buzzer = true; this.hud.flash(t('flash.buzzer'), '#ff7b1c', 1.4); this.hud.sfx('buzzer'); }
+      } else if (this.timeUp()) return;
     }
 
     // during the unstoppable Super Strike everybody but the captain is frozen (FreezeEveryoneButCaptain)
@@ -1160,6 +1319,26 @@ export class Game {
     this.ball.events.length = 0;
   }
 
+  // a shot still in play when the clock reaches 0:00: in flight, being struck, or a Super Strike
+  shotLive() {
+    const b = this.ball;
+    if (this.superStrike) return true;
+    if (!b.owner && b.shotTimer > 0 && !b.inGoal) return true;
+    return this.players.some((p) => p.state === 'kick' && !p.stateData.released && b.owner === p);
+  }
+
+  // the time is up: a knockout still level goes to one minute of golden goal, then the team with more shots;
+  // returns true when the match is over
+  timeUp() {
+    this.buzzer = false; this.buzzerT = 0;
+    if (this.knockout && !this.golden && this.score[0] === this.score[1]) {
+      this.golden = true; this.clock = 60; this.hud.flash(t('flash.golden'), '#ffd21f', 2);
+      return false;
+    }
+    this.endMatch();
+    return true;
+  }
+
   onGoal(side) {
     // side = +1: ball went into the goal at +X, scored by team 0
     const team = side > 0 ? 0 : 1;
@@ -1173,6 +1352,7 @@ export class Game {
     this.phaseTime = 0;
     this.hud.goal(team, this.score);
     if (sup) this.hud.flash(t('flash.superGoal'), this.teams[team].color, 2.4);
+    if (this.buzzer) { this.hud.flash(t('flash.buzzerGoal'), '#ff7b1c', 2.6); this.emit('buzzerBeater', { team }); }
     this.stadium.msgColor = this.teams[team].color; // scoreboard 'GOL!' in the scorer's colour
     for (const p of this.players) {
       p.desiredSpeed = 0;
@@ -1215,7 +1395,12 @@ export class Game {
     const frozen = this.superStrike && this.superStrike.frozen ? this.superStrike.p : null;
     for (const p of this.players) p.render(frozen && p !== frozen ? 0 : frameDt, alpha);
     this.updateSuperLook(Math.min(0.1, realDt));
+    this.updateSuperAura(Math.min(0.1, realDt));
+    this.updateZaps(Math.min(0.1, realDt));
     this.ball.updateMesh(frameDt, alpha);
+    // a keeper holding the ball holds it in his hands (the step position is a point in front of him)
+    const own = this.ball.owner;
+    if (own && own.isGoalie && this.ballInHands(own, tmp)) { this.ball.rpos.copy(tmp); this.ball.mesh.position.copy(tmp); }
     const bp = this.ball.rpos;
     this.ballShadow.position.set(bp.x, 0.008, bp.z);
     const h = bp.y;
@@ -1224,6 +1409,26 @@ export class Game {
     this.updateCamera(realDt);
     this.stadium.update(realDt, this);
     this.hud.update(this);
+  }
+
+  // While the match is paused: the play stays frozen, the camera turns slowly round the pitch looking at the ball,
+  // the crowd and the LED boards go on (the pause menu sits on the left, the stadium shows on the right)
+  pauseView(realDt) {
+    const dt = Math.min(0.1, realDt);
+    if (!this.pauseCam) {
+      const c = this.camera.position;
+      this.pauseCam = { a: Math.atan2(c.z / 15, c.x / 17), t: 0, from: c.clone() };
+    }
+    const pc = this.pauseCam;
+    pc.t += dt;
+    const a = pc.a - pc.t * 0.09, b = this.ball.rpos;
+    tmp.set(Math.cos(a) * 17, 5.5 + Math.sin(pc.t * 0.3) * 1.2, Math.sin(a) * 15);
+    const k = Math.min(1, pc.t / 1.2), e = k * k * (3 - 2 * k); // from where the match camera was
+    this.camera.position.lerpVectors(pc.from, tmp, e);
+    if (this.camera.fov !== 42) { this.camera.fov = 42; this.camera.updateProjectionMatrix(); }
+    this.camera.lookAt(b.x * (0.6 + 0.4 * (1 - e)), 0.8, b.z * 0.6);
+    this.stadium.update(dt, this);
+    this.hud.hideMarkers();
   }
 
   // world darkness, the captain's light and the burst of the Super Strike scene (real time)
@@ -1244,6 +1449,71 @@ export class Game {
       e.mesh.material.opacity = 0.9 * (1 - k);
       if (k >= 1) { this.scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); this.effects.splice(i, 1); }
     }
+  }
+
+  // Super Strike charge: a column of light in gold and the team colour, rings rising round the captain and a shock
+  // wave on the grass when it starts, from the switch to the long charge to the kick (HUD: golden vignette)
+  updateSuperAura(dt) {
+    let c = null, k = 0;
+    const s = this.superStrike;
+    if (s && s.phase === 'meter') { c = s.p; k = 1; }
+    else for (const p of this.players) {
+      if (p.state === 'windup' && this.canSuper(p) && p.stateTime > SHOT.windupSeconds) {
+        c = p; k = clamp01((p.stateTime - SHOT.windupSeconds) / Math.max(0.05, this.superChargeSeconds(p) - SHOT.windupSeconds));
+      }
+    }
+    if (!this.aura) {
+      const cv = document.createElement('canvas'); cv.width = 4; cv.height = 64;
+      const g2 = cv.getContext('2d'), gr = g2.createLinearGradient(0, 64, 0, 0);
+      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g2.fillStyle = gr; g2.fillRect(0, 0, 4, 64);
+      const tex = new THREE.CanvasTexture(cv);
+      const mat = (col, op) => new THREE.MeshBasicMaterial({ color: col, map: tex, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      const grp = new THREE.Group();
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.5 * SIZE, 0.7 * SIZE, 3.4 * SIZE, 28, 1, true), mat(0xffd21f, 0.75));
+      col.position.y = 1.7 * SIZE;
+      const inner = new THREE.Mesh(new THREE.CylinderGeometry(0.28 * SIZE, 0.4 * SIZE, 2.6 * SIZE, 20, 1, true), mat(0xffffff, 0.6));
+      inner.position.y = 1.3 * SIZE;
+      grp.add(col, inner);
+      const rings = [];
+      for (let i = 0; i < 3; i++) {
+        const r = new THREE.Mesh(new THREE.TorusGeometry(0.62 * SIZE, 0.035 * SIZE, 6, 40), new THREE.MeshBasicMaterial({ color: 0xffe680, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+        r.rotation.x = Math.PI / 2; grp.add(r); rings.push(r);
+      }
+      grp.visible = false;
+      this.scene.add(grp);
+      this.aura = { grp, col, inner, rings, t: 0, on: null };
+    }
+    const a = this.aura;
+    a.grp.visible = !!c;
+    this.superAuraK = c ? k : 0;
+    if (!c) { a.on = null; return; }
+    if (a.on !== c) {
+      // the moment it starts: a shock wave on the grass in the team colour, a flash and a sound
+      a.on = c; a.t = 0;
+      a.col.material.color.set(this.teams?.[c.team]?.color || '#ffd21f').lerp(new THREE.Color('#ffd21f'), 0.55);
+      const wave = new THREE.Mesh(new THREE.TorusGeometry(0.6 * SIZE, 0.06 * SIZE, 6, 48), new THREE.MeshBasicMaterial({ color: 0xffd21f, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+      wave.position.set(c.rpos.x, 0.06, c.rpos.z); wave.rotation.x = Math.PI / 2;
+      this.scene.add(wave);
+      this.effects.push({ mesh: wave, t: 0, life: 0.7 });
+      this.hud.flash(t('flash.superCharge'), '#ffd21f', 0.9);
+      this.hud.sfx('charge');
+      this.hud.superPulse();
+    }
+    a.t += dt;
+    a.grp.position.set(c.rpos.x, 0, c.rpos.z);
+    const grow = 0.35 + 0.65 * k, flick = 0.85 + 0.15 * Math.sin(a.t * 40);
+    a.col.scale.set(grow, 0.4 + 0.6 * k, grow);
+    a.col.position.y = 1.7 * SIZE * (0.4 + 0.6 * k);
+    a.col.material.opacity = (0.14 + 0.22 * k) * flick;
+    a.inner.material.opacity = 0.06 + 0.14 * k;
+    a.col.rotation.y += dt * 2; a.inner.rotation.y -= dt * 3;
+    a.rings.forEach((r, i) => {
+      const u = (a.t * (0.9 + k) + i / 3) % 1;
+      r.position.y = u * 3 * SIZE;
+      r.scale.setScalar((1.25 - u * 0.6) * grow);
+      r.material.opacity = (1 - u) * (0.45 + 0.4 * k);
+    });
   }
 
   updateCamera(dt) {

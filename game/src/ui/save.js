@@ -67,6 +67,8 @@ export const save = {
   // the single-player cup in progress, so "Continua la coppa" works after closing the game
   run(profileId) { return this.byId(profileId)?.cupRun || null; },
   setRun(profileId, run) { const p = this.byId(profileId); if (p) { p.cupRun = run; store(); } },
+  // secret characters (cups/secrets.js): a secret mission completed
+  missionDone(profileId, id) { const p = this.byId(profileId); if (!p) return; p.secrets = p.secrets || {}; p.secrets[id] = true; store(); },
   // result: 'won' | 'drawn' | 'lost'
   addResult(result, profileId = data.activeId) {
     const p = this.byId(profileId); if (!p) return;

@@ -27,6 +27,8 @@ CHARACTERS.forEach((char, ci) => {
   for (const rarity of rarities) {
     const bonus = rarity === 'goldRare' ? 2 : ECO.rarities[rarity]?.ovrBonus || 0; // gold rare: +2 like tools/economy_sim.py
     const stats = Object.fromEntries(Object.entries(c.stats).map(([k, v]) => [k, Math.min(99, v + bonus)]));
+    // holo cards only for strong players: the card must be 85 or more (economy.json rarities.*.minOvr)
+    if (ovrOf(c.role, stats) < (ECO.rarities[rarity]?.minOvr ?? 0)) continue;
     const fx = HOLO_FX[rarity] ? HOLO_FX[rarity][ci % HOLO_FX[rarity].length] : '';
     CATALOG.push({ id: `${char}:${rarity}`, char, team: c.team || char.split('_')[0], role: c.role, gk: c.role === 'POR', rarity, baseOvr, ovr: ovrOf(c.role, stats), stats, fx });
   }

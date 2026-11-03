@@ -186,6 +186,7 @@ export function bindHolo(root) {
       s.raf = Math.abs(s.tx - s.x) + Math.abs(s.ty - s.y) + Math.abs(s.to - s.o) * 50 > 0.05 && card.isConnected ? requestAnimationFrame(tick) : 0;
     };
     const kick = () => { if (!s.raf) s.raf = requestAnimationFrame(tick); };
+    s.kick = kick;
     box.addEventListener('pointermove', (e) => {
       const r = box.getBoundingClientRect();
       if (card.classList.contains('idle')) { card.classList.remove('idle'); const cs = getComputedStyle(card); s.x = +cs.getPropertyValue('--mx') || 50; s.y = +cs.getPropertyValue('--my') || 50; }
@@ -194,6 +195,17 @@ export function bindHolo(root) {
     });
     box.addEventListener('pointerleave', () => { s.tx = 50; s.ty = 50; s.to = 0; kick(); });
   }
+}
+
+// a controller stick turns the card like the pointer does: x, y from -1 to 1; near the centre it goes back to rest
+export function stickHolo(card, x, y) {
+  if (!card._holo) bindHolo(card.parentElement || document.body);
+  const s = card._holo;
+  if (!s || !s.kick) return;
+  const on = Math.hypot(x, y) > 0.15;
+  if (on && card.classList.contains('idle')) card.classList.remove('idle');
+  s.tx = on ? 50 + x * 50 : 50; s.ty = on ? 50 + y * 50 : 50; s.to = on ? 1 : 0;
+  s.kick();
 }
 
 // golden sweep when a card comes out of a pack

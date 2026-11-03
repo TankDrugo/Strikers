@@ -14,6 +14,7 @@ Fatto:
 - 25 personaggi con carta: anche Big Smoke, Crilin, Dastardly, Goku, Goku SSJ, Jak, Kairi, Piccolo, Ratchet, Riku, Roxas, Snake, Sora, Spike e Vegeta (nazionale nel walkout)
 - Capitano scelto nella Rosa (solo lui fa la Super Strike, mai il portiere)
 - Build di prova con 10 milioni di crediti sul link privato (`node game/tools/build.mjs --web --prova`, prova `game/tools/packtest.cjs`)
+- 3 novembre: holo solo per le carte da 85 in su (80 carte in catalogo), walkout solo da 85 con la carta gigante che si sblocca dietro al personaggio, carte del pacchetto selezionabili con le statistiche, levetta del controller che gira le carte holo, panchina raggiungibile col controller nella Rosa
 
 Prossimo:
 - Più esultanze originali: servono altri file goal_winner dal disco (oggi 2 su 10)

@@ -60,6 +60,7 @@ const CSS = `
 /* P1 theatre */
 .ui .theatre{position:absolute;inset:0;z-index:5;overflow:hidden;container-type:size;background:radial-gradient(ellipse at 50% 70%,#3e1d8a,#140a33 70%)}
 .ui .theatre.see3d{background:none}
+.ui .theatre.see3d .clue{top:8%;font-size:min(7cqh,6cqw)}
 .ui .theatre .beams{position:absolute;inset:-50%;opacity:0;background:repeating-conic-gradient(from 0deg at 50% 50%,var(--beam,#fff) 0 6deg,transparent 6deg 18deg);transition:opacity .3s;animation:ut-spin 12s linear infinite;pointer-events:none}
 @keyframes ut-spin{to{transform:rotate(360deg)}}
 .ui .pack{position:absolute;left:50%;top:50%;width:min(28cqh,22cqw);aspect-ratio:5/7.6;transform:translate(-50%,-50%);border:.35em solid var(--ink);border-radius:1em;background:var(--pk,linear-gradient(160deg,#ffe066,#ff9a1f 50%,#e03a1e));
@@ -76,6 +77,11 @@ const CSS = `
 .ui .theatre .skip{position:absolute;right:1.4em;bottom:1.2em}
 .ui .packrow{display:flex;gap:1em;justify-content:center;flex-wrap:wrap;align-items:flex-end}
 .ui .packrow .cpick{width:min(9em,17%)}
+.ui .pinfo{display:grid;grid-template-columns:auto 1fr;gap:.2em 1.2em;align-items:center;background:#fff;border:.18em solid var(--ink);border-radius:1em;padding:.6em 1em;min-height:6.5em}
+.ui .pinfo h3{margin:0;font-family:var(--fd);font-weight:400;font-size:1.4em;display:flex;align-items:center;gap:.4em}.ui .pinfo h3 .big{font-size:1.2em;color:var(--sun);-webkit-text-stroke:.05em var(--ink)}
+.ui .pinfo>p{margin:0;font-size:.9em}.ui .pinfo .pstats{grid-column:2;grid-row:1/4;grid-template-columns:auto 1fr;gap:.2em .6em}
+.ui .statbar{position:relative;height:1.1em;background:#ece6f7;border-radius:.55em;overflow:hidden;border:.12em solid var(--ink)}
+.ui .statbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#41c24a,#ffd21f)}.ui .statbar em{position:relative;font-style:normal;font-weight:800;font-size:.8em;padding-left:.4em}
 .ui .pk-tile .pk{width:4.4em;aspect-ratio:5/7.6;border:.2em solid var(--ink);border-radius:.5em;background:var(--pk);align-self:center;margin:.2em 0}
 .ui .odds{font-size:.8em;line-height:1.3;opacity:.9}
 .ui .bar-mini{height:.7em;border:.15em solid var(--ink);border-radius:.5em;background:#fff;overflow:hidden}.ui .bar-mini i{display:block;height:100%;background:var(--leaf)}

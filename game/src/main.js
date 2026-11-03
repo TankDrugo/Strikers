@@ -162,9 +162,12 @@ function makeAudio() {
   return (name) => {
     const a = ctx; if (!a) return;
     const o = a.createOscillator(), g = a.createGain();
-    const spec = { hit: [140, 0.12, 'square'], post: [880, 0.18, 'triangle'], wall: [220, 0.06, 'sine'], goal: [520, 0.6, 'sawtooth'] }[name] || [300, 0.1, 'sine'];
+    const spec = { hit: [140, 0.12, 'square'], post: [880, 0.18, 'triangle'], wall: [220, 0.06, 'sine'], goal: [520, 0.6, 'sawtooth'],
+      shock: [90, 0.7, 'sawtooth'], buzzer: [180, 0.9, 'square'], charge: [300, 0.5, 'triangle'] }[name] || [300, 0.1, 'sine'];
     o.type = spec[2]; o.frequency.value = spec[0];
     if (name === 'goal') o.frequency.linearRampToValueAtTime(1040, a.currentTime + 0.5);
+    if (name === 'charge') o.frequency.exponentialRampToValueAtTime(1200, a.currentTime + 0.45);
+    if (name === 'shock') for (let k = 0; k < 14; k++) o.frequency.setValueAtTime(k % 2 ? 60 : 1400 + Math.random() * 900, a.currentTime + k * 0.045);
     g.gain.setValueAtTime(0.12, a.currentTime); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + spec[1]);
     o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + spec[1]);
   };
@@ -223,7 +226,14 @@ async function boot() {
       tr.onChange = (i, st) => hud.toast(t(st === 'done' ? 'obj.toastDone' : 'obj.toastFailed', { text: t('obj.' + o.ids[i]) }), st === 'done' ? '#d8f7c9' : '#f3d6dc');
       return tr;
     });
-    game.onEvent = trackers.length ? (type, d) => { for (const tr of trackers) tr.event(type, d); } : null;
+    // match facts for the secret missions (cups/secrets.js), per team
+    const facts = [0, 1].map(() => ({ shocks: 0, buzzer: false, superGoal: false }));
+    game.onEvent = (type, d) => {
+      if (type === 'shock') facts[d.team].shocks++;
+      if (type === 'buzzerBeater') facts[d.team].buzzer = true;
+      if (type === 'goal' && d.superStrike) facts[d.team].superGoal = true;
+      for (const tr of trackers) tr.event(type, d);
+    };
     game.cpuLevel = match.cpuLevel;
     game.clock = match.seconds;
     for (const tr of trackers) tr.f.length = game.clock;
@@ -238,12 +248,19 @@ async function boot() {
     hud.onEnd = (score, humanTeam, stats) => {
       if (match.onFinish) {
         const g = game, res = { score: [...score], winner: g.winner, golden: g.golden && score[0] !== score[1], decided: score[0] === score[1],
-          trackers: trackers.map((tr) => ({ team: tr.f.me, ids: tr.ids, stars: tr.finish(g.winner === tr.f.me), status: [...tr.status] })) };
+          trackers: trackers.map((tr) => ({ team: tr.f.me, ids: tr.ids, stars: tr.finish(g.winner === tr.f.me), status: [...tr.status] })), facts };
         if (res.decided) res.score[g.winner]++; // decided on shots: the winner goes through by one
         setTimeout(() => { if (mode === 'game' && game === g) { mode = 'menu'; hud.show(false); game = null; match.onFinish(res); } }, 2500);
         return;
       }
-      if (match.kind === 'cpu' || match.kind === 'coop' || match.kind === 'friend') {
+      if (match.players) {
+        // side select: every profile that played gets its own result (guests have none)
+        for (const pl of match.players) {
+          if (!pl.profileId) continue;
+          const me = score[pl.team], them = score[1 - pl.team];
+          save.addResult(me > them ? 'won' : me < them ? 'lost' : 'drawn', pl.profileId);
+        }
+      } else if (match.kind === 'cpu' || match.kind === 'coop' || match.kind === 'friend') {
         const me = score[humanTeam], them = score[1 - humanTeam];
         save.addResult(me > them ? 'won' : me < them ? 'lost' : 'drawn');
       }
@@ -265,11 +282,12 @@ async function boot() {
     const objectives = trackers.map((tr) => ({ n: game.controllers.findIndex((c) => c.team === tr.f.me) + 1,
       items: tr.ids.map((id, i) => ({ text: t('obj.' + id), status: tr.status[i] })) }));
     const quit = () => { paused = false; if (match.onQuit) { mode = 'menu'; hud.show(false); game = null; match.onQuit(); } else showMenu(); };
-    const l = menu.showPause({ onResume: resume, onRestart: () => { paused = false; startMatch(match); }, onQuit: quit, objectives });
+    const l = menu.showPause({ onResume: resume, onRestart: () => { paused = false; startMatch(match); }, onQuit: quit, objectives,
+      score: game.score, teams: game.teams, clock: game.clock });
     l.isPause = true;
   }
 
-  function resume() { paused = false; for (const c of game.controllers) c.input.actions.clear(); if (input) { input.keys.clear(); input.resumeGuard = true; } }
+  function resume() { paused = false; if (game) game.pauseCam = null; for (const c of game.controllers) c.input.actions.clear(); if (input) { input.keys.clear(); input.resumeGuard = true; } }
 
   function showMenu() {
     mode = 'menu';
@@ -290,7 +308,7 @@ async function boot() {
 
   menu.onStart = startMatch;
   menu.onViewer = openViewer;
-  window.__proto = { get game() { return game; }, startMatch, openViewer, showMenu, template, menu, ut: { club: UTC, cards: UTCARDS } };
+  window.__proto = { get game() { return game; }, get input() { return input; }, startMatch, openViewer, showMenu, template, menu, ut: { club: UTC, cards: UTCARDS } };
 
   const padMenus = new PadMenus();
   const helpEl = hud.el.querySelector('#help');
@@ -313,7 +331,7 @@ async function boot() {
       input.poll();
       if (helpPad !== input.usingPad) { helpPad = input.usingPad; helpEl.innerHTML = t(helpPad ? 'help.pad' : 'help.kb'); }
     }
-    if (!paused) game.update(dt);
+    if (!paused) game.update(dt); else game.pauseView(dt);
     if (trackers.length && (trackT += dt) > 0.25) { trackT = 0; for (const tr of trackers) tr.tick(); }
     renderer.render(game.scene, game.camera);
   });

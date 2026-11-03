@@ -13,6 +13,36 @@ const CSS = `
 .ui *{box-sizing:border-box}
 .ui .layer{position:absolute;inset:0;pointer-events:auto;overflow:hidden;display:flex;flex-direction:column}
 .ui .layer.dim{background:rgba(27,16,54,.55)}
+.ui .sides-panel{width:min(60em,100%)}
+.ui .sides-grid{display:grid;grid-template-columns:1fr .8fr 1fr;gap:.8em;min-height:13em}
+.ui .side-col{border:.2em solid var(--ink);border-radius:1em;padding:.6em;display:flex;flex-direction:column;gap:.5em;background:color-mix(in srgb,var(--tc,#fff) 22%,#fff);cursor:pointer}
+.ui .side-col h3{margin:0 0 .2em;font-family:var(--fd);font-weight:400;font-size:1.3em;text-align:center;color:var(--tc,var(--ink));-webkit-text-stroke:.05em var(--ink);paint-order:stroke fill}
+.ui .side-col.mid{background:#ece6f7;border-style:dashed}.ui .side-col.mid h3{color:#8a80a0;-webkit-text-stroke:0}
+.ui .side-chip{position:relative;display:grid;gap:.2em;background:#fff;border:.18em solid var(--ink);border-left:.6em solid var(--pc);border-radius:.7em;padding:.4em .6em;box-shadow:0 .2em 0 var(--ink)}
+.ui .side-chip.new{animation:chip-new .6s 3 ease-in-out}
+@keyframes chip-new{50%{transform:scale(1.06);box-shadow:0 0 0 .25em var(--sun),0 .2em 0 var(--ink)}}
+.ui .side-chip.ready{background:#d8f7c9}
+.ui .side-chip .sc-dev{font-weight:800;font-size:.85em}
+.ui .side-chip .sc-prof{display:flex;align-items:center;gap:.35em;font-size:1.05em}.ui .side-chip .sc-prof i{font-style:normal;font-size:.7em;opacity:.6}
+.ui .side-chip .sc-prof .av{width:1.5em;height:1.5em;font-size:.8em}
+.ui .side-chip .sc-st{font-size:.8em;font-weight:800}
+.ui .side-chip .sc-n{position:absolute;top:.3em;right:.4em;font-family:var(--fd);font-size:.85em}
+.ui .tile.secret{align-items:center;text-align:center;gap:.3em;cursor:default}
+.ui .tile.secret .qmark{width:1.7em;height:2em;display:grid;place-items:center;border:.2em solid var(--ink);border-radius:.8em;background:linear-gradient(160deg,#2a1260,#140a33);color:#fff;font-family:var(--fd);font-size:3em;-webkit-text-stroke:.04em var(--ink);overflow:hidden}
+.ui .tile.secret.half .qmark{background:linear-gradient(160deg,#6a2fd8,#2a1260);box-shadow:0 0 .6em #b07bff}
+.ui .tile.secret.on .qmark{background:linear-gradient(160deg,#ffe27a,#e8a91a)}.ui .tile.secret .qmark img{width:100%;height:100%;object-fit:cover}
+.ui .tile.secret .bar-mini{width:100%;height:.7em;border:.15em solid var(--ink);border-radius:.5em;background:#fff;overflow:hidden}.ui .tile.secret .bar-mini i{display:block;height:100%;background:var(--leaf)}
+.ui .secret-row{display:flex;align-items:center;gap:.4em}.ui .secret-row .sq{width:1.8em;height:2.2em;display:grid;place-items:center;border:.15em solid var(--ink);border-radius:.4em;background:#2a1260;color:#fff;font-family:var(--fd);overflow:hidden}
+.ui .secret-row .sq.on{background:#ffe27a}.ui .secret-row .sq img{width:100%;height:100%;object-fit:cover;margin:0!important}.ui .secret-row small{font-weight:700}
+.ui .layer.pause{background:linear-gradient(90deg,rgba(27,16,54,.82) 0,rgba(27,16,54,.6) 32%,rgba(27,16,54,0) 62%)}
+.ui .pause-side{flex:1;display:flex;align-items:center;padding:1.5em max(1.5em,env(safe-area-inset-left,0px));min-height:0}
+.ui .pause-side .panel{width:min(26em,100%);animation:pause-in .35s cubic-bezier(.3,1.3,.5,1)}
+@keyframes pause-in{from{transform:translateX(-30%);opacity:0}}
+.ui .pause-side .pause-tag{font-family:var(--fd);font-size:1.7em;color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .06em 0 var(--ink)}
+.ui .pause-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5em;font-family:var(--fd);text-align:center;background:#1b1036;color:#fff;border-radius:.8em;padding:.4em .7em}
+.ui .pause-score b{font-weight:400;font-size:.95em;-webkit-text-stroke:.04em #1b1036;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui .pause-score span{font-size:1.8em}.ui .pause-score small{grid-column:1/-1;font-family:var(--fn);opacity:.8}
+.ui .pause-btns{gap:.5em}.ui .pause-btns .btn{width:100%;text-align:left}
 .ui .layer.layer-in>.panel,.ui .layer.layer-in>.hub-ui{animation:ui-pop .35s cubic-bezier(.3,1.6,.5,1)}
 @keyframes ui-pop{from{transform:scale(.94) translateY(1.5em);opacity:0}}
 .ui .bg{position:absolute;inset:-25%;z-index:0;background:repeating-conic-gradient(from 0deg at 50% 60%,var(--m2) 0 10deg,var(--m3) 10deg 20deg);animation:ui-drift 40s linear infinite}
@@ -136,6 +166,7 @@ const CSS = `
 /* HUD and the old screens get the same look */
 .hud .score{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;background:#1b1036e0;border:3px solid #fff}
 .hud .flash{font-family:"Lilita One","Arial Black",sans-serif;font-weight:400;-webkit-text-stroke:3px #1b1036;paint-order:stroke fill}
+.hud .ptag.captain{border-color:#ffd21f;box-shadow:0 0 10px #ffd21f,0 2px 0 rgba(0,0,0,.45)}.hud .ptag.captain::after{border-top-color:#ffd21f}
 .hud .ptag{position:absolute;font-family:"Bungee","Arial Black",sans-serif;font-size:14px;line-height:1.25;color:#fff;background:var(--pc,#2b8cff);border:2px solid #fff;border-radius:7px;padding:0 7px;transform:translate(-50%,calc(-100% - 11px));white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.45);text-shadow:0 1px 0 rgba(0,0,0,.5)}.hud .ptag::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:8px solid transparent;border-top:10px solid #fff;margin-top:1px}.hud .ptag::before{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top:8px solid var(--pc,#2b8cff);z-index:1}
 `;
 

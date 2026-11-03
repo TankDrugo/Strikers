@@ -57,15 +57,18 @@
     },
     "holo": {
       "quickSell": 2000,
-      "ovrBonus": 2
+      "ovrBonus": 2,
+      "minOvr": 85
     },
     "holoRare": {
       "quickSell": 6000,
-      "ovrBonus": 4
+      "ovrBonus": 4,
+      "minOvr": 85
     },
     "holoEpic": {
       "quickSell": 15000,
-      "ovrBonus": 6
+      "ovrBonus": 6,
+      "minOvr": 85
     },
     "numbered": {
       "quickSell": 0,
@@ -198,5 +201,7 @@
       "what": "goals",
       "n": 4
     }
-  ]
+  ],
+  "_holoMinOvr": "holo, holoRare, holoEpic exist only for a character whose card in that rarity is 85 or more (decided with the user on 3 November: holo and special cards only for strong players)",
+  "walkoutMinOvr": 85
 }

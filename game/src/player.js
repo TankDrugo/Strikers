@@ -73,6 +73,11 @@ export class Player {
     // dark edge around the ring so any team colour reads on the grass
     const edgeMat = new THREE.MeshBasicMaterial({ color: 0x0b1410, transparent: true, opacity: 0.55, depthWrite: false });
     for (const [a, b] of [[0.255, 0.28], [0.36, 0.39]]) this.ring.add(new THREE.Mesh(new THREE.RingGeometry(a * SIZE, b * SIZE, 28), edgeMat));
+    // the captain (the only one who can do the Super Strike): a second ring in gold round the team one
+    if (!this.isGoalie && game.teams?.[team] && index === (game.teams[team].captain ?? 3)) {
+      this.ring.add(new THREE.Mesh(new THREE.RingGeometry(0.41 * SIZE, 0.5 * SIZE, 32), new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.95, depthWrite: false })));
+      this.ring.add(new THREE.Mesh(new THREE.RingGeometry(0.5 * SIZE, 0.53 * SIZE, 32), edgeMat));
+    }
     this.ring.rotation.x = -Math.PI / 2; this.ring.position.y = 0.012;
     this.root.add(this.ring);
     this.shadow = new THREE.Mesh(new THREE.CircleGeometry(0.33 * SIZE, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false }));

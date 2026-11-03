@@ -2,8 +2,16 @@
 // LB / RB (keyboard Q / E) switch tabs, d-pad / stick / arrows move between [data-nav] items by position,
 // A / Enter confirm, B / Esc go back. Menus are stacked "layers"; only the top one listens.
 import { readPads, padPressed, PAD } from '../input.js';
+import { t } from './i18n.js';
+import { stickHolo } from './holo.js';
+
+// Button chips (.btnA, .btnB, .btnY, .btnLR, .shoulder) show the controller's buttons; with the keyboard in use they
+// show its keys instead. The device in use is the last one touched (a controller already connected at start wins).
+const KB_KEYS = { A: 'key.enter', B: 'key.esc', Y: 'key.del', X: 'key.space', LB: 'Q', RB: 'E', LT: 'Z', RT: 'X' };
+const CHIPS = '.btnA,.btnB,.btnY,.btnX,.btnLR,.shoulder,[data-pad]';
 
 // layer = { el, onBack(), onTab(dir), onMove(dir, el) -> true if handled, onRaw(device, what) -> true if handled,
+//           onRawMove(device, dx, dy) -> true if handled (each device moves on its own: side select),
 //           onText(ch), textEntry, onShow() }
 export class UiNav {
   constructor(root) {
@@ -13,11 +21,38 @@ export class UiNav {
     this.repeat = 0;
     this.held = false;
     this.onSound = null;
-    addEventListener('keydown', (e) => this.keydown(e));
+    this.dev = readPads().length ? 'pad' : 'kb';
+    root.dataset.dev = this.dev;
+    new MutationObserver((list) => { for (const m of list) for (const a of m.addedNodes) if (a.nodeType === 1) this.relabel(a); })
+      .observe(root, { childList: true, subtree: true });
+    addEventListener('keydown', (e) => { this.setDevice('kb'); this.keydown(e); });
     root.addEventListener('pointerover', (e) => {
       const it = e.target.closest('[data-nav]');
       if (it && this.top && this.top.el.contains(it)) this.focus(it, false);
     });
+  }
+
+  // the device the player is using: 'pad' or 'kb' (the chips and the controls screens follow it)
+  setDevice(dev) {
+    if (dev === this.dev) return;
+    this.dev = dev;
+    this.root.dataset.dev = dev;
+    this.relabel(this.root);
+    if (this.onDevice) this.onDevice(dev);
+  }
+
+  relabel(node) {
+    const list = node.matches?.(CHIPS) ? [node, ...node.querySelectorAll(CHIPS)] : node.querySelectorAll(CHIPS);
+    for (const c of list) {
+      if (c.dataset.pad === undefined) {
+        const txt = c.textContent.trim();
+        if (!(txt in KB_KEYS)) continue; // arrows and other symbols are the same on both
+        c.dataset.pad = txt;
+      }
+      const k = KB_KEYS[c.dataset.pad];
+      const want = this.dev === 'kb' && k ? (k.startsWith('key.') ? t(k) : k) : c.dataset.pad;
+      if (c.textContent !== want) c.textContent = want;
+    }
   }
 
   get top() { return this.layers[this.layers.length - 1] || null; }
@@ -88,6 +123,28 @@ export class UiNav {
     if (best) this.focus(best);
   }
 
+  // the right stick turns the focused card (holo light); on a layer with stickTilt (pack opening) both sticks turn
+  // every card on it
+  stickCards() {
+    const top = this.top;
+    let x = 0, y = 0;
+    for (const gp of readPads()) {
+      const a = gp.axes, all = top.stickTilt;
+      for (const [i, j] of all ? [[2, 3], [0, 1]] : [[2, 3]]) {
+        const ax = a[i] || 0, ay = a[j] || 0;
+        if (Math.hypot(ax, ay) > Math.hypot(x, y)) { x = ax; y = ay; }
+      }
+    }
+    const on = Math.hypot(x, y) > 0.2;
+    if (!on && !this.stickOn) return;
+    this.stickOn = on;
+    const cards = top.stickTilt ? top.el.querySelectorAll('.card') : top.focused ? top.focused.querySelectorAll('.card') : [];
+    for (const c of cards) stickHolo(c, on ? x : 0, on ? y : 0);
+    // a card that lost the focus while turned goes back to rest
+    if (this.stickLast && this.stickLast !== top.focused) for (const c of this.stickLast.querySelectorAll?.('.card') || []) stickHolo(c, 0, 0);
+    this.stickLast = top.focused;
+  }
+
   confirm() {
     const f = this.top && this.top.focused;
     if (f && f.isConnected) { if (this.onSound) this.onSound('ok'); f.click(); }
@@ -104,6 +161,8 @@ export class UiNav {
       if (k.length === 1 && /[\p{L}\p{N} ._-]/u.test(e.key)) { top.onText(e.key); e.preventDefault(); return; }
       if (k === 'backspace') { top.onText('\b'); e.preventDefault(); return; }
     }
+    const dirs = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1], a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1] };
+    if (top.onRawMove && dirs[k] && !top.textEntry && top.onRawMove('kb', ...dirs[k])) { e.preventDefault(); return; }
     const typing = top.textEntry;
     const map = {
       arrowleft: () => this.move(-1, 0), arrowright: () => this.move(1, 0), arrowup: () => this.move(0, -1), arrowdown: () => this.move(0, 1),
@@ -127,6 +186,7 @@ export class UiNav {
     for (const gp of readPads()) {
       const id = gp.index;
       const now = gp.buttons.map((_, i) => padPressed(gp, i));
+      if (now.some(Boolean) || Math.abs(gp.axes[0] || 0) > 0.6 || Math.abs(gp.axes[1] || 0) > 0.6) this.setDevice('pad');
       const prev = this.prev[id] || [];
       const edge = (i) => now[i] && !prev[i];
       this.prev[id] = now;
@@ -138,12 +198,20 @@ export class UiNav {
       if (edge(PAD.RB)) this.tab(1);
       if (edge(PAD.Y) && top.onRaw) top.onRaw('pad' + id, 'y');
       const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
-      if (now[PAD.LEFT] || ax < -0.6) dir = [-1, 0];
-      else if (now[PAD.RIGHT] || ax > 0.6) dir = [1, 0];
-      else if (now[PAD.UP] || ay < -0.6) dir = [0, -1];
-      else if (now[PAD.DOWN] || ay > 0.6) dir = [0, 1];
+      let d = null;
+      if (now[PAD.LEFT] || ax < -0.6) d = [-1, 0];
+      else if (now[PAD.RIGHT] || ax > 0.6) d = [1, 0];
+      else if (now[PAD.UP] || ay < -0.6) d = [0, -1];
+      else if (now[PAD.DOWN] || ay > 0.6) d = [0, 1];
+      // a layer that moves each device on its own gets one move per push of the stick
+      this.dirPrev = this.dirPrev || {};
+      const was = this.dirPrev[id];
+      this.dirPrev[id] = d;
+      if (top.onRawMove) { if (d && (!was || was[0] !== d[0] || was[1] !== d[1])) top.onRawMove('pad' + id, d[0], d[1]); continue; }
+      if (d) dir = d;
     }
     if (!this.top) { this.held = false; return; }
+    this.stickCards();
     if (dir && this.repeat <= 0) {
       this.move(dir[0], dir[1]);
       this.repeat = this.held ? 0.16 : 0.42; // first repeat waits longer, like console menus

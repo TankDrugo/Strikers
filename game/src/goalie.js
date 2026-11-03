@@ -189,7 +189,13 @@ export class Keeper {
     g.facing = d.f - (rs[2] - d.root0[2]) * m;
     if (!d.resolved && g.stateTime >= d.contactAt) { d.resolved = true; this.contact(g, d); }
     if (g.stateTime >= d.endAt) {
-      if (b.owner === g) { g.setState('hold', {}); g.play('gk_idle_with_Ball', { loop: true, fade: 0.15 }); return; }
+      if (b.owner === g) {
+        // InitActionDiveRecover with the ball: up from the dive with the ball (gk_recover_with_ball_side), then standing
+        const rec = d.save.recover && d.save.recover.clip === 'gk_recover_with_ball_side' && meta[d.save.recover.clip] ? d.save.recover : null;
+        g.setState('hold', { clipEnd: rec ? meta[rec.clip].duration * 0.9 : 0 });
+        g.play(rec ? rec.clip : 'gk_idle_with_Ball', rec ? { fade: 0.1, mirror: rec.mirrored } : { loop: true, fade: 0.2 });
+        return;
+      }
       // InitActionDiveRecover: the recovery clip of the save, or the generic one
       const rec = d.save.recover && meta[d.save.recover.clip] ? d.save.recover : { clip: 'gk_recover_without_ball', mirrored: d.mirror };
       g.setState('react', {});
@@ -338,7 +344,7 @@ export class Keeper {
       }
     }
     if (g.stateTime > (meta?.duration ?? 0.33)) {
-      if (b.owner === g) { g.setState('hold', {}); g.play('gk_recover_trap_with_ball', { fade: 0.1 }); }
+      if (b.owner === g) { g.setState('hold', { clipEnd: (game.template.meta.gk_recover_trap_with_ball?.duration ?? 0.6) * 0.9 }); g.play('gk_recover_trap_with_ball', { fade: 0.1 }); }
       else { g.setState('react', {}); g.stun = game.template.meta.gk_recover_trap_without_ball?.duration ?? 0.45; g.play('gk_recover_trap_without_ball', { fade: 0.1 }); }
     }
   }

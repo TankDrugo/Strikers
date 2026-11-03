@@ -17,6 +17,7 @@ Fatto:
 - Statistiche per giocatore dalle carte di Ultimate Team (`src/stats.js`)
 - Super Strike del capitano come nell'originale (`SUPER` in `src/config.js`): carica 0,91 s, una lancetta sul tempo della clip, scena dal fotogramma 27; indicatore G1–G4 stile FIFA sopra il giocatore controllato
 - Build di prova con 10 milioni di crediti (`--prova`) e build per itch.io (`--itch`), caricata sulla pagina ristretta https://goleador0702.itch.io/strikers
+- 3 novembre: barriera elettrica (spallata verso la barriera = scossa, `FENCE` in `src/config.js`), buzzer beater (a 0:00 il tiro già partito si gioca fino in fondo e il gol vale, `MATCH.buzzerMax`), il portiere raccoglie o blocca il pallone libero con la sua clip e lo tiene davvero in mano (anche dopo il tuffo, con l'alzata `gk_recover_with_ball_side`), effetto della carica della Super Strike (colonna di luce, anelli, onda, bordi dorati), capitano con l'anello dorato e la «C» sopra la testa, pausa con la telecamera che gira attorno alla partita ferma
 
 Prossimo:
 - Pallone attaccato all'osso `ball` delle clip (riga 12 di `VERIFICA.md`: va esportato l'osso), stati di corsa (riga 11), condizioni degli script della CPU
@@ -84,11 +85,16 @@ Prima build caricata il 31 ottobre (canale `html5`). Per provare Ultimate Team c
 | X | finta | spallata |
 | LB | – | cambia giocatore |
 | Menu ☰ | pausa | pausa |
+| Levetta destra (nei menu) | gira la carta selezionata (luce holo) | |
 | View ⧉ (nella pausa) | ricomincia la partita | |
 
 Nei menu (stile EA FC): **LB / RB** cambiano scheda, croce o levetta si spostano, **A** conferma, **B** torna indietro. Funzionano tutti i controller collegati. Nel visualizzatore: croce su/giù per cambiare animazione, X per specchiarla, B per uscire.
 
-**Super Strike** (vale 2 gol): solo il capitano (© sopra la testa e nell'editor della formazione; in Ultimate Team si sceglie nella Rosa, mai il portiere). Nella metà campo avversaria tieni premuto B (tastiera: K) oltre la barra piena: il capitano brilla d'oro e dopo 0,91 s salta. Al rallentatore una lancetta sale e poi scende: premi B quando sale sul verde a destra (0,84) e di nuovo quando scende sul verde a sinistra (0,16). Conta soprattutto la seconda pressione: sul verde è gol; se anche la prima era perfetta il tiro è imparabile e il portiere finisce in rete; sul giallo il portiere para e resta stordito 1–2 s; fuori, respinge. Una prima pressione vicina allo 0,84 allarga il verde della seconda. Se ti placcano mentre carichi, la perdi; se sei a meno di 2 m dal portiere, può uscirti addosso. Vicino alla linea di porta o negli ultimi 5 s diventa un tiro normale.
+**Barriera elettrica**: una spallata (X, tastiera L) che spinge un avversario contro la barriera a bordo campo gli fa prendere la scossa: resta a terra quasi 2,5 s (fulmini sulla barriera). Davanti alle porte la barriera non c'è.
+
+**Buzzer beater**: se a 0:00 un tiro (o una Super Strike) è già partito, si gioca fino a quando entra, viene parato o si ferma (al massimo 7 s): il gol vale.
+
+**Super Strike** (vale 2 gol): solo il capitano (anello dorato a terra, «C» dorata sopra la testa, © nell'editor della formazione; in Ultimate Team si sceglie nella Rosa, mai il portiere). Nella metà campo avversaria tieni premuto B (tastiera: K) oltre la barra piena: il capitano brilla d'oro e dopo 0,91 s salta. Al rallentatore una lancetta sale e poi scende: premi B quando sale sul verde a destra (0,84) e di nuovo quando scende sul verde a sinistra (0,16). Conta soprattutto la seconda pressione: sul verde è gol; se anche la prima era perfetta il tiro è imparabile e il portiere finisce in rete; sul giallo il portiere para e resta stordito 1–2 s; fuori, respinge. Una prima pressione vicina allo 0,84 allarga il verde della seconda. Se ti placcano mentre carichi, la perdi; se sei a meno di 2 m dal portiere, può uscirti addosso. Vicino alla linea di porta o negli ultimi 5 s diventa un tiro normale.
 
 Il controller va collegato prima di aprire il gioco, oppure basta premere un suo tasto con la pagina aperta: il browser lo rende visibile solo dopo la prima pressione. Funziona in Chrome, Edge e Firefox.
 
@@ -109,7 +115,9 @@ Nei menu: **Q / E** come LB / RB, frecce o WASD per spostarsi, **Invio** per con
 
 ### In due
 
-In Gioco rapido: *Contro un amico* (uno per squadra) o *In due contro il computer* (stessa squadra). Ogni giocatore entra premendo **A** sul suo controller o **Invio** sulla tastiera; un'etichetta G1 / G2 segue il giocatore di ognuno.
+In Gioco rapido, dopo le scelte della partita, c'è **Scegli il lato** come in FC: ogni controller collegato (e la tastiera) è una scheda al centro; con **◀ ▶** la porta su una squadra, con **▲ ▼** sceglie **il suo profilo** (o Ospite: due controller non possono avere lo stesso profilo), con **A** è pronto, **B** torna indietro. La partita parte quando tutti quelli su una squadra sono pronti: uno solo contro la CPU (anche con la squadra di destra), due contro (*Contro un amico*) o due insieme. A fine partita ogni profilo ha il suo risultato. Un'etichetta G1 / G2 segue il giocatore di ognuno (bordo dorato sul capitano). Nei tornei con gli amici si entra ancora premendo **A** o **Invio**.
+
+Nei menu i tasti mostrati sono quelli del dispositivo che stai usando: controller (A, B, LB, RB) o tastiera (Invio, Esc, Q, E); cambiano appena tocchi l'altro.
 
 Dal menu (Gioco rapido o Home) puoi anche guardare una partita CPU contro CPU; da Impostazioni apri il **visualizzatore** con tutte le 183 animazioni: 84 da giocatore e 99 da portiere, anche specchiate.
 

@@ -150,3 +150,10 @@ Italiano e inglese, scelti all'apertura. Tutti i testi stanno in un file di trad
 ## Bozze
 
 Pagina di prova: https://claude.ai/artifact/M9yMAgV1hSDitKZo9UgzLA (Artifact privato, solo mockup, non il gioco). Sorgente: [`bozze/bozze-menu.html`](bozze/bozze-menu.html); si ripubblica sullo stesso link. Contiene menu (stili M1-M3), holo (H1-H8), top loader (L1-L4) e aperture dei pacchetti (P1-P3). Quando l'utente sceglie, le scelte vanno scritte qui.
+
+## Richieste del 3 novembre
+
+- **Scegli il lato** (Gioco rapido): come in FC, ogni controller collegato e la tastiera sono schede al centro; ◀ ▶ squadra, ▲ ▼ profilo (Ospite compreso, mai due uguali), A pronto, B indietro. Il risultato va a ogni profilo che ha giocato.
+- **Tasti del dispositivo in uso**: nei menu le pastiglie dei tasti mostrano il controller (A, B, LB, RB) o la tastiera (Invio, Esc, Q, E), secondo l'ultimo usato; anche la schermata Comandi e la pausa.
+- **Pausa**: menu a sinistra (punteggio, Riprendi, Ricomincia, Esci, obiettivi, comandi), a destra lo stadio con la telecamera che gira attorno alla partita ferma, il pubblico e i LED che continuano.
+- **Personaggi segreti** (Coppe › Segreti): Snake (12 stelle, 3 scosse in una partita di coppa), Piccolo (30, un buzzer beater), Vegeta (55, un gol di Super Strike), Goku SSJ (85, una coppa vinta a Difficile). Fino allo sblocco sono «?»: non sono nell'editor della formazione e nelle squadre pronte gioca una riserva al loro posto; la CPU delle coppe può già schierarli.

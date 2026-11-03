@@ -15,8 +15,8 @@ import { clubOf, squadRating, divName } from '../ut/club.js';
 import { cupById, roundKey } from '../cups/cups.js';
 
 const MAIN = ['home', 'quick', 'cups', 'ut', 'opts'];
-const SUB = { cups: ['cups', 'private', 'trophies'], ut: ['club', 'squad', 'market', 'divisions', 'album'] };
-const SUB_KEY = { cups: 'sub.cups', private: 'sub.private', trophies: 'sub.trophies', club: 'sub.club', squad: 'sub.squad', market: 'sub.market', divisions: 'sub.divisions', album: 'sub.album' };
+const SUB = { cups: ['cups', 'private', 'trophies', 'secrets'], ut: ['club', 'squad', 'market', 'divisions', 'album'] };
+const SUB_KEY = { cups: 'sub.cups', private: 'sub.private', trophies: 'sub.trophies', secrets: 'sub.secrets', club: 'sub.club', squad: 'sub.squad', market: 'sub.market', divisions: 'sub.divisions', album: 'sub.album' };
 const CUPS = [['c1', 3], ['c2', 4], ['c3', 5], ['c4', 5]];
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -51,6 +51,7 @@ export class Menu {
     this.nav = new UiNav(this.root);
     this.sfx = makeBlips();
     this.nav.onSound = (n) => this.sfx(n);
+    this.nav.onDevice = () => this.deviceChanged();
     this.state = { mode: 'main', tab: 0, sub: 0 };
     this.setup = { kind: 'cpu', seconds: 180, cpuLevel: 1, sides: null, stadium: 'random' };
     this.newsIdx = 0;
@@ -271,6 +272,8 @@ export class Menu {
         return this.privateView();
       case 'trophies':
         return this.trophiesView();
+      case 'secrets':
+        return this.secretsView();
       case 'ut':
         return `<div class="view" style="grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr">
           ${tile('enter-ut', t('tab.ut'), t('ut.intro'), `<span class="hint"><span class="btnA">A</span>${t('foot.enter')}</span>`, 'grid-row:span 2;background:linear-gradient(135deg,#2a1260,#6a2fd8);color:#fff', '')}
@@ -369,17 +372,23 @@ export class Menu {
     this.nav.push(l);
   }
 
+  // only the device in use: the controller's buttons or the keyboard's keys (UiNav.dev, the last one touched)
   controlsHtml() {
-    const pad = readPads().length > 0;
-    return `${pad ? `<div class="keys">${t('keys.pad')}</div>` : ''}<div class="keys">${t('keys.kb')}</div><p class="sub">${t('keys.perfect')}</p><p class="sub">${t('keys.menu')}</p>`;
+    const pad = this.nav.dev === 'pad';
+    return `<div class="keys">${t(pad ? 'keys.pad' : 'keys.kb')}</div><p class="sub">${t('keys.perfect')}</p><p class="sub">${t(pad ? 'keys.menu' : 'keys.menuKb')}</p>`;
   }
 
   showControls() {
-    const l = this.layer('dim', `<div class="center"><div class="panel"><h1 class="title">${t('controls.title')}</h1>${this.controlsHtml()}
+    const l = this.layer('dim', `<div class="center"><div class="panel"><h1 class="title">${t('controls.title')}</h1><div class="ctl">${this.controlsHtml()}</div>
       <div class="row-btns"><button class="btn" data-nav data-act="close">${t('foot.back')}</button></div></div></div>`, {
       act: () => this.nav.pop(l), onBack: () => this.nav.pop(l),
     });
     this.nav.push(l);
+  }
+
+  // the controls on screen follow the device as soon as the player switches (controls screen, pause)
+  deviceChanged() {
+    for (const c of this.root.querySelectorAll('.ctl')) c.innerHTML = this.controlsHtml();
   }
 
   // ------------------------------------------------------------- quick play set-up
@@ -438,8 +447,116 @@ export class Menu {
 
   afterSetup(setupLayer) {
     const s = this.setup;
-    if (s.kind === 'friend' || s.kind === 'coop') this.showJoin(2, setupLayer, (devs) => this.launch({ ...this.setup, bindings: devs.map((d, i) => d === 'kb' ? { device: 'kb', ctrl: i } : { device: 'pad', index: +d.slice(3), ctrl: i }) }));
-    else { this.nav.pop(setupLayer); this.launch({ ...s }); }
+    if (s.kind === 'watch') { this.nav.pop(setupLayer); this.launch({ ...s }); return; }
+    this.showSides(setupLayer, (players) => {
+      const bindings = players.length === 1 ? [{ device: 'any', ctrl: 0 }]
+        : players.map((p, i) => p.device === 'kb' ? { device: 'kb', ctrl: i } : { device: 'pad', index: +p.device.slice(3), ctrl: i });
+      const teams = new Set(players.map((p) => p.team));
+      const kind = teams.size === 2 ? 'friend' : players.length > 1 ? 'coop' : 'cpu';
+      this.launch({ ...s, kind, humans: players.map((p) => p.team), bindings, players });
+    });
+  }
+
+  // FC-style side select: every controller (and the keyboard) is a chip in the middle column; ◀ ▶ take it onto a team,
+  // ▲ ▼ pick its own profile (or a guest: two controllers never share one), A says ready, B steps back. The match
+  // starts when everyone on a team is ready. The mode only sets where the chips start (vs CPU: player 1 on the left;
+  // with a friend: one per side; together: both on the left); done([{ device, team, profileId }]).
+  showSides(hideLayer, done) {
+    const kind = this.setup.kind, sides = sidesColors(...this.sides());
+    const profiles = save.profiles();
+    const devs = [];
+    let started = false;
+    const devName = (d) => d === 'kb' ? t('join.keyboard') : t('join.pad', { n: +d.slice(3) + 1 });
+    const devIcon = (d) => d === 'kb' ? '⌨' : '🎮';
+    const usedBy = (i, skip) => devs.some((x) => x !== skip && x.prof === i);
+    const add = (id) => {
+      let d = devs.find((x) => x.id === id);
+      if (d) return d;
+      const act = profiles.indexOf(save.active());
+      d = { id, col: 0, prof: -1, ready: false, born: performance.now() };
+      d.prof = !devs.length && act >= 0 ? act : profiles.findIndex((_, i) => !usedBy(i, d));
+      const left = devs.filter((x) => x.col === -1).length, right = devs.filter((x) => x.col === 1).length;
+      if (kind === 'cpu' && !left && !right) d.col = -1;
+      else if (kind === 'coop' && left < 2) d.col = -1;
+      else if (kind === 'friend' && left + right < 2) d.col = left ? 1 : -1;
+      devs.push(d);
+      if (devs.length > 1) this.sfx('tab');
+      return d;
+    };
+    const chip = (d) => {
+      const p = d.prof >= 0 ? profiles[d.prof] : null, n = devs.indexOf(d) + 1;
+      return `<div class="side-chip${d.ready ? ' ready' : ''}${performance.now() - d.born < 2500 ? ' new' : ''}" style="--pc:${p ? p.color : '#ffffff'}" data-dev="${d.id}">
+        <span class="sc-dev">${devIcon(d.id)} ${esc(devName(d.id))}</span>
+        <span class="sc-prof"><i>▲</i><span class="av" style="background:${p ? p.color : '#fff'}">${esc((p ? p.name : '?')[0].toUpperCase())}</span><b>${esc(p ? p.name : t('sides.guest'))}</b><i>▼</i></span>
+        <span class="sc-st">${d.ready ? '✓ ' + t('sides.ready') : d.col ? `<span class="btnA">A</span>` : `◀ ▶`}</span><span class="sc-n">${t('hud.p', { n })}</span></div>`;
+    };
+    const col = (c) => devs.filter((d) => d.col === c).map(chip).join('');
+    const paint = () => {
+      const sided = devs.filter((d) => d.col);
+      l.el.querySelector('.sides-grid').innerHTML = `
+        <div class="side-col" data-col="-1" style="--tc:${sides[0].color}"><h3>${esc(sides[0].name)}</h3>${col(-1)}</div>
+        <div class="side-col mid" data-col="0"><h3>${t('sides.none')}</h3>${col(0)}</div>
+        <div class="side-col" data-col="1" style="--tc:${sides[1].color}"><h3>${esc(sides[1].name)}</h3>${col(1)}</div>`;
+      l.el.querySelector('#sw').textContent = !sided.length ? t('sides.need') : sided.every((d) => d.ready) ? t('join.start') : t('sides.wait');
+    };
+    const check = () => {
+      const sided = devs.filter((d) => d.col);
+      if (!started && sided.length && sided.every((d) => d.ready)) { started = true; setTimeout(go, 450); }
+    };
+    const l = this.layer('dim', `<div class="center"><div class="panel sides-panel">
+      <h1 class="title">${t('sides.title')}</h1><p class="sub">${t('sides.hint')}</p>
+      <div class="sides-grid"></div><p class="sub" id="sw" style="font-weight:800"></p>
+      <div class="footer" style="color:var(--ink);-webkit-text-stroke:0"><span><span class="btnLR">◀</span><span class="btnLR">▶</span>${t('sides.side')}</span><span><span class="btnLR">▲</span><span class="btnLR">▼</span>${t('sides.profile')}</span><span><span class="btnA">A</span>${t('sides.readyKey')}</span><span><span class="btnB">B</span>${t('foot.back')}</span></div>
+      <div class="row-btns"><button class="btn primary" data-nav data-act="go">${t('sides.go')}</button><button class="btn" data-nav data-act="back">${t('foot.back')}</button></div></div></div>`, {
+      onRawMove: (dev, dx, dy) => {
+        const d = add(dev);
+        if (started) return true;
+        if (dx && !d.ready) { const c = Math.max(-1, Math.min(1, d.col + dx)); if (c !== d.col) { d.col = c; this.sfx('move'); } }
+        if (dy && !d.ready) {
+          const opts = [-1, ...profiles.keys()].filter((i) => i < 0 || !usedBy(i, d));
+          d.prof = opts[(opts.indexOf(d.prof) + dy + opts.length) % opts.length];
+          this.sfx('tab');
+        }
+        paint();
+        return true;
+      },
+      onRaw: (dev, what) => {
+        if (what === 'y') return true;
+        const d = add(dev);
+        if (started) return true;
+        if (what === 'confirm') { if (d.col) { d.ready = true; this.sfx('ok'); } else this.sfx('back'); paint(); check(); return true; }
+        if (what === 'back') {
+          if (d.ready) { d.ready = false; this.sfx('back'); paint(); return true; }
+          close(); return true;
+        }
+        return false;
+      },
+      act: (a) => {
+        if (a === 'back') return close();
+        if (a === 'go') { const sided = devs.filter((x) => x.col); if (!sided.length) return; sided.forEach((x) => { x.ready = true; }); paint(); check(); }
+      },
+      onBack: () => close(),
+    });
+    // a click on a column takes the keyboard there
+    l.el.querySelector('.sides-grid').addEventListener('click', (e) => {
+      const c = e.target.closest('[data-col]'); if (!c || started) return;
+      const d = add('kb'); if (!d.ready) { d.col = +c.dataset.col; paint(); }
+    });
+    const scan = () => { for (const gp of readPads()) add('pad' + gp.index); if (!devs.some((d) => d.id === 'kb')) add('kb'); };
+    // controllers appear (the browser shows them after their first press): each one is listed at once with its profile
+    const timer = setInterval(() => { if (!l.el.isConnected) return clearInterval(timer); const n = devs.length; for (const gp of readPads()) add('pad' + gp.index); if (devs.length !== n) paint(); }, 250);
+    const close = () => { clearInterval(timer); hideLayer.el.style.visibility = ''; this.nav.pop(l); };
+    const go = () => {
+      if (!l.el.isConnected) return;
+      clearInterval(timer);
+      hideLayer.el.style.visibility = '';
+      this.nav.pop(hideLayer); this.nav.pop(l);
+      done(devs.filter((d) => d.col).map((d) => ({ device: d.id, team: d.col < 0 ? 0 : 1, profileId: d.prof >= 0 ? profiles[d.prof].id : null })));
+    };
+    hideLayer.el.style.visibility = 'hidden';
+    this.nav.push(l);
+    scan();
+    paint();
   }
 
   // Couch-style join: each device presses A / Enter to take the next free slot; done(devices) when all are in.
@@ -489,7 +606,7 @@ export class Menu {
   }
 
   launch(opts) {
-    const humans = opts.kind === 'watch' ? [] : opts.kind === 'friend' ? [0, 1] : opts.kind === 'coop' ? [0, 0] : [0];
+    const humans = opts.humans || (opts.kind === 'watch' ? [] : opts.kind === 'friend' ? [0, 1] : opts.kind === 'coop' ? [0, 0] : [0]);
     const bindings = opts.bindings || (humans.length ? [{ device: 'any', ctrl: 0 }] : []);
     const lineups = sidesColors(...this.sides()).map((x) => ({ name: x.name, color: x.color, slots: [...x.slots], captain: x.captain }));
     this.lastLaunch = { ...opts, humans, bindings, lineups };
@@ -499,12 +616,17 @@ export class Menu {
 
   // ------------------------------------------------------------- in match
 
-  showPause({ onResume, onRestart, onQuit, objectives = [] }) {
+  // pause, FC style: the menu on the left, the stadium on the right with the camera turning round the frozen play
+  // (Game.pauseView)
+  showPause({ onResume, onRestart, onQuit, objectives = [], score = null, teams = null, clock = 0 }) {
     const obj = objectives.map((o) => `<div class="grid" style="gap:.3em"><h3 style="font-family:var(--fd);font-weight:400;font-size:1.3em;margin:0">${t('cup.objectives')}${objectives.length > 1 ? ` · ${t('hud.p', { n: o.n })}` : ''}</h3>
       ${o.items.map((it) => `<div class="obj ${it.status}">${it.status === 'done' ? '★' : it.status === 'failed' ? '✗' : '☆'} ${it.text}</div>`).join('')}</div>`).join('');
-    const l = this.layer('dim', `<div class="center"><div class="panel">
-      <h1 class="title">${t('pause.title')}</h1>${obj}${obj ? `<details><summary style="cursor:pointer;font-weight:800">${t('controls.title')}</summary>${this.controlsHtml()}</details>` : this.controlsHtml()}
-      <div class="row-btns"><button class="btn primary" data-nav data-act="resume" data-autofocus>${t('pause.resume')}</button><button class="btn" data-nav data-act="restart">${t('pause.restart')}</button><button class="btn" data-nav data-act="quit">${t('pause.quit')}</button></div></div></div>`, {
+    const c = Math.ceil(clock);
+    const head = score && teams ? `<div class="pause-score"><b style="color:${teams[0].color}">${esc(teams[0].name)}</b><span>${score[0]} – ${score[1]}</span><b style="color:${teams[1].color}">${esc(teams[1].name)}</b><small>${Math.floor(c / 60)}:${String(c % 60).padStart(2, '0')}</small></div>` : '';
+    const l = this.layer('pause', `<div class="pause-side"><div class="panel">
+      <p class="sub pause-tag">${t('pause.match')}</p>${head}
+      <div class="grid pause-btns"><button class="btn primary" data-nav data-act="resume" data-autofocus>${t('pause.resume')}</button><button class="btn" data-nav data-act="restart">${t('pause.restart')}</button><button class="btn" data-nav data-act="quit">${t('pause.quit')}</button></div>
+      ${obj}<details><summary style="cursor:pointer;font-weight:800">${t('controls.title')}</summary><div class="ctl">${this.controlsHtml()}</div></details></div></div>`, {
       act: (a) => { this.nav.pop(l); ({ resume: onResume, restart: onRestart, quit: onQuit })[a](); },
       onBack: () => { this.nav.pop(l); onResume(); },
     });
